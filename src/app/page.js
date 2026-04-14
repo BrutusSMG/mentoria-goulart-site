@@ -10,12 +10,14 @@ import Offer from '@/components/Offer.jsx';
 import Faq from '@/components/Faq.jsx';
 import Footer from '@/components/Footer.jsx';
 import Author from '@/components/Author';
+import Opportunity from '@/components/Opportunity';
 
 export default function Home() {
   return (
     <main>
       <Header />
       <Hero />
+      <Opportunity />
       <Testimonials />
       <Author />
       <Audience />

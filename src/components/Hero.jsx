@@ -42,7 +42,7 @@ const Hero = () => {
         <div className="mt-10 w-full max-w-5xl p-6 md:p-8 border-2 border-gray-700 rounded-lg shadow-2xl shadow-green-500/10">
           <div className="mb-8">
             <div className="flex flex-col items-center justify-center gap-4 mb-4">
-              <span className="text-xl font-semibold tracking-wider text-gray-300">
+              <span className="text-2xl font-semibold tracking-wider text-gray-300">
                 O CURSO
               </span>
               <Image

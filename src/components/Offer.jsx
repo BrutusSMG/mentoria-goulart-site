@@ -13,16 +13,16 @@ const Offer = () => {
         {/* Bloco de Preço */}
         <div className="mb-8">
           <p className="text-xl text-gray-400 line-through">
-            De R$997,00
+            De R$5997,00
           </p>
           <p className="text-lg text-white mb-2">
             Por apenas 12x de
           </p>
           <p className="text-7xl md:text-8xl font-extrabold text-green-500">
-            R$29,82
+            R$206,54
           </p>
           <p className="text-lg text-white mt-2">
-            ou R$297,00 à vista
+            ou R$1997,00 à vista
           </p>
         </div>
 

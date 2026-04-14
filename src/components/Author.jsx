@@ -1,35 +1,63 @@
 // src/components/Author.jsx
 import Image from 'next/image';
+import { HeartHandshake } from 'lucide-react'; // Vamos usar um ícone para o "compromisso"
 
 const Author = () => {
   return (
-    <section className="bg-gray-900/50 py-16 px-4">
-      <div className="container mx-auto max-w-4xl">
-        <h2 className="text-center text-3xl md:text-4xl font-bold mb-12">
-          Quem vai te <span className="text-green-500">guiar</span>
-        </h2>
-        <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 bg-black p-8 rounded-lg">
+    <section className="py-16 md:py-24 px-4">
+      <div className="container mx-auto max-w-6xl">
+        {/* Título da Seção */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
+            De uma dificuldade pessoal, nasceu uma missão:
+          </h2>
+          <p className="text-2xl md:text-3xl text-green-500 font-semibold mt-2">
+            A sua jornada para o sucesso.
+          </p>
+        </div>
+
+        {/* Container Principal */}
+        <div className="flex flex-col md:flex-row items-start gap-8 md:gap-12 bg-black p-8 rounded-lg shadow-xl">
+          
           {/* Coluna da Imagem */}
           <div className="flex-shrink-0">
-            <Image
-              src="/autor.png" // Certifique-se que o nome do arquivo corresponde
-              alt="Foto de José Goulart Filho"
-              width={250}
-              height={250}
-              className="rounded-full object-cover w-[200px] h-[200px] md:w-[250px] md:h-[250px] border-4 border-green-500"
-            />
+            <div className="relative w-48 h-48 md:w-46 md:h-46 rounded-full overflow-hidden shadow-2xl shadow-green-500/20 border-4 border-gray-700">
+              <Image
+                src="/autor.png"
+                alt="Foto de José Goulart Filho"
+                fill
+                className="object-cover"
+              />
+            </div>
           </div>
 
-          {/* Coluna do Texto */}
-          <div className="text-lg text-gray-300 space-y-4">
-            <p className="text-2xl font-bold text-white">Olá, eu sou José Goulart Filho.</p>
+          {/* Coluna do Texto Narrativo */}
+          <div className="flex-1 space-y-5 text-lg text-gray-300 leading-relaxed">
             <p>
-              Com quase <strong className="text-white">30 anos de experiência</strong> no campo de batalha da metalurgia, me especializei em transformar sucata em riqueza, recuperando e refinando metais preciosos como ouro, prata e platina.
+              Olá, eu sou <strong className="text-white">José Goulart Filho.</strong> Hoje, sou especialista em Processos Metalúrgicos com mais de 30 anos de experiência, mas quero te contar como tudo começou.
             </p>
             <p>
-              Eu compilei décadas de conhecimento prático em um método simples e direto para que você não precise passar pelos mesmos obstáculos que eu. Meu objetivo é multiplicar esse conhecimento e guiar você, passo a passo, na jornada para lucrar com essa nobre profissão.
+              Quando dei meus primeiros passos, eu era como você: cheio de vontade, mas sem um guia. O método que aprendi era <strong className="text-red-400">precário e caro</strong>. E o pior? Quando eu buscava ajuda, o conhecimento era guardado como um segredo de estado. Eu senti na pele essa frustração.
             </p>
-            <p className="font-bold text-green-500">Vamos juntos transformar conhecimento em ouro.</p>
+            
+            {/* Bloco de Destaque para a "Virada" da história */}
+            <div className="my-6 p-6 bg-gray-800/50 border-l-4 border-green-500 rounded-r-lg">
+              <p className="text-xl font-semibold text-white italic">
+                "Foi essa dificuldade que me moveu. Eu decidi que, se não havia um caminho, eu mesmo o construiria."
+              </p>
+            </div>
+
+            <p>
+              Criei este treinamento por um motivo muito simples: ele é o curso que <strong className="text-green-400">eu desesperadamente gostaria que existisse quando comecei.</strong>
+            </p>
+
+            {/* Bloco de Compromisso com Ícone */}
+            <div className="flex items-start gap-4 pt-4">
+              <HeartHandshake className="h-10 w-10 text-green-500 flex-shrink-0 mt-1" />
+              <p>
+                Meu compromisso é garantir que <strong className="text-white">você não passe pelas mesmas dificuldades que eu passei.</strong> É pegar na sua mão e te dar o mapa completo, sem segredos, para que sua jornada seja muito mais rápida e tranquila.
+              </p>
+            </div>
           </div>
         </div>
       </div>

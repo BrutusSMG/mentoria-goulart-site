@@ -4,7 +4,7 @@ import { CheckCircle2 } from 'lucide-react'; // Importando o ícone que acabamos
 // Melhor Prática: Manter o conteúdo (os textos da lista) em um array.
 // Facilita a manutenção e a leitura do código.
 const audienceItems = [
-  'Para quem busca uma nova fonte de renda através da internet.',
+  'Para quem busca uma nova fonte de renda.',
   'Para quem é iniciante e quer começar a investir em ouro do jeito certo.',
   'Para quem já investe e quer aprimorar suas estratégias e lucros.',
   'Para quem deseja aprender com um especialista com resultados comprovados.',
