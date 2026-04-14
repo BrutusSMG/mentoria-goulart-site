@@ -12,7 +12,7 @@ const Footer = () => {
             <Image
               src="/LogoGU2.png" // Reutilizando o mesmo logo da pasta /public
               alt="Logo Goulart Metais Preciosos"
-              width={200} // Um tamanho um pouco menor para o rodapé
+              width={100} // Um tamanho um pouco menor para o rodapé
               height={43}
             />
           </Link>
@@ -29,13 +29,7 @@ const Footer = () => {
         </div>
 
         {/* Aviso Legal e Direitos Autorais */}
-        <div className="text-xs space-y-4 max-w-3xl mx-auto">
-          <p>
-            Este site não faz parte do site do Facebook ou Facebook Inc. Além disso, este site não é endossado pelo Facebook de forma alguma. FACEBOOK é uma marca comercial da FACEBOOK, Inc.
-          </p>
-          <p>
-            Os resultados podem variar de pessoa para pessoa. Todo investimento envolve riscos e não há garantia de retorno. Nenhuma informação contida nesta página deve ser interpretada como uma garantia de resultados.
-          </p>
+        <div className="text-xs space-y-4 max-w-3xl mx-auto">          
           <p className="mt-6">
             &copy; {new Date().getFullYear()} Goulart Metais Preciosos. Todos os direitos reservados.
           </p>

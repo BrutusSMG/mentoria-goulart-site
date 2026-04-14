@@ -1,7 +1,6 @@
 // src/app/page.js
 import Header from '@/components/Header.jsx';
 import Hero from '@/components/Hero.jsx';
-import CTAButton from '@/components/CTAButton.jsx';
 import Testimonials from '@/components/Testimonials.jsx';
 import Audience from '@/components/Audience.jsx';
 import Learning from '@/components/Learning.jsx';
@@ -17,7 +16,6 @@ export default function Home() {
     <main>
       <Header />
       <Hero />
-      <CTAButton />
       <Testimonials />
       <Author />
       <Audience />
