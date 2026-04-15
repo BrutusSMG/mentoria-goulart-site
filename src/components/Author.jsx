@@ -4,7 +4,7 @@ import { HeartHandshake } from 'lucide-react'; // Vamos usar um ícone para o "c
 
 const Author = () => {
   return (
-    <section className="py-16 md:py-24 px-4">
+    <section className="bg-black py-16 md:py-24 px-4">
       <div className="container mx-auto max-w-6xl">
         {/* Título da Seção */}
         <div className="text-center mb-12">
@@ -17,10 +17,10 @@ const Author = () => {
         </div>
 
         {/* Container Principal */}
-        <div className="flex flex-col md:flex-row items-start gap-8 md:gap-12 bg-black p-8 rounded-lg shadow-xl">
+        <div className="flex flex-col md:flex-row items-start gap-8 md:gap-12 p-8 rounded-lg shadow-xl">
           
           {/* Coluna da Imagem */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <div className="relative w-48 h-48 md:w-46 md:h-46 rounded-full overflow-hidden shadow-2xl shadow-green-500/20 border-4 border-gray-700">
               <Image
                 src="/autor.png"
@@ -43,7 +43,7 @@ const Author = () => {
             {/* Bloco de Destaque para a "Virada" da história */}
             <div className="my-6 p-6 bg-gray-800/50 border-l-4 border-green-500 rounded-r-lg">
               <p className="text-xl font-semibold text-white italic">
-                "Foi essa dificuldade que me moveu. Eu decidi que, se não havia um caminho, eu mesmo o construiria."
+                &ldquo;Foi essa dificuldade que me moveu. Eu decidi que, se não havia um caminho, eu mesmo o construiria.&rdquo;
               </p>
             </div>
 
@@ -53,7 +53,7 @@ const Author = () => {
 
             {/* Bloco de Compromisso com Ícone */}
             <div className="flex items-start gap-4 pt-4">
-              <HeartHandshake className="h-10 w-10 text-green-500 flex-shrink-0 mt-1" />
+              <HeartHandshake className="h-10 w-10 text-green-500 shrink-0 mt-1" />
               <p>
                 Meu compromisso é garantir que <strong className="text-white">você não passe pelas mesmas dificuldades que eu passei.</strong> É pegar na sua mão e te dar o mapa completo, sem segredos, para que sua jornada seja muito mais rápida e tranquila.
               </p>

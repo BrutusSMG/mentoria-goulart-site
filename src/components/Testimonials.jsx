@@ -64,7 +64,7 @@ const Testimonials = () => {
                     <Image
                       src={`/testimonials/${imageName}`}
                       alt={`Depoimento de aluno ${index + 1}`}
-                      layout="fill"
+                      fill
                       objectFit="contain"
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     />

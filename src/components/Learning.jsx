@@ -1,53 +1,53 @@
 // src/components/Learning.jsx
-import { BookOpen, BarChart3, ShieldCheck, BrainCircuit } from 'lucide-react'; // Importando ícones relevantes
+import { FlaskConical, Gem, Warehouse, ShieldCheck, Beaker, Truck, Flame, Droplets, BarChart3, Recycle, Car, Film, Watch, Cpu, Sparkles } from 'lucide-react';
 
-// Melhor Prática: Usar um array de objetos para dados estruturados.
-// Cada objeto contém todas as informações de um item da lista,
-// tornando o código extremamente fácil de ler e manter.
-const learningItems = [
-  {
-    icon: <BookOpen className="h-10 w-10 text-green-500" />,
-    title: 'Fundamentos do Mercado de Ouro',
-    description: 'Entenda o que move o preço do ouro e como se posicionar de forma inteligente.',
-  },
-  {
-    icon: <BarChart3 className="h-10 w-10 text-green-500" />,
-    title: 'Análise Técnica Aplicada',
-    description: 'Aprenda a ler gráficos e identificar os melhores pontos de compra e venda.',
-  },
-  {
-    icon: <ShieldCheck className="h-10 w-10 text-green-500" />,
-    title: 'Gerenciamento de Risco',
-    description: 'Proteja seu capital e minimize perdas, garantindo a sustentabilidade dos seus lucros.',
-  },
-  {
-    icon: <BrainCircuit className="h-10 w-10 text-green-500" />,
-    title: 'Psicologia do Trader',
-    description: 'Desenvolva a mentalidade correta para operar com confiança e disciplina.',
-  },
+// Array com os dados dos módulos (refinados)
+const learningModules = [
+  { icon: <BarChart3 />, title: "Módulo 01: Visão Geral", description: "Uma introdução completa ao treinamento e à jornada que você irá percorrer." },
+  { icon: <FlaskConical />, title: "Módulo 02: Metalurgia Nobre", description: "Aprenda a diferença entre lixo e resíduo industrial e conheça as principais rotas metalúrgicas." },
+  { icon: <Gem />, title: "Módulo 03: Ligas na Indústria de Joias", description: "Entenda a composição dos metais e suas ligas usados na fabricação de joias." },
+  { icon: <Warehouse />, title: "Módulo 04: Boas Práticas e Segurança", description: "Como recolher, armazenar e proteger seus resíduos para maximizar a apuração." },
+  { icon: <ShieldCheck />, title: "Módulo 05: Saúde e Segurança", description: "Garanta sua integridade física e saúde com as melhores práticas de segurança laboratorial." },
+  { icon: <Beaker />, title: "Módulo 06: Montando seu Laboratório", description: "Descubra quais equipamentos e produtos químicos são essenciais para começar." },
+  { icon: <Truck />, title: "Módulo 07: Coleta e Transporte", description: "Aprenda o método correto para coletar e transportar resíduos de forma segura e eficiente." },
+  { icon: <Flame />, title: "Módulo 08: Preparo e Descontaminação", description: "Domine as etapas cruciais: queima, separação magnética, moagem e descontaminação." },
+  { icon: <Flame />, title: "Módulo 09: Rota Pirometalúrgica", description: "Aprenda a extrair e refinar metais preciosos usando a técnica de fusão em fornos." },
+  { icon: <Droplets />, title: "Módulo 10: Rota Hidrometalúrgica", description: "Domine a extração e o refino de metais usando apenas reagentes líquidos." },
+  { icon: <Sparkles />, title: "Módulo 11: Refino de Ligas e Joias", description: "Como purificar barras de metal ou joias velhas para obter o máximo de valor." },
+  { icon: <Recycle />, title: "Módulo 12: Tratamento de Resíduos", description: "Aprenda a neutralizar, precipitar e descartar os resíduos do processo de forma segura." },
+  { icon: <Car />, title: "Módulo 13: Metais de Catalisadores", description: "Guia completo para extrair Paládio, Platina e Ródio de catalisadores de automóveis." },
+  { icon: <Film />, title: "Módulo 14: Prata de Radiografias", description: "Aprenda o processo específico para recuperar prata de filmes de raios-X." },
+  { icon: <Watch />, title: "Módulo 15: Prata de Baterias", description: "Descubra como extrair prata de baterias de relógios, uma fonte muitas vezes ignorada." },
+  { icon: <Cpu />, title: "Módulo 16: Metais de Eletrônicos", description: "O passo a passo para recuperar metais preciosos de contatos eletrônicos e placas de circuito." },
+  { icon: <Gem />, title: "Módulo 17: Ouro de Semijoias", description: "Aprenda a técnica para extrair e refinar ouro de semijoias e caixas de relógios." },
 ];
 
 const Learning = () => {
   return (
-    <section className="bg-gray-900/50 py-16 px-4"> {/* Um fundo ligeiramente diferente para quebrar a monotonia */}
-      <div className="container mx-auto max-w-4xl">
+    <section className="bg-black py-16 md:py-24 px-4">
+      <div className="container mx-auto max-w-7xl">
         {/* Título da Seção */}
-        <h2 className="text-center text-3xl md:text-4xl font-bold mb-12">
-          O que você vai <span className="text-green-500">aprender?</span>
-        </h2>
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-white">
+            O Que Você Vai Aprender na Prática?
+          </h2>
+          <p className="text-lg text-gray-400 mt-3 max-w-3xl mx-auto">
+            O treinamento está dividido em <strong className="text-white">17 módulos principais</strong>, além das aulas e mentorias ao vivo, cobrindo do absoluto zero ao refino avançado.
+          </p>
+        </div>
 
-        {/* Lista de Itens */}
-        <div className="grid md:grid-cols-2 gap-8"> {/* Usando grid para dividir em 2 colunas em telas maiores */}
-          {learningItems.map((item, index) => (
-            <div key={index} className="flex items-start space-x-4">
+        {/* Grid de Módulos */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {learningModules.map((module, index) => (
+            <div key={index} className="bg-gray-900/80 p-6 rounded-lg border border-gray-800 flex items-start gap-5">
               {/* Ícone */}
-              <div className="flex-shrink-0">
-                {item.icon}
+              <div className="text-green-500 mt-1">
+                {React.cloneElement(module.icon, { className: "h-8 w-8" })}
               </div>
-              {/* Título e Descrição */}
+              {/* Conteúdo */}
               <div>
-                <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                <p className="text-gray-300">{item.description}</p>
+                <h3 className="font-bold text-white text-lg mb-2">{module.title}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">{module.description}</p>
               </div>
             </div>
           ))}
@@ -57,4 +57,6 @@ const Learning = () => {
   );
 };
 
+// Precisamos do React para usar o cloneElement
+import React from 'react';
 export default Learning;

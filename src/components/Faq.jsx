@@ -56,7 +56,7 @@ const Faq = () => {
   };
 
   return (
-    <section className="bg-gray-900/50 py-16 px-4">
+    <section className="bg-blac py-16 px-4">
       <div className="container mx-auto max-w-3xl">
         <h2 className="text-center text-3xl md:text-4xl font-bold mb-12">
           Perguntas <span className="text-green-500">Frequentes</span>

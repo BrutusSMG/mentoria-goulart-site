@@ -1,57 +1,65 @@
 // src/components/Offer.jsx
 import Link from 'next/link';
+import { Check, Package, BookMarked, GraduationCap, Rocket } from 'lucide-react';
+
+// Vamos reutilizar os dados dos bônus para calcular o valor total
+const bonusValue = 198 + 147 + 247; // R$592
+const courseValue = 4997;
+const totalValue = courseValue + bonusValue;
 
 const Offer = () => {
   return (
-    <section className="bg-black py-16 px-4">
-      <div className="container mx-auto max-w-3xl text-center">
-        {/* Título da Oferta */}
-        <h2 className="text-2xl font-bold uppercase tracking-wider text-gray-400 mb-4">
-          Oferta Especial
-        </h2>
+    <section className="bg-black py-16 md:py-24 px-4">
+      <div className="container mx-auto max-w-4xl text-center">
+        
+        {/* Card de Oferta Principal */}
+        <div className="bg-gray-900 border-2 border-green-500 rounded-2xl shadow-2xl shadow-green-500/20 p-6 md:p-10 mx-auto">
 
-        {/* Bloco de Preço */}
-        <div className="mb-8">
-          <p className="text-xl text-gray-400 line-through">
-            De R$5997,00
-          </p>
-          <p className="text-lg text-white mb-2">
-            Por apenas 12x de
-          </p>
-          <p className="text-7xl md:text-8xl font-extrabold text-green-500">
-            R$206,54
-          </p>
-          <p className="text-lg text-white mt-2">
-            ou R$1997,00 à vista
-          </p>
-        </div>
+          {/* Título da Oferta */}
+          <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-2">
+            Sua Vaga na Mentoria Garimpo Urbano
+          </h2>
+          <p className="text-yellow-400 font-semibold mb-8">OFERTA ESPECIAL DE LANÇAMENTO</p>
 
-        {/* Botão de CTA (reutilizando o estilo do componente CTAButton) */}
-        <div className="mt-10">
-          <Link 
-            href="#" // Substitua pelo link de checkout/compra
-            className="
-              bg-green-500 
-              text-white 
-              font-bold 
-              text-2xl 
-              md:text-3xl 
-              py-5 
-              px-8 
-              rounded-lg 
-              shadow-lg 
-              shadow-green-500/50
-              hover:bg-green-600 
-              hover:scale-105
-              transition-all 
-              duration-300 
-              ease-in-out
-              animate-pulse
-              inline-block
-            "
-          >
-            QUERO LUCRAR COM OURO AGORA
-          </Link>
+          {/* Lista de Entregáveis (O que o aluno leva) */}
+          <div className="text-left max-w-md mx-auto space-y-3 mb-10">
+            <p className="flex items-center gap-3 text-lg"><Check className="h-6 w-6 text-green-500" /> Acesso completo aos <strong className="text-white">17 Módulos do Curso</strong></p>
+            <p className="flex items-center gap-3 text-lg"><Check className="h-6 w-6 text-green-500" /> <strong className="text-white">Aulas e Mentorias</strong> ao vivo</p>
+            <p className="flex items-center gap-3 text-lg"><Check className="h-6 w-6 text-green-500" /> Acesso à <strong className="text-white">Comunidade VIP</strong></p>
+            <p className="flex items-center gap-3 text-lg text-yellow-400"><Package className="h-6 w-6" /> <strong className="text-white">Pacote de Bônus Exclusivos</strong></p>
+          </div>
+
+          {/* Bloco de Preço */}
+          <div className="mb-8">
+            <div className="text-center mb-4">
+              <span className="text-gray-400">Valor total do pacote: </span>
+              <span className="text-red-500 line-through text-xl">R${totalValue.toFixed(2).replace('.', ',')}</span>
+            </div>
+            <p className="text-lg text-white mb-2">
+              Hoje, por apenas 12x de
+            </p>
+            <p className="text-5xl sm:text-7xl md:text-8xl font-extrabold text-green-500 animate-pulse">
+              R$206,54
+            </p>
+            <p className="text-lg text-white mt-2">
+              ou R$1997,00 à vista
+            </p>
+          </div>
+
+          {/* Botão de CTA */}
+          <div className="mt-10">
+            <Link 
+              href="#" // Substitua pelo link de checkout
+              className="bg-green-500 text-white font-bold text-2xl md:text-3xl py-5 px-8 rounded-lg shadow-lg shadow-green-500/50 hover:bg-green-600 hover:scale-105 transition-all duration-300 ease-in-out inline-block"
+            >
+              QUERO GARANTIR MINHA VAGA AGORA!
+            </Link>
+          </div>
+
+          {/* Gatilho de Urgência */}
+          <p className="text-gray-500 text-sm mt-8">
+            ⚠️ Vagas limitadas. Esta oferta pode encerrar a qualquer momento.
+          </p>
         </div>
       </div>
     </section>
