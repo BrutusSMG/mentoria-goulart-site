@@ -1,6 +1,6 @@
 // src/components/Author.jsx
 import Image from 'next/image';
-import { HeartHandshake } from 'lucide-react'; // Vamos usar um ícone para o "compromisso"
+import { HeartHandshake } from 'lucide-react';
 
 const Author = () => {
   return (
@@ -25,8 +25,9 @@ const Author = () => {
               <Image
                 src="/autor.png"
                 alt="Foto de José Goulart Filho"
-                fill
-                className="object-cover"
+                width={100} // Ajuste a LARGURA da sua imagem de autor
+                height={100} // Ajuste a ALTURA da sua imagem de autor
+                className="object-cover h-auto w-full max-w-md"
               />
             </div>
           </div>

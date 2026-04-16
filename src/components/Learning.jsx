@@ -57,6 +57,5 @@ const Learning = () => {
   );
 };
 
-// Precisamos do React para usar o cloneElement
 import React from 'react';
 export default Learning;

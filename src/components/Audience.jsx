@@ -2,7 +2,7 @@
 import { CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 
-// 1. Atualizamos o conteúdo com os novos textos persuasivos
+// 1. Conteúdo com os textos persuasivos
 const audienceItems = [
   {
     title: "Para o Iniciante Absoluto",
@@ -40,10 +40,10 @@ const Audience = () => {
             Para Quem é o Curso
           </h2>
           <Image
-            src="/GUText.png" // Certifique-se que o nome do arquivo corresponde
+            src="/GUText.png"
             alt="Garimpo Urbano"
-            width={400} // Ajuste a LARGURA da sua imagem de logo
-            height={80} // Ajuste a ALTURA da sua imagem de logo
+            width={600} 
+            height={100} 
             className="h-auto w-full max-w-md" 
           />
           

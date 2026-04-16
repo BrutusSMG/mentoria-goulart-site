@@ -47,10 +47,10 @@ const Hero = () => {
               </span>
               <Image
                 src="/GUText.png" // Certifique-se que o nome do arquivo corresponde
-                alt="Logo do Curso Garimpo Urbano - Recuperação de Metais Preciosos"
+                alt="Garimpo Urbano - Recuperação de Metais Preciosos"
                 width={600} // Ajuste a largura conforme o tamanho da sua imagem
                 height={100} // Ajuste a altura para manter a proporção
-                className="h-auto" // Garante que a altura se ajuste se a largura for responsiva
+                className="h-auto w-full max-w-md"  // Garante que a altura se ajuste se a largura for responsiva
               />
             </div>
             <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-3xl mx-auto">
@@ -63,7 +63,7 @@ const Hero = () => {
           </div>
           <div className="w-full aspect-video rounded-lg overflow-hidden relative">
             {!loadVideo ? (
-              <div onClick={() => setLoadVideo(true)} className="cursor-pointer w-full h-full">
+              <div onClick={() => setLoadVideo(true)} className="cursor-pointer w-full h-full relative">
                 <Image
                   src={`https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`}
                   alt="Thumbnail do vídeo da mentoria"

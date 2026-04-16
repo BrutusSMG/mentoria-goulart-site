@@ -27,7 +27,6 @@ export default function Home() {
       <Guarantee />      
       <Faq />
       <Footer />
-      {/* As próximas seções virão aqui */}
     </main>
   );
 }

@@ -12,7 +12,7 @@ const Guarantee = () => {
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
             
             {/* Coluna da Imagem (Selo) */}
-            <div className="flex-shrink-0 text-center">
+            <div className="shrink-0 text-center">
               <Image
                 src="/selo-garantia.png"
                 alt="Selo de Garantia Incondicional de 7 dias"
@@ -33,7 +33,7 @@ const Guarantee = () => {
               </p>
               <div className="space-y-4">
                 <div className="flex items-start gap-4 p-4 bg-gray-900 rounded-lg">
-                  <ShieldCheck className="h-8 w-8 text-green-500 flex-shrink-0 mt-1" />
+                  <ShieldCheck className="h-8 w-8 text-green-500 shrink-0 mt-1" />
                   <div>
                     <h3 className="font-bold text-white">Garantia Incondicional de 7 Dias</h3>
                     <p className="text-gray-400">
@@ -42,7 +42,7 @@ const Guarantee = () => {
                   </div>
                 </div>
                 <div className="flex items-start gap-4 p-4 bg-gray-900 rounded-lg">
-                  <ShieldCheck className="h-8 w-8 text-green-500 flex-shrink-0 mt-1" />
+                  <ShieldCheck className="h-8 w-8 text-green-500 shrink-0 mt-1" />
                   <div>
                     <h3 className="font-bold text-white">Reembolso de 100% do Valor</h3>
                     <p className="text-gray-400">

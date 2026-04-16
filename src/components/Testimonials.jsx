@@ -58,14 +58,14 @@ const Testimonials = () => {
                 <div 
                   key={index} 
                   // Define a largura dos slides para criar o efeito de 4, 3, 2 ou 1 por vez
-                  className="flex-shrink-0 flex-grow-0 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 p-2"
+                  className="shrink-0 grow-0 basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 p-2"
                 >
                   <div className="relative w-full h-150 rounded-lg overflow-hidden shadow-md">
                     <Image
                       src={`/testimonials/${imageName}`}
                       alt={`Depoimento de aluno ${index + 1}`}
                       fill
-                      objectFit="contain"
+                      className="object-contain"
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     />
                   </div>

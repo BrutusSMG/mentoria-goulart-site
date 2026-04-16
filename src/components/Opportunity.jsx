@@ -19,12 +19,13 @@ const Opportunity = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           
           {/* Coluna da Imagem */}
-          <div className="w-full h-80 md:h-full relative rounded-lg overflow-hidden shadow-lg">
+          <div className="w-full h-50 md:h-full relative rounded-lg overflow-hidden shadow-lg">
             <Image
               src="/garimpo-urbano-sucata.png" // Use o nome da sua imagem
               alt="Sucata eletrônica rica em metais preciosos"
               fill
               className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
 
@@ -46,7 +47,7 @@ const Opportunity = () => {
               A Hora de Empreender é Agora
             </h3>
             <p>
-              Como diz o ditado: <em className="text-gray-400">"quem chega primeiro à fonte, bebe água limpa."</em> Nós formamos você <strong className="text-white">do absoluto zero</strong> para se tornar uma autoridade no setor. Para isso, conte conosco!
+              Como diz o ditado: <em className="text-gray-400">&ldquo;quem chega primeiro à fonte, bebe água limpa.&rdquo;</em> Nós formamos você <strong className="text-white">do absoluto zero</strong> para se tornar uma autoridade no setor. Para isso, conte conosco!
             </p>
           </div>
         </div>

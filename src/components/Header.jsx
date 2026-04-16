@@ -7,23 +7,14 @@ const Header = () => {
     <header className="bg-black py-6">
       <div className="container mx-auto flex justify-center">
         <Link href="/">
-          <video
-            autoPlay
-            muted
-            // playsInline: Importante para dispositivos móveis (iOS). Garante que o vídeo toque
-            // no local, em vez de abrir em tela cheia.
-            playsInline
-            // --- Estilização e Acessibilidade ---
-            // src: O caminho para o vídeo na pasta /public.
-            src="/logoAnimada.mp4"
-            className="w-92 h-auto"
-            // Oculta o vídeo de leitores de tela, pois o link já tem um propósito.
-            // A logo é decorativa.
-            aria-hidden="true"
-          >
-            {/* Melhor Prática: Fornecer um fallback para navegadores que não suportam o vídeo. */}
-            Seu navegador não suporta o vídeo.
-          </video>
+          <Image
+            src="/logo_fundoTransparentered.png" // O caminho para a imagem na pasta /public
+            alt="Logo Garimpo Urbano" // Texto alternativo para acessibilidade e SEO
+            width={368} // A largura original da sua imagem (equivalente a w-92)
+            height={80}  // A altura correspondente para manter a proporção. AJUSTE SE NECESSÁRIO.
+            priority // Diz ao Next.js para carregar esta imagem primeiro, pois ela está no topo da página.
+            className="w-full h-auto" // Garante que a altura se ajuste caso a largura mude
+          />
         </Link>
       </div>
     </header>

@@ -14,6 +14,7 @@ const Footer = () => {
               alt="Logo Goulart Metais Preciosos"
               width={100} // Um tamanho um pouco menor para o rodapé
               height={43}
+              className="object-cover h-auto w-full max-w-md"
             />
           </Link>
         </div>

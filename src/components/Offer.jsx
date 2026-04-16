@@ -22,11 +22,23 @@ const Offer = () => {
           <p className="text-yellow-400 font-semibold mb-8">OFERTA ESPECIAL DE LANÇAMENTO</p>
 
           {/* Lista de Entregáveis (O que o aluno leva) */}
-          <div className="text-left max-w-md mx-auto space-y-3 mb-10">
-            <p className="flex items-center gap-3 text-lg"><Check className="h-6 w-6 text-green-500" /> Acesso completo aos <strong className="text-white">17 Módulos do Curso</strong></p>
-            <p className="flex items-center gap-3 text-lg"><Check className="h-6 w-6 text-green-500" /> <strong className="text-white">Aulas e Mentorias</strong> ao vivo</p>
-            <p className="flex items-center gap-3 text-lg"><Check className="h-6 w-6 text-green-500" /> Acesso à <strong className="text-white">Comunidade VIP</strong></p>
-            <p className="flex items-center gap-3 text-lg text-yellow-400"><Package className="h-6 w-6" /> <strong className="text-white">Pacote de Bônus Exclusivos</strong></p>
+          <div className="text-left max-w-md mx-auto space-y-4 mb-10">
+            <p className="flex items-start gap-3 text-lg">
+              <Check className="h-6 w-6 text-green-500 shrink-0 mt-1" />
+              <span>Acesso completo aos <strong className="text-white">17 Módulos do Curso</strong></span>
+            </p>
+            <p className="flex items-start gap-3 text-lg">
+              <Check className="h-6 w-6 text-green-500 shrink-0 mt-1" />
+              <span><strong className="text-white">Aulas e Mentorias</strong> ao vivo</span>
+            </p>
+            <p className="flex items-start gap-3 text-lg">
+              <Check className="h-6 w-6 text-green-500 shrink-0 mt-1" />
+              <span>Acesso à <strong className="text-white">Comunidade VIP</strong></span>
+            </p>
+            <p className="flex items-center gap-3 text-lg text-yellow-400">
+              <Package className="h-6 w-6 shrink-0 mt-1" /> 
+              <span><strong className="text-white">Pacote de Bônus Exclusivos</strong></span>
+            </p>
           </div>
 
           {/* Bloco de Preço */}
