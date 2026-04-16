@@ -11,6 +11,7 @@ import Faq from '@/components/Faq.jsx';
 import Footer from '@/components/Footer.jsx';
 import Author from '@/components/Author';
 import Opportunity from '@/components/Opportunity';
+import VideoTestimonials from '@/components/VideoTestimonials';
 
 export default function Home() {
   return (
@@ -24,7 +25,8 @@ export default function Home() {
       <Learning />  
       <Bonus />    
       <Offer />      
-      <Guarantee />      
+      <Guarantee />
+      <VideoTestimonials />
       <Faq />
       <Footer />
     </main>
