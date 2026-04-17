@@ -61,7 +61,7 @@ const Offer = () => {
           {/* Botão de CTA */}
           <div className="mt-10">
             <Link 
-              href="#" // Substitua pelo link de checkout
+              href="https://pay.hotmart.com/Y38962738S?off=1a7iy0g9&ref=J105438092D&bid=1776465352908" // Substitua pelo link de checkout
               className="bg-green-500 text-white font-bold text-2xl md:text-3xl py-5 px-8 rounded-lg shadow-lg shadow-green-500/50 hover:bg-green-600 hover:scale-105 transition-all duration-300 ease-in-out inline-block"
             >
               QUERO GARANTIR MINHA VAGA AGORA!
