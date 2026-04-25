@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 const Opportunity = () => {
   return (
-    <section className="bg-black text-white text-center py-12 px-4">
+    <section className="bg-[#171f35] text-white text-center py-12 px-4">
       <div className="container mx-auto px-4">
         {/* Título Principal da Seção */}
         <div className="text-center mb-12">

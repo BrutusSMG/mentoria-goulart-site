@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { PlayCircle, Star } from 'lucide-react';
+import Link from 'next/link';
 
 const VideoTestimonials = () => {
   // Cole o ID do seu vídeo compilado de depoimentos aqui
@@ -13,7 +14,7 @@ const VideoTestimonials = () => {
 
   return (
     // 1. Fundo preto e efeito de "holofote" com gradiente radial
-    <section className="relative bg-black py-20 md:py-32 px-4 overflow-hidden">
+    <section className="relative bg-[#171f35] py-20 md:py-32 px-4 overflow-hidden">
       <div 
         className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,197,94,0.1)_0%,rgba(0,0,0,0)_50%)]"
         aria-hidden="true"
@@ -67,7 +68,15 @@ const VideoTestimonials = () => {
               </div>
             </div>
           )}
-        </div>
+        </div>        
+      </div>
+      <div className="text-center mt-8">
+        <Link 
+          href="https://pay.hotmart.com/Y38962738S?off=1a7iy0g9&ref=J105438092D&bid=1776465352908"
+          className="inline-block bg-green-500 text-white font-bold text-2xl md:text-3xl py-5 px-8 rounded-lg shadow-lg shadow-green-500/50 hover:bg-green-600 hover:scale-105 transition-all duration-300 ease-in-out animate-pulse"
+        >
+          QUERO LUCRAR COM OURO
+        </Link>
       </div>
     </section>
   );

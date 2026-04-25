@@ -6,10 +6,11 @@ import { Check, Package, BookMarked, GraduationCap, Rocket } from 'lucide-react'
 const bonusValue = 198 + 147 + 247; // R$592
 const courseValue = 4997;
 const totalValue = courseValue + bonusValue;
+const discountedValue = 2497;
 
 const Offer = () => {
   return (
-    <section className="bg-black py-16 md:py-24 px-4">
+    <section className="bg-[#171f35] py-16 md:py-24 px-4">
       <div className="container mx-auto max-w-4xl text-center">
         
         {/* Card de Oferta Principal */}
@@ -51,10 +52,10 @@ const Offer = () => {
               Hoje, por apenas 12x de
             </p>
             <p className="text-5xl sm:text-7xl md:text-8xl font-extrabold text-green-500 animate-pulse">
-              R$206,54
+              R$281,57
             </p>
             <p className="text-lg text-white mt-2">
-              ou R$1997,00 à vista
+              ou {discountedValue.toFixed(2).replace('.', ',')} à vista
             </p>
           </div>
 

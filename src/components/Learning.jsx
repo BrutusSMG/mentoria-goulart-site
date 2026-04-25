@@ -24,7 +24,7 @@ const learningModules = [
 
 const Learning = () => {
   return (
-    <section className="bg-black py-16 md:py-24 px-4">
+    <section className="bg-[#171f35] py-16 md:py-24 px-4">
       <div className="container mx-auto max-w-7xl">
         {/* Título da Seção */}
         <div className="text-center mb-16">
@@ -39,7 +39,7 @@ const Learning = () => {
         {/* Grid de Módulos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {learningModules.map((module, index) => (
-            <div key={index} className="bg-gray-900/80 p-6 rounded-lg border border-gray-800 flex items-start gap-5">
+            <div key={index} className="bg-gray-700/80 p-6 rounded-lg border border-gray-800 flex items-start gap-5">
               {/* Ícone */}
               <div className="text-green-500 mt-1">
                 {React.cloneElement(module.icon, { className: "h-8 w-8" })}

@@ -1,39 +1,157 @@
 // src/components/Footer.jsx
+
+"use client";
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 
 const Footer = () => {
+  const [formData, setFormData] = useState({
+    nome: '',
+    email: '',
+    assunto: '',
+    mensagem: ''
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Aqui você integrará com sua API de envio de e-mail ou webhook
+    console.log("Formulário enviado:", formData);
+    alert("Mensagem enviada com sucesso! Retornaremos em breve.");
+    setFormData({ nome: '', email: '', assunto: '', mensagem: '' });
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   return (
-    <footer className="bg-black border-t border-gray-800 py-12 px-4">
-      <div className="container mx-auto text-center text-gray-400">
-        {/* Logo */}
-        <div className="flex justify-center mb-6">
-          <Link href="/">
-            <Image
-              src="/LogoGU2.png" // Reutilizando o mesmo logo da pasta /public
-              alt="Logo Goulart Metais Preciosos"
-              width={100} // Um tamanho um pouco menor para o rodapé
-              height={43}
-              className="object-cover h-auto w-full max-w-md"
-            />
-          </Link>
+    <footer className="bg-[#232324] border-t border-gray-800 py-12 px-4">
+      <div className="container mx-auto max-w-6xl">
+        
+        {/* Grid Principal do Rodapé */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+          
+          {/* Coluna 1: Logo, Descrição e Redes Sociais */}
+          <div className="flex flex-col items-center md:items-start text-center md:text-left">
+            <Link href="/" className="mb-6">
+              <Image
+                src="/Logo_fundoTransparentered.png"
+                alt="Logo Goulart Metais Preciosos"
+                width={150}
+                height={75}
+                className="object-contain h-auto w-full max-w-37.5"
+              />
+            </Link>
+            <p className="text-gray-400 text-sm mb-6">
+              O portal completo para você dominar a recuperação de metais preciosos e construir um negócio lucrativo do zero.
+            </p>
+            
+            {/* Ícones de Redes Sociais */}
+            <div className="flex gap-4">
+              {/* Instagram */}
+              <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#d89900] transition-colors">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.20 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+              </a>
+              {/* YouTube */}
+              <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#d89900] transition-colors">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              </a>
+              {/* WhatsApp */}
+              <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#d89900] transition-colors">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.383 0 0 5.383 0 12.031c0 2.123.552 4.195 1.606 6.015L.106 24l6.105-1.602a11.96 11.96 0 005.82 1.514h.005c6.646 0 12.028-5.383 12.028-12.031S18.677 0 12.031 0zm0 21.912c-1.796 0-3.555-.483-5.097-1.397l-.366-.217-3.787.993.993-3.787-.217-.366a9.98 9.98 0 01-1.397-5.097c0-5.542 4.51-10.052 10.052-10.052s10.052 4.51 10.052 10.052-4.51 10.052-10.052 10.052zm5.51-7.53c-.302-.151-1.788-.882-2.065-.983-.276-.101-.478-.151-.679.151-.201.302-.78 .983-.956 1.184-.176.201-.352.226-.654.075-1.726-.867-2.946-1.714-4.088-3.664-.176-.302.176-.276.478-.882.101-.201.05-.377-.025-.528-.075-.151-.679-1.635-.93-2.238-.245-.59-.494-.51-.679-.52-.176-.01-.377-.01-.578-.01-.201 0-.528.075-.804.377-.276.302-1.056 1.031-1.056 2.515 0 1.484 1.081 2.918 1.232 3.12.151.201 2.126 3.245 5.148 4.548 2.035.879 2.785.754 3.313.628.628-.151 1.788-.73 2.04-1.434.251-.704.251-1.308.176-1.434-.075-.126-.276-.201-.578-.352z"/></svg>
+              </a>
+              {/* Facebook */}
+              <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#d89900] transition-colors">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35C.597 0 0 .597 0 1.325v21.351C0 23.403.597 24 1.325 24h11.495v-9.294H9.691v-3.622h3.129V8.413c0-3.1 1.894-4.788 4.659-4.788 1.325 0 2.464.099 2.794.143v3.24l-1.918.001c-1.504 0-1.796.715-1.796 1.763v2.312h3.591l-.467 3.622h-3.124V24h"/></svg>
+              </a>
+              {/* LinkedIn */}
+              <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#d89900] transition-colors">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.327-.026-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667h-3.554V9h3.413v1.561h.049c.476-.9 1.637-1.852 3.37-1.852 3.602 0 4.268 2.371 4.268 5.455v6.288zM5.337 7.433a2.062 2.062 0 11-.001-4.123 2.062 2.062 0 010 4.123zM6.814 20.452H3.861V9h2.953v11.452zM22.225 0H1.771C.792 0 0 .771 0 1.723v20.555C0 23.229.792 24 1.771 24h20.451C23.208 24 24 23.229 24 22.278V1.723C24 .771 23.208 0 22.225 0z"/></svg>
+              </a>
+              {/* TikTok */}
+              <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#d89900] transition-colors">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 2.26-1.17 4.49-2.96 5.9-1.71 1.34-3.95 1.86-6.09 1.45-2.24-.42-4.25-1.83-5.36-3.83-1.1-1.99-1.2-4.42-.28-6.49 1.03-2.31 3.3-3.9 5.8-4.26v4.06c-1.51.23-2.94 1.18-3.6 2.53-.66 1.36-.6 3.03.16 4.33.76 1.3 2.25 2.15 3.78 2.22 1.54.07 3.09-.6 4.02-1.81.93-1.21 1.25-2.8 1.14-4.33-.1-4.9-.05-9.8-.05-14.7z" />
+                </svg>
+              </a>
+
+            </div>
+          </div>
+
+          {/* Coluna 2: Links Úteis */}
+          <div className="flex flex-col items-center md:items-start">
+            <h3 className="text-white font-semibold mb-4">Links Úteis</h3>
+            <ul className="space-y-3 text-sm text-gray-400">
+              <li><Link href="#produtos" className="hover:text-white transition-colors">Nossos Treinamentos</Link></li>
+              <li><Link href="/mentoria" className="hover:text-white transition-colors">Mentoria Online</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Área do Aluno</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Termos de Uso</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Políticas de Privacidade</Link></li>
+            </ul>
+          </div>
+
+          {/* Coluna 3: Formulário de Contato */}
+          <div className="flex flex-col">
+            <h3 className="text-white font-semibold mb-4 text-center md:text-left">Fale Conosco</h3>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+              <input 
+                type="text" 
+                name="nome"
+                placeholder="Seu Nome" 
+                required
+                value={formData.nome}
+                onChange={handleChange}
+                className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-green-500"
+              />
+              <input 
+                type="email" 
+                name="email"
+                placeholder="Seu E-mail" 
+                required
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-green-500"
+              />
+              <select 
+                name="assunto"
+                required
+                value={formData.assunto}
+                onChange={handleChange}
+                className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 focus:outline-none focus:border-green-500"
+              >
+                <option value="" disabled>Selecione o Assunto</option>
+                <option value="Dúvida sobre Cursos">Dúvida sobre Cursos</option>
+                <option value="Mentoria">Mentoria</option>
+                <option value="Suporte Técnico">Suporte Técnico</option>
+                <option value="Parcerias">Parcerias</option>
+                <option value="Outros">Outros</option>
+              </select>
+              <textarea 
+                name="mensagem"
+                placeholder="Sua Mensagem" 
+                rows="3"
+                required
+                value={formData.mensagem}
+                onChange={handleChange}
+                className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-green-500 resize-none"
+              ></textarea>
+              <button 
+                type="submit"
+                className="w-full bg-[#d89900] text-black font-semibold text-sm py-2 rounded hover:bg-[#F7FA83] transition-colors"
+              >
+                Enviar Mensagem
+              </button>
+            </form>
+          </div>
+
         </div>
 
-        {/* Links Legais */}
-        <div className="flex justify-center gap-6 mb-6">
-          <Link href="#" className="hover:text-white transition-colors">
-            Termos de Uso
-          </Link>
-          <Link href="#" className="hover:text-white transition-colors">
-            Políticas de Privacidade
-          </Link>
-        </div>
-
-        {/* Aviso Legal e Direitos Autorais */}
-        <div className="text-xs space-y-4 max-w-3xl mx-auto">          
-          <p className="mt-6">
+        {/* Linha Divisória e Direitos Autorais */}
+        <div className="border-t border-gray-800 pt-6 text-center text-xs text-gray-500">          
+          <p>
             &copy; {new Date().getFullYear()} Goulart Metais Preciosos. Todos os direitos reservados.
-          </p>
+          </p>          
         </div>
       </div>
     </footer>

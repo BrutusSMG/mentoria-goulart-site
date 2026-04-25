@@ -3,7 +3,7 @@
 "use client";
 import { useState } from 'react';
 import Image from 'next/image';
-import { PlayCircle, ChevronsDown } from 'lucide-react';
+import { PlayCircle, ChevronsDown, Recycle, Car, Gem, Plus } from 'lucide-react';
 import Link from 'next/link';
 
 const Hero = () => {
@@ -31,10 +31,22 @@ const Hero = () => {
           </p>
           {/* Lista de Oportunidades */}
           <div className="flex justify-center items-center gap-4 md:gap-8 flex-wrap text-lg">
-            <span className="bg-gray-800 px-4 py-2 rounded-full">♻️ Lixo Eletrônico</span>
-            <span className="bg-gray-800 px-4 py-2 rounded-full">🚗 Catalisadores</span>
-            <span className="bg-gray-800 px-4 py-2 rounded-full">💍 Resíduos de Joalheria</span>
-            <span className="bg-gray-800 px-4 py-2 rounded-full">...e muito mais!</span>
+            <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
+              <Recycle className="w-5 h-5 text-green-400" />
+              Lixo Eletrônico
+            </span>
+            <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
+              <Car className="w-5 h-5 text-green-400" />
+              Catalisadores
+            </span>
+            <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
+              <Gem className="w-5 h-5 text-green-400" />
+              Resíduos de Joalheria
+            </span>
+            <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
+              <Plus className="w-5 h-5 text-green-400" />
+              ...e muito mais!
+            </span>
           </div>
         </div>
         
@@ -92,7 +104,7 @@ const Hero = () => {
               href="https://pay.hotmart.com/Y38962738S?off=1a7iy0g9&ref=J105438092D&bid=1776465352908"
               className="inline-block bg-green-500 text-white font-bold text-2xl md:text-3xl py-5 px-8 rounded-lg shadow-lg shadow-green-500/50 hover:bg-green-600 hover:scale-105 transition-all duration-300 ease-in-out animate-pulse"
             >
-              QUERO LUCRAR COM OURO AGORA
+              QUERO APRENDER O MÉTODO
             </Link>
           </div>
         </div>

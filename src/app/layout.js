@@ -1,5 +1,9 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ExitIntentHandler from "@/components/ExitIntentHandler";
+import Header from "@/components/Header"; 
+import Navbar from "@/components/Navbar"; 
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +29,13 @@ export default function RootLayout({ children }) {
       <link rel="preconnect" href="https://www.youtube.com" />
       <link rel="preconnect" href="https://i.ytimg.com" />
 
-      <body className="min-h-full flex flex-col bg-black text-white">{children}</body>
+      <body className="min-h-full flex flex-col bg-black text-white">
+        <Header />
+        <Navbar />
+        {children}
+        <Footer />
+        <ExitIntentHandler />
+      </body>
     </html>
   );
 }

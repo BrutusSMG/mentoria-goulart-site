@@ -4,7 +4,7 @@ import { HeartHandshake } from 'lucide-react';
 
 const Author = () => {
   return (
-    <section className="bg-black py-16 md:py-24 px-4">
+    <section className="bg-[#171f35] py-16 md:py-24 px-4">
       <div className="container mx-auto max-w-6xl">
         {/* Título da Seção */}
         <div className="text-center mb-12">
@@ -42,7 +42,7 @@ const Author = () => {
             </p>
             
             {/* Bloco de Destaque para a "Virada" da história */}
-            <div className="my-6 p-6 bg-gray-800/50 border-l-4 border-green-500 rounded-r-lg">
+            <div className="my-6 p-6 bg-green-400/50 border-l-4 border-yellow-500 rounded-r-lg">
               <p className="text-xl font-semibold text-white italic">
                 &ldquo;Foi essa dificuldade que me moveu. Eu decidi que, se não havia um caminho, eu mesmo o construiria.&rdquo;
               </p>
