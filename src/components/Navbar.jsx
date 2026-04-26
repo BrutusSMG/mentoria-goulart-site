@@ -13,8 +13,8 @@ const navItems = [
     href: '/Cursos',
     children: [
       { label: 'Garimpo Urbano - Mentoria Individual', href: '/mentoria' },
-      { label: 'Garimpo Urbano - Mentoria em Grupo', href: '/#' },
-      { label: 'Curso Empreendedor 4.0', href: '/#' },
+      { label: 'Garimpo Urbano - Mentoria em Grupo', href: '/em-breve' },
+      { label: 'Curso Empreendedor 4.0', href: '/em-breve' },
     ],
   },
 
@@ -22,12 +22,12 @@ const navItems = [
     label: 'E-books',
     href: '/ebooks',
     children: [
-      { label: 'Extração e Refino de Ouro e Prata', href: '/ebooks/trafego-pago' },
-      { label: 'E-book Garimpo Urbano', href: '/ebooks/copywriting' },
+      { label: 'Extração e Refino de Ouro e Prata', href: '/em-breve' },
+      { label: 'E-book Garimpo Urbano', href: '/em-breve' },
     ],
   },
 
-  { label: 'Contato', href: '/contato' },
+  { label: 'Contato', href: '/#contato' },
 ];
 
 const Navbar = () => {
@@ -69,7 +69,7 @@ const Navbar = () => {
                         <Link
                           key={child.label}
                           href={child.href}
-                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-green-400"
+                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-[#d89900]"
                         >
                           {child.label}
                         </Link>

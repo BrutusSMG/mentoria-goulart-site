@@ -14,12 +14,40 @@ const Footer = () => {
     mensagem: ''
   });
 
-  const handleSubmit = (e) => {
+  const [status, setStatus] = useState('idle'); // 'idle', 'loading', 'success', 'error'
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aqui você integrará com sua API de envio de e-mail ou webhook
-    console.log("Formulário enviado:", formData);
-    alert("Mensagem enviada com sucesso! Retornaremos em breve.");
-    setFormData({ nome: '', email: '', assunto: '', mensagem: '' });
+    setStatus('loading');
+
+    try {
+      // Chama a nossa API centralizada
+      const response = await fetch('/api/contato', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          origem: 'Formulário de Contato - Footer', // Identificador para a API
+          ...formData // Envia nome, email, assunto e mensagem
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.sucesso) {
+        setStatus('success');
+        setFormData({ nome: '', email: '', assunto: '', mensagem: '' });
+        
+        // Volta ao normal após 5 segundos para o usuário poder enviar outra, se quiser
+        setTimeout(() => setStatus('idle'), 5000);
+      } else {
+        setStatus('error');
+      }
+    } catch (error) {
+      console.error("Erro ao enviar contato:", error);
+      setStatus('error');
+    }
   };
 
   const handleChange = (e) => {
@@ -27,7 +55,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-[#232324] border-t border-gray-800 py-12 px-4">
+    <footer id="contato" className="bg-[#232324] border-t border-gray-800 py-12 px-4">
       <div className="container mx-auto max-w-6xl">
         
         {/* Grid Principal do Rodapé */}
@@ -37,11 +65,11 @@ const Footer = () => {
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <Link href="/" className="mb-6">
               <Image
-                src="/Logo_fundoTransparentered.png"
-                alt="Logo Goulart Metais Preciosos"
-                width={150}
-                height={75}
-                className="object-contain h-auto w-full max-w-37.5"
+                src="/logo_fundoTransparentered.png"
+                alt="Logo Garimpo Urbano"
+                width={200} // Tamanho um pouco menor para o rodapé
+                height={45} // Altura proporcional
+                className="max-w-full h-auto object-contain"
               />
             </Link>
             <p className="text-gray-400 text-sm mb-6">
@@ -64,11 +92,11 @@ const Footer = () => {
               </a>
               {/* Facebook */}
               <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#d89900] transition-colors">
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35C.597 0 0 .597 0 1.325v21.351C0 23.403.597 24 1.325 24h11.495v-9.294H9.691v-3.622h3.129V8.413c0-3.1 1.894-4.788 4.659-4.788 1.325 0 2.464.099 2.794.143v3.24l-1.918.001c-1.504 0-1.796.715-1.796 1.763v2.312h3.591l-.467 3.622h-3.124V24h"/></svg>
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
               </a>
               {/* LinkedIn */}
               <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#d89900] transition-colors">
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.327-.026-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667h-3.554V9h3.413v1.561h.049c.476-.9 1.637-1.852 3.37-1.852 3.602 0 4.268 2.371 4.268 5.455v6.288zM5.337 7.433a2.062 2.062 0 11-.001-4.123 2.062 2.062 0 010 4.123zM6.814 20.452H3.861V9h2.953v11.452zM22.225 0H1.771C.792 0 0 .771 0 1.723v20.555C0 23.229.792 24 1.771 24h20.451C23.208 24 24 23.229 24 22.278V1.723C24 .771 23.208 0 22.225 0z"/></svg>
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
               </a>
               {/* TikTok */}
               <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#d89900] transition-colors">

@@ -5,7 +5,7 @@ const HomePageAuthor = () => {
   return (
     <section id="sobre" className="bg-[#111] py-24 px-4 border-t border-zinc-800">
       <div className="container mx-auto max-w-6xl">
-        <div className="flex flex-col md:flex-row items-center gap-12">
+        <div className="flex flex-col md:flex-row items-start gap-12">
           
           {/* Lado Esquerdo: Foto do Especialista */}
           <div className="w-full md:w-1/2 relative">
