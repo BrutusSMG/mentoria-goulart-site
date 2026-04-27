@@ -1,5 +1,4 @@
 // src/components/Footer.jsx
-
 "use client";
 
 import Image from 'next/image';
@@ -21,15 +20,14 @@ const Footer = () => {
     setStatus('loading');
 
     try {
-      // Chama a nossa API centralizada
       const response = await fetch('/api/contato', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          origem: 'Formulário de Contato - Footer', // Identificador para a API
-          ...formData // Envia nome, email, assunto e mensagem
+          origem: 'Formulário de Contato - Footer',
+          ...formData
         }),
       });
 
@@ -38,8 +36,6 @@ const Footer = () => {
       if (response.ok && data.sucesso) {
         setStatus('success');
         setFormData({ nome: '', email: '', assunto: '', mensagem: '' });
-        
-        // Volta ao normal após 5 segundos para o usuário poder enviar outra, se quiser
         setTimeout(() => setStatus('idle'), 5000);
       } else {
         setStatus('error');
@@ -61,15 +57,32 @@ const Footer = () => {
         {/* Grid Principal do Rodapé */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
           
-          {/* Coluna 1: Logo, Descrição e Redes Sociais */}
-          <div className="flex flex-col items-center md:items-start text-center md:text-left">
+          {/* ========================================== */}
+          {/* BLOCO 1: LINKS ÚTEIS (Mobile: 2º | Desktop: 1º) */}
+          {/* ========================================== */}
+          <div className="order-2 md:order-1 flex flex-col items-start text-left">
+            <h3 className="text-white font-semibold mb-4">Links Úteis</h3>
+            <ul className="space-y-3 text-sm text-gray-400">
+              <li><Link href="#produtos" className="hover:text-white transition-colors">Nossos Treinamentos</Link></li>
+              <li><Link href="/mentoria" className="hover:text-white transition-colors">Mentoria Online</Link></li>
+              <li><Link href="https://hotmart.com/pt-br/club/curso-garimpo-urbano" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Área do Aluno</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Termos de Uso</Link></li>
+              <li><Link href="#" className="hover:text-white transition-colors">Políticas de Privacidade</Link></li>
+            </ul>
+          </div>
+
+          {/* ========================================== */}
+          {/* BLOCO 2: LOGO E REDES (Mobile: 3º | Desktop: 2º ) */}
+          {/* ========================================== */}
+          <div className="order-3 md:order-2 flex flex-col items-center text-center">
             <Link href="/" className="mb-6">
               <Image
                 src="/logo_fundoTransparentered.png"
                 alt="Logo Garimpo Urbano"
-                width={200} // Tamanho um pouco menor para o rodapé
-                height={45} // Altura proporcional
+                width={200}
+                height={45}
                 className="max-w-full h-auto object-contain"
+                style={{ width: 'auto', height: 'auto' }} 
               />
             </Link>
             <p className="text-gray-400 text-sm mb-6">
@@ -77,7 +90,7 @@ const Footer = () => {
             </p>
             
             {/* Ícones de Redes Sociais */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 justify-center">
               {/* Instagram */}
               <a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#d89900] transition-colors">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.20 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
@@ -103,80 +116,86 @@ const Footer = () => {
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 2.26-1.17 4.49-2.96 5.9-1.71 1.34-3.95 1.86-6.09 1.45-2.24-.42-4.25-1.83-5.36-3.83-1.1-1.99-1.2-4.42-.28-6.49 1.03-2.31 3.3-3.9 5.8-4.26v4.06c-1.51.23-2.94 1.18-3.6 2.53-.66 1.36-.6 3.03.16 4.33.76 1.3 2.25 2.15 3.78 2.22 1.54.07 3.09-.6 4.02-1.81.93-1.21 1.25-2.8 1.14-4.33-.1-4.9-.05-9.8-.05-14.7z" />
                 </svg>
               </a>
-
             </div>
           </div>
 
-          {/* Coluna 2: Links Úteis */}
-          <div className="flex flex-col items-center md:items-start">
-            <h3 className="text-white font-semibold mb-4">Links Úteis</h3>
-            <ul className="space-y-3 text-sm text-gray-400">
-              <li><Link href="#produtos" className="hover:text-white transition-colors">Nossos Treinamentos</Link></li>
-              <li><Link href="/mentoria" className="hover:text-white transition-colors">Mentoria Online</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Área do Aluno</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Termos de Uso</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Políticas de Privacidade</Link></li>
-            </ul>
-          </div>
-
-          {/* Coluna 3: Formulário de Contato */}
-          <div className="flex flex-col">
+          {/* ========================================== */}
+          {/* BLOCO 3: FORMULÁRIO (Mobile: 1º | Desktop: 3º) */}
+          {/* ========================================== */}
+          <div className="order-1 md:order-3 flex flex-col">
             <h3 className="text-white font-semibold mb-4 text-center md:text-left">Fale Conosco</h3>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-              <input 
-                type="text" 
-                name="nome"
-                placeholder="Seu Nome" 
-                required
-                value={formData.nome}
-                onChange={handleChange}
-                className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-green-500"
-              />
-              <input 
-                type="email" 
-                name="email"
-                placeholder="Seu E-mail" 
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-green-500"
-              />
-              <select 
-                name="assunto"
-                required
-                value={formData.assunto}
-                onChange={handleChange}
-                className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 focus:outline-none focus:border-green-500"
-              >
-                <option value="" disabled>Selecione o Assunto</option>
-                <option value="Dúvida sobre Cursos">Dúvida sobre Cursos</option>
-                <option value="Mentoria">Mentoria</option>
-                <option value="Suporte Técnico">Suporte Técnico</option>
-                <option value="Parcerias">Parcerias</option>
-                <option value="Outros">Outros</option>
-              </select>
-              <textarea 
-                name="mensagem"
-                placeholder="Sua Mensagem" 
-                rows="3"
-                required
-                value={formData.mensagem}
-                onChange={handleChange}
-                className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-green-500 resize-none"
-              ></textarea>
-              <button 
-                type="submit"
-                className="w-full bg-[#d89900] text-black font-semibold text-sm py-2 rounded hover:bg-[#F7FA83] transition-colors"
-              >
-                Enviar Mensagem
-              </button>
-            </form>
+            
+            {status === 'success' ? (
+              <div className="bg-green-500/10 border border-green-500/50 text-green-400 p-4 rounded-lg text-sm text-center">
+                Mensagem enviada com sucesso! Retornaremos em breve.
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                <input 
+                  type="text" 
+                  name="nome"
+                  placeholder="Seu Nome" 
+                  required
+                  disabled={status === 'loading'}
+                  value={formData.nome}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-[#d89900] disabled:opacity-50"
+                />
+                <input 
+                  type="email" 
+                  name="email"
+                  placeholder="Seu E-mail" 
+                  required
+                  disabled={status === 'loading'}
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-[#d89900] disabled:opacity-50"
+                />
+                <select 
+                  name="assunto"
+                  required
+                  disabled={status === 'loading'}
+                  value={formData.assunto}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 focus:outline-none focus:border-[#d89900] disabled:opacity-50"
+                >
+                  <option value="" disabled>Selecione o Assunto</option>
+                  <option value="Dúvida sobre Cursos">Dúvida sobre Cursos</option>
+                  <option value="Mentoria">Mentoria</option>
+                  <option value="Suporte Técnico">Suporte Técnico</option>
+                  <option value="Parcerias">Parcerias</option>
+                  <option value="Outros">Outros</option>
+                </select>
+                <textarea 
+                  name="mensagem"
+                  placeholder="Sua Mensagem" 
+                  rows="3"
+                  required
+                  disabled={status === 'loading'}
+                  value={formData.mensagem}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-[#d89900] resize-none disabled:opacity-50"
+                ></textarea>
+                
+                {status === 'error' && (
+                  <p className="text-red-500 text-xs">Erro ao enviar. Tente novamente.</p>
+                )}
+
+                <button 
+                  type="submit"
+                  disabled={status === 'loading'}
+                  className="w-full bg-[#d89900] text-black font-bold text-sm py-2 rounded hover:bg-[#F7FA83] transition-colors disabled:opacity-70 flex justify-center items-center"
+                >
+                  {status === 'loading' ? 'Enviando...' : 'Enviar Mensagem'}
+                </button>
+              </form>
+            )}
           </div>
 
         </div>
 
         {/* Linha Divisória e Direitos Autorais */}
-        <div className="border-t border-gray-800 pt-6 text-center text-xs text-gray-500">          
+        <div className="border-t border-gray-600 pt-6 text-center text-xs text-gray-500">          
           <p>
             &copy; {new Date().getFullYear()} Goulart Metais Preciosos. Todos os direitos reservados.
           </p>          
