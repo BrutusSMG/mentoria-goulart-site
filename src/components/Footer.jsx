@@ -122,85 +122,85 @@ const Footer = () => {
           {/* ========================================== */}
           {/* BLOCO 3: FORMULÁRIO (Mobile: 1º | Desktop: 3º) */}
           {/* ========================================== */}
-          <div className="order-1 md:order-3 flex flex-col">
-            <h3 className="text-white font-semibold mb-4 text-center md:text-left">Fale Conosco</h3>
-            
-            {status === 'success' ? (
-              <div className="bg-green-500/10 border border-green-500/50 text-green-400 p-4 rounded-lg text-sm text-center">
-                Mensagem enviada com sucesso! Retornaremos em breve.
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-                <input 
-                  type="text" 
-                  name="nome"
-                  placeholder="Seu Nome" 
-                  required
-                  disabled={status === 'loading'}
-                  value={formData.nome}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-[#d89900] disabled:opacity-50"
-                />
-                <input 
-                  type="email" 
-                  name="email"
-                  placeholder="Seu E-mail" 
-                  required
-                  disabled={status === 'loading'}
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-[#d89900] disabled:opacity-50"
-                />
-                <select 
-                  name="assunto"
-                  required
-                  disabled={status === 'loading'}
-                  value={formData.assunto}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 focus:outline-none focus:border-[#d89900] disabled:opacity-50"
-                >
-                  <option value="" disabled>Selecione o Assunto</option>
-                  <option value="Dúvida sobre Cursos">Dúvida sobre Cursos</option>
-                  <option value="Mentoria">Mentoria</option>
-                  <option value="Suporte Técnico">Suporte Técnico</option>
-                  <option value="Parcerias">Parcerias</option>
-                  <option value="Outros">Outros</option>
-                </select>
-                <textarea 
-                  name="mensagem"
-                  placeholder="Sua Mensagem" 
-                  rows="3"
-                  required
-                  disabled={status === 'loading'}
-                  value={formData.mensagem}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-[#d89900] resize-none disabled:opacity-50"
-                ></textarea>
-                
-                {status === 'error' && (
-                  <p className="text-red-500 text-xs">Erro ao enviar. Tente novamente.</p>
-                )}
+          <div className="order-1 md:order-3 flex flex-col items-center md:items-end w-full">
+            <div className="w-full max-w-70">
+              <h3 className="text-white font-semibold mb-2 text-center md:text-left">Fale Conosco</h3>            
+                {status === 'success' ? (
+                  <div className="bg-green-500/10 border border-green-500/50 text-green-400 p-4 rounded-lg text-sm text-center">
+                    Mensagem enviada com sucesso! Retornaremos em breve.
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="flex flex-col gap-1">
+                    <input 
+                      type="text" 
+                      name="nome"
+                      placeholder="Seu Nome" 
+                      required
+                      disabled={status === 'loading'}
+                      value={formData.nome}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-[#d89900] disabled:opacity-50"
+                    />
+                    <input 
+                      type="email" 
+                      name="email"
+                      placeholder="Seu E-mail" 
+                      required
+                      disabled={status === 'loading'}
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-[#d89900] disabled:opacity-50"
+                    />
+                    <select 
+                      name="assunto"
+                      required
+                      disabled={status === 'loading'}
+                      value={formData.assunto}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-gray-300 focus:outline-none focus:border-[#d89900] disabled:opacity-50"
+                    >
+                      <option value="" disabled>Selecione o Assunto</option>
+                      <option value="Dúvida sobre Cursos">Dúvida sobre Cursos</option>
+                      <option value="Mentoria">Mentoria</option>
+                      <option value="Suporte Técnico">Suporte Técnico</option>
+                      <option value="Parcerias">Parcerias</option>
+                      <option value="Outros">Outros</option>
+                    </select>
+                    <textarea 
+                      name="mensagem"
+                      placeholder="Sua Mensagem" 
+                      rows="3"
+                      required
+                      disabled={status === 'loading'}
+                      value={formData.mensagem}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-[#d89900] resize-none disabled:opacity-50"
+                    ></textarea>
+                    
+                    {status === 'error' && (
+                      <p className="text-red-500 text-xs">Erro ao enviar. Tente novamente.</p>
+                    )}
 
-                <button 
-                  type="submit"
-                  disabled={status === 'loading'}
-                  className="w-full bg-[#d89900] text-black font-bold text-sm py-2 rounded hover:bg-[#F7FA83] transition-colors disabled:opacity-70 flex justify-center items-center"
-                >
-                  {status === 'loading' ? 'Enviando...' : 'Enviar Mensagem'}
-                </button>
-              </form>
-            )}
+                    <button 
+                      type="submit"
+                      disabled={status === 'loading'}
+                      className="w-full bg-[#d89900] text-black font-bold text-sm py-2 rounded hover:bg-[#F7FA83] transition-colors disabled:opacity-70 flex justify-center items-center"
+                    >
+                      {status === 'loading' ? 'Enviando...' : 'Enviar Mensagem'}
+                    </button>
+                  </form>
+                )}              
+              </div>
+            </div>
           </div>
 
+          {/* Linha Divisória e Direitos Autorais */}
+          <div className="border-t border-gray-600 pt-6 text-center text-xs text-gray-500">          
+            <p>
+              &copy; {new Date().getFullYear()} Goulart Metais Preciosos. Todos os direitos reservados.
+            </p>          
+          </div>
         </div>
-
-        {/* Linha Divisória e Direitos Autorais */}
-        <div className="border-t border-gray-600 pt-6 text-center text-xs text-gray-500">          
-          <p>
-            &copy; {new Date().getFullYear()} Goulart Metais Preciosos. Todos os direitos reservados.
-          </p>          
-        </div>
-      </div>
     </footer>
   );
 };
