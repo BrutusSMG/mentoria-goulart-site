@@ -13,7 +13,8 @@ const Header = () => {
             width={368}
             height={80}
             priority
-            className="max-w-full h-auto object-contain" 
+            className="max-w-full h-auto object-contain"
+            style={{ width: 'auto', height: 'auto' }}
           />
         </Link>
       </div>
