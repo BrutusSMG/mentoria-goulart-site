@@ -14,7 +14,7 @@ const Offer = () => {
       <div className="container mx-auto max-w-4xl text-center">
         
         {/* Card de Oferta Principal */}
-        <div className="bg-gray-900 border-2 border-green-500 rounded-2xl shadow-2xl shadow-green-500/20 p-6 md:p-10 mx-auto">
+        <div className="bg-gray-900 border-2 border-[#d89900] rounded-2xl shadow-2xl shadow-[#d89900]/20 p-6 md:p-10 mx-auto">
 
           {/* Título da Oferta */}
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-2">
@@ -63,7 +63,7 @@ const Offer = () => {
           <div className="mt-10">
             <Link 
               href="https://pay.hotmart.com/Y38962738S?off=1a7iy0g9&ref=J105438092D&bid=1776465352908" // Substitua pelo link de checkout
-              className="bg-green-500 text-white font-bold text-2xl md:text-3xl py-5 px-8 rounded-lg shadow-lg shadow-green-500/50 hover:bg-green-600 hover:scale-105 transition-all duration-300 ease-in-out inline-block"
+              className="bg-[#d89900] text-white font-bold text-2xl md:text-3xl py-5 px-8 rounded-lg shadow-lg shadow-[#d89900]/50 hover:bg-[#c68a00] hover:scale-105 transition-all duration-300 ease-in-out inline-block"
             >
               QUERO GARANTIR MINHA VAGA AGORA!
             </Link>

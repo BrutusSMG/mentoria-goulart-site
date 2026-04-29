@@ -58,10 +58,10 @@ const Audience = () => {
             // 3. O Card Individual
             <div 
               key={index} 
-              className="bg-gray-900/80 p-6 rounded-lg border border-gray-800 flex flex-col items-start gap-4 hover:border-green-500 hover:scale-105 transition-all duration-300"
+              className="bg-gray-900/80 p-6 rounded-lg border border-gray-800 flex flex-col items-start gap-4 hover:border-[#d89900] hover:scale-105 transition-all duration-300"
             >
-              <div className="bg-green-500/10 p-3 rounded-full">
-                <CheckCircle2 className="h-8 w-8 text-green-500" />
+              <div className="bg-[#d89900]/10 p-3 rounded-full">
+                <CheckCircle2 className="h-8 w-8 text-[#d89900]" />
               </div>
               <h3 className="text-xl font-bold text-white">{item.title}</h3>
               <p className="text-gray-400 leading-relaxed">

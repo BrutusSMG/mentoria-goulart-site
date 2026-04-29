@@ -25,11 +25,11 @@ const VideoTestimonials = () => {
         {/* 2. Título com tratamento especial */}
         <div className="mb-12">
           <div className="flex justify-center items-center gap-2 mb-4">
-            <Star className="h-5 w-5 text-yellow-400" fill="currentColor" />
-            <Star className="h-5 w-5 text-yellow-400" fill="currentColor" />
-            <Star className="h-5 w-5 text-yellow-400" fill="currentColor" />
-            <Star className="h-5 w-5 text-yellow-400" fill="currentColor" />
-            <Star className="h-5 w-5 text-yellow-400" fill="currentColor" />
+            <Star className="h-5 w-5 text-[#d89900]" fill="currentColor" />
+            <Star className="h-5 w-5 text-[#d89900]" fill="currentColor" />
+            <Star className="h-5 w-5 text-[#d89900]" fill="currentColor" />
+            <Star className="h-5 w-5 text-[#d89900]" fill="currentColor" />
+            <Star className="h-5 w-5 text-[#d89900]" fill="currentColor" />
           </div>
           <h2 className="text-4xl md:text-5xl font-extrabold text-white">
             A Prova Real da Transformação
@@ -43,7 +43,7 @@ const VideoTestimonials = () => {
         <div className="
           w-full max-w-4xl aspect-video mx-auto rounded-xl overflow-hidden bg-black
           shadow-[0_0_30px_rgba(34,197,94,0.4),0_0_60px_rgba(34,197,94,0.2)]
-          border border-green-500/30
+          border border-[#d89900]/30
         ">
           {loadVideo ? (
             <iframe
@@ -73,7 +73,7 @@ const VideoTestimonials = () => {
       <div className="text-center mt-8">
         <Link 
           href="https://pay.hotmart.com/Y38962738S?off=1a7iy0g9&ref=J105438092D&bid=1776465352908"
-          className="inline-block bg-green-500 text-white font-bold text-2xl md:text-3xl py-5 px-8 rounded-lg shadow-lg shadow-green-500/50 hover:bg-green-600 hover:scale-105 transition-all duration-300 ease-in-out animate-pulse"
+          className="inline-block bg-[#d89900] text-white font-bold text-2xl md:text-3xl py-5 px-8 rounded-lg shadow-lg shadow-[#d89900]/50 hover:bg-[#c68a00] hover:scale-105 transition-all duration-300 ease-in-out animate-pulse"
         >
           QUERO LUCRAR COM OURO
         </Link>

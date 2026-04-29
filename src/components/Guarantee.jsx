@@ -20,20 +20,20 @@ const Guarantee = () => {
                 height={200}
                 className="mx-auto"
               />
-              <p className="text-yellow-400 font-bold mt-2">Garantia Blindada</p>
+              <p className="text-[#d89900] font-bold mt-2">Garantia Blindada</p>
             </div>
 
             {/* Coluna do Texto */}
             <div className="border-t-2 md:border-t-0 md:border-l-2 border-gray-700 pt-8 md:pt-0 md:pl-8">
               <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
-                Seu Risco é <span className="text-green-500">ZERO</span>. O Compromisso é Todo Meu.
+                Seu Risco é <span className="text-[#d89900]">ZERO</span>. O Compromisso é Todo Meu.
               </h2>
               <p className="text-lg text-gray-300 leading-relaxed mb-6">
                 Eu tenho tanta confiança no método que desenvolvi que faço questão de assumir todo o risco por você.
               </p>
               <div className="space-y-4">
                 <div className="flex items-start gap-4 p-4 bg-gray-900 rounded-lg">
-                  <ShieldCheck className="h-8 w-8 text-green-500 shrink-0 mt-1" />
+                  <ShieldCheck className="h-8 w-8 text-[#d89900] shrink-0 mt-1" />
                   <div>
                     <h3 className="font-bold text-white">Garantia Incondicional de 7 Dias</h3>
                     <p className="text-gray-400">
@@ -42,7 +42,7 @@ const Guarantee = () => {
                   </div>
                 </div>
                 <div className="flex items-start gap-4 p-4 bg-gray-900 rounded-lg">
-                  <ShieldCheck className="h-8 w-8 text-green-500 shrink-0 mt-1" />
+                  <ShieldCheck className="h-8 w-8 text-[#d89900] shrink-0 mt-1" />
                   <div>
                     <h3 className="font-bold text-white">Reembolso de 100% do Valor</h3>
                     <p className="text-gray-400">

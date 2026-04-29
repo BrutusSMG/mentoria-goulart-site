@@ -41,7 +41,7 @@ const Learning = () => {
           {learningModules.map((module, index) => (
             <div key={index} className="bg-gray-700/80 p-6 rounded-lg border border-gray-800 flex items-start gap-5">
               {/* Ícone */}
-              <div className="text-green-500 mt-1">
+              <div className="text-[#d89900] mt-1">
                 {React.cloneElement(module.icon, { className: "h-8 w-8" })}
               </div>
               {/* Conteúdo */}

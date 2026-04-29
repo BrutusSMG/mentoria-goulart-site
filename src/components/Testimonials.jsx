@@ -77,10 +77,10 @@ const Testimonials = () => {
           {/* Botões de Navegação */}
           <div className="absolute top-1/2 left-0 right-0 flex justify-between -translate-y-1/2 px-4">
             <button onClick={scrollPrev} aria-label="Depoimento anterior">
-              <ArrowLeftCircle className="h-10 w-10 text-white/50 hover:text-white transition-colors" />
+              <ArrowLeftCircle className="h-10 w-10 text-[#d89900] hover:text-white transition-colors" />
             </button>
             <button onClick={scrollNext} aria-label="Próximo depoimento">
-              <ArrowRightCircle className="h-10 w-10 text-white/50 hover:text-white transition-colors" />
+              <ArrowRightCircle className="h-10 w-10 text-[#d89900] hover:text-white transition-colors" />
             </button>
           </div>
         </div>

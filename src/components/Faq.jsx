@@ -34,11 +34,11 @@ const FaqItem = ({ item, isOpen, onToggle }) => {
         className="w-full flex justify-between items-center text-left p-6"
       >
         {/* 2. Título muda de cor quando está ativo */}
-        <h3 className={`text-lg font-semibold ${isOpen ? 'text-green-500' : 'text-white'}`}>
+        <h3 className={`text-lg font-semibold ${isOpen ? 'text-[#d89900]' : 'text-white'}`}>
           {item.question}
         </h3>
         <ChevronDown
-          className={`h-6 w-6 shrink-0 transform transition-transform duration-300 ${isOpen ? 'rotate-180 text-green-500' : 'text-gray-400'}`}
+          className={`h-6 w-6 shrink-0 transform transition-transform duration-300 ${isOpen ? 'rotate-180 text-[#d89900]' : 'text-gray-400'}`}
         />
       </button>
       
@@ -69,7 +69,7 @@ const Faq = () => {
       <div className="container mx-auto max-w-3xl">
         {/* 4. Título da seção aprimorado */}
         <div className="text-center mb-12">
-          <HelpCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+          <HelpCircle className="h-12 w-12 text-[#d89900] mx-auto mb-4" />
           <h2 className="text-3xl md:text-4xl font-extrabold text-white">
             Ainda tem alguma dúvida?
           </h2>

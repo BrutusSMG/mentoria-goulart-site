@@ -15,7 +15,7 @@ const Hero = () => {
     <section className="bg-black text-white text-center py-12 px-4">
       <div className="container mx-auto flex flex-col items-center">
         {/* Selo de Vagas Abertas */}
-        <div className="bg-green-500 text-black font-bold uppercase px-4 py-1 rounded-md mb-6">
+        <div className="bg-[#d89900] text-black font-bold uppercase px-4 py-1 rounded-md mb-6">
           Vagas Abertas
         </div>
 
@@ -32,19 +32,19 @@ const Hero = () => {
           {/* Lista de Oportunidades */}
           <div className="flex justify-center items-center gap-4 md:gap-8 flex-wrap text-lg">
             <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
-              <Recycle className="w-5 h-5 text-green-400" />
+              <Recycle className="w-5 h-5 text-[#d89900]" />
               Lixo Eletrônico
             </span>
             <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
-              <Car className="w-5 h-5 text-green-400" />
+              <Car className="w-5 h-5 text-[#d89900]" />
               Catalisadores
             </span>
             <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
-              <Gem className="w-5 h-5 text-green-400" />
+              <Gem className="w-5 h-5 text-[#d89900]" />
               Resíduos de Joalheria
             </span>
             <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
-              <Plus className="w-5 h-5 text-green-400" />
+              <Plus className="w-5 h-5 text-[#d89900]" />
               ...e muito mais!
             </span>
           </div>
@@ -70,7 +70,7 @@ const Hero = () => {
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-2">
               <span className="font-semibold">Assista ao vídeo abaixo para entender</span>
-              <ChevronsDown className="h-18 w-28 text-green-500 animate-bounce" />
+              <ChevronsDown className="h-18 w-28 text-[#d89900] animate-bounce" />
             </div>
           </div>
           <div className="w-full aspect-video rounded-lg overflow-hidden relative">
@@ -102,7 +102,7 @@ const Hero = () => {
           <div className="mt-8">
             <Link 
               href="https://pay.hotmart.com/Y38962738S?off=1a7iy0g9&ref=J105438092D&bid=1776465352908"
-              className="inline-block bg-green-500 text-white font-bold text-2xl md:text-3xl py-5 px-8 rounded-lg shadow-lg shadow-green-500/50 hover:bg-green-600 hover:scale-105 transition-all duration-300 ease-in-out animate-pulse"
+              className="inline-block bg-[#d89900] text-black font-bold text-2xl md:text-3xl py-5 px-8 rounded-lg shadow-lg shadow-[#d89900]/50 hover:bg-[#c68a00] hover:scale-105 transition-all duration-300 ease-in-out animate-pulse"
             >
               QUERO APRENDER O MÉTODO
             </Link>

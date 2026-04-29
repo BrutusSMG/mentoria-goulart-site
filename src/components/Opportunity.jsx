@@ -10,7 +10,7 @@ const Opportunity = () => {
           <h2 className="text-3xl md:text-4xl font-extrabold text-white">
             Como Criar um Grande Negócio
           </h2>
-          <p className="text-xl md:text-2xl text-green-500 font-semibold">
+          <p className="text-xl md:text-2xl text-[#d89900] font-semibold">
             Com Pequeno Investimento
           </p>
         </div>
@@ -31,19 +31,19 @@ const Opportunity = () => {
 
           {/* Coluna do Texto */}
           <div className="space-y-6 text-lg text-gray-300 leading-relaxed">
-            <h3 className="text-2xl font-bold text-white border-l-4 border-green-500 pl-4">
+            <h3 className="text-3xl font-bold text-white border-l-4 border-[#d89900] pl-4">
               A Mina de Ouro Escondida nas Cidades
             </h3>
             <p>
               Diariamente, toneladas de sucatas ricas em metais preciosos são descartadas. Este é o <strong className="text-white">Garimpo Urbano</strong>: uma nova fronteira que nasceu no coração das grandes cidades.
             </p>
-            <h3 className="text-2xl font-bold text-white border-l-4 border-green-500 pl-4 mt-8">
+            <h3 className="text-3xl font-bold text-white border-l-4 border-[#d89900] pl-4 mt-8">
               Um Mercado com Demanda Explosiva
             </h3>
             <p>
               A indústria precisa desesperadamente desses metais, mas <strong className="text-white">faltam profissionais qualificados.</strong> Os poucos que dominam essa atividade são escassos e, por isso, muito bem remunerados.
             </p>
-            <h3 className="text-2xl font-bold text-white border-l-4 border-green-500 pl-4 mt-8">
+            <h3 className="text-3xl font-bold text-white border-l-4 border-[#d89900] pl-4 mt-8">
               A Hora de Empreender é Agora
             </h3>
             <p>

@@ -11,7 +11,7 @@ const Author = () => {
           <h2 className="text-3xl md:text-4xl font-extrabold text-white leading-tight">
             De uma dificuldade pessoal, nasceu uma missão:
           </h2>
-          <p className="text-2xl md:text-3xl text-green-500 font-semibold mt-2">
+          <p className="text-2xl md:text-3xl text-[#d89900] font-semibold mt-2">
             A sua jornada para o sucesso.
           </p>
         </div>
@@ -42,19 +42,19 @@ const Author = () => {
             </p>
             
             {/* Bloco de Destaque para a "Virada" da história */}
-            <div className="my-6 p-6 bg-green-400/50 border-l-4 border-yellow-500 rounded-r-lg">
-              <p className="text-xl font-semibold text-white italic">
+            <div className="my-6 p-6 bg-[#d89900] border-l-4 border-green-400/50 rounded-r-lg">
+              <p className="text-xl font-semibold text-black italic">
                 &ldquo;Foi essa dificuldade que me moveu. Eu decidi que, se não havia um caminho, eu mesmo o construiria.&rdquo;
               </p>
             </div>
 
             <p>
-              Criei este treinamento por um motivo muito simples: ele é o curso que <strong className="text-green-400">eu desesperadamente gostaria que existisse quando comecei.</strong>
+              Criei este treinamento por um motivo muito simples: ele é o curso que <strong className="text-[#d89900]">eu desesperadamente gostaria que existisse quando comecei.</strong>
             </p>
 
             {/* Bloco de Compromisso com Ícone */}
             <div className="flex items-start gap-4 pt-4">
-              <HeartHandshake className="h-10 w-10 text-green-500 shrink-0 mt-1" />
+              <HeartHandshake className="h-10 w-10 text-[#d89900] shrink-0 mt-1" />
               <p>
                 Meu compromisso é garantir que <strong className="text-white">você não passe pelas mesmas dificuldades que eu passei.</strong> É pegar na sua mão e te dar o mapa completo, sem segredos, para que sua jornada seja muito mais rápida e tranquila.
               </p>
