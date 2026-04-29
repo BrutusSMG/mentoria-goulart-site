@@ -17,7 +17,7 @@ const DownsellPopup = ({ show, onClose }) => {
     >
       {/* 2. O Card do Popup */}
       <div 
-        className="relative bg-gray-900 border border-yellow-500 rounded-2xl shadow-2xl shadow-yellow-500/20 p-8 max-w-lg w-full"
+        className="relative bg-gray-900 border border-[#d89900] rounded-2xl shadow-2xl shadow-[#d89900]/20 p-8 max-w-lg w-full"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 3. Botão de Fechar (X) */}
@@ -55,7 +55,7 @@ const DownsellPopup = ({ show, onClose }) => {
             {/* Botão de CTA para a nova oferta */}
             <Link 
               href="https://pay.hotmart.com/Y38962738S?off=mku66p4r&ref=J105438092D&bid=1777080674185" 
-              className="block w-full bg-green-500 text-white font-bold text-xl py-4 px-6 rounded-lg hover:bg-green-600 transition-colors"
+              className="block w-full bg-[#d89900] text-white font-bold text-xl py-4 px-6 rounded-lg hover:bg-[#c68a00] transition-colors"
             >
               QUERO O CURSO AGORA!
             </Link>
