@@ -13,7 +13,7 @@ const geistSans = Geist({
 });
 
 export const metadata = {
-  metadataBase: new URL('https://mentoriagarimpourbano.com.br' ),
+  metadataBase: new URL('https://www.mentoriagarimpourbano.com.br' ),
   title: {
     default: "Garimpo Urbano | Recuperação de Metais Preciosos",
     template: "%s | Garimpo Urbano" // Se você criar outras páginas, o Next.js adiciona o sufixo automaticamente
@@ -37,7 +37,7 @@ export const metadata = {
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "https://mentoriagarimpourbano.com.br",
+    url: "https://www.mentoriagarimpourbano.com.br",
     title: "Garimpo Urbano | Recuperação de Metais Preciosos",
     description: "Aprenda o passo a passo para extrair e refinar ouro, prata, platina e paládio de sucatas e resíduos.",
     siteName: "Garimpo Urbano",
