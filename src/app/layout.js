@@ -13,7 +13,7 @@ const geistSans = Geist({
 });
 
 export const metadata = {
-  metadataBase: new URL('https://www.mentoriagarimpourbano.com.br' ),
+  metadataBase: new URL('https://mentoriagarimpourbano.com.br' ),
   title: {
     default: "Garimpo Urbano | Recuperação de Metais Preciosos",
     template: "%s | Garimpo Urbano" // Se você criar outras páginas, o Next.js adiciona o sufixo automaticamente
@@ -26,12 +26,18 @@ export const metadata = {
   ],
   authors: [{ name: "José Goulart Filho" }],
   creator: "José Goulart Filho",
+
+  verification: {
+    other: {
+      'facebook-domain-verification': ['0bmexp76fhcrl6zwl4ididimzorvf3'], 
+    },
+  },
   
   // Configurações para WhatsApp, Facebook e LinkedIn
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "https://www.mentoriagarimpourbano.com.br",
+    url: "https://mentoriagarimpourbano.com.br",
     title: "Garimpo Urbano | Recuperação de Metais Preciosos",
     description: "Aprenda o passo a passo para extrair e refinar ouro, prata, platina e paládio de sucatas e resíduos.",
     siteName: "Garimpo Urbano",
