@@ -1,4 +1,5 @@
 import { Geist } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import ExitIntentHandler from "@/components/ExitIntentHandler";
 import Header from "@/components/Header"; 
@@ -84,7 +85,9 @@ export default function RootLayout({ children }) {
       <link rel="preconnect" href="https://i.ytimg.com" />
 
       <body className="min-h-full flex flex-col bg-black text-white" suppressHydrationWarning>
-        <FacebookPixel />
+        <Suspense fallback={null}>
+          <FacebookPixel />
+        </Suspense>
         <Header />
         <Navbar />
         {children}
