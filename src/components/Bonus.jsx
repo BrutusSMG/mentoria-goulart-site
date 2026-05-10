@@ -6,7 +6,7 @@ import { Gift } from 'lucide-react';
 // 1. Estrutura de dados com título, descrição, valor e ícone
 const bonusData = [
   {
-    title: "Livro Digital Garimpo Urbano",
+    title: "Guia Definitivo do Garimpo Urbano",
     description: "Um guia completo com as técnicas de recuperação de ouro, prata, paládio, platina e ródio de sucatas e resíduos.",
     value: "198,00",
     icon: <BookMarked />

@@ -12,7 +12,6 @@ const WhatsAppButton = () => {
   const handleTrackClick = () => {
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'Lead');
-      console.log("Evento Lead disparado!"); // Apenas para você debugar no F12
     }
   };
 

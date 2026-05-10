@@ -12,7 +12,7 @@ const faqItems = [
   },
   {
     question: 'Por quanto tempo terei acesso?',
-    answer: 'O acesso à mentoria e a todos os bônus é vitalício. Você poderá ver e rever as aulas quantas vezes quiser, para sempre.',
+    answer: 'O seu acesso é válido por 12 meses, com opção de renovação especial para alunos após este período.',
   },
   {
     question: 'Preciso ter algum conhecimento prévio?',

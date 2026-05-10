@@ -38,7 +38,7 @@ const Author = () => {
               Olá, eu sou <strong className="text-white">José Goulart Filho.</strong> Hoje, sou especialista em Processos Metalúrgicos com mais de 30 anos de experiência, mas quero te contar como tudo começou.
             </p>
             <p>
-              Quando dei meus primeiros passos, eu era como você: cheio de vontade, mas sem um guia. O método que aprendi era <strong className="text-red-400">precário e caro</strong>. E o pior? Quando eu buscava ajuda, o conhecimento era guardado como um segredo de estado. Eu senti na pele essa frustração.
+              Quando dei meus primeiros passos, eu era como você: cheio de vontade, mas sem um guia. O método que aprendi era <strong className="text-red-400">precário e caro</strong>. E o pior: quando eu buscava ajuda, o conhecimento era guardado como um segredo de estado. Eu senti na pele essa frustração.
             </p>
             
             {/* Bloco de Destaque para a "Virada" da história */}
