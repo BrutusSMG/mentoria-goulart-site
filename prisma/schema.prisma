@@ -1,0 +1,21 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Tabela para guardar o histórico de cotações
+model CotacaoHistorico {
+  id           String   @id @default(cuid())
+  dolar        Float    // Valor do dólar no momento
+  ouro         Float    // Valor do ouro em BRL/grama
+  prata        Float
+  platina      Float
+  paladio      Float
+  criadoEm     DateTime @default(now()) // Salva a data e hora exata automaticamente
+}
