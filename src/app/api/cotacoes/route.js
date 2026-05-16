@@ -23,10 +23,24 @@ export async function GET() {
       'Content-Type': 'application/json'
     };
 
-    // 1. Busca a cotação do Dólar (USD para BRL) em uma API pública e gratuita
-    const dolarRes = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL', { next: { revalidate: 14400 } } );
-    const dolarData = await dolarRes.json();
-    const valorDolar = parseFloat(dolarData.USDBRL.bid); // Ex: 5.15
+    // 1. Busca a cotação do Dólar COM PROTEÇÃO
+    let valorDolar = 5.15; // Valor de segurança (fallback) caso a API do dólar falhe na Vercel
+    
+    try {
+      const dolarRes = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL', { next: { revalidate: 14400 } } );
+      if (dolarRes.ok) {
+        const dolarData = await dolarRes.json();
+        if (dolarData && dolarData.USDBRL && dolarData.USDBRL.bid) {
+          const valorDolar = parseFloat(dolarData.USDBRL.bid); // Ex: 5.15
+        } else {
+          console.error("AwesomeAPI retornou um formato inesperado:", dolarData);
+        }
+      }else {
+        console.error(`Erro na AwesomeAPI: Status ${dolarRes.status}`);
+      }
+    } catch (error) {
+      console.error("Falha ao conectar na API do Dólar:", dolarError.message);
+    }
 
     // 2. Busca os metais em USD (como manda o exemplo da GoldAPI)
     const fetchCotacao = async (metal) => {
