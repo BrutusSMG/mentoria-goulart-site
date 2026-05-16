@@ -1,16 +1,20 @@
 // src/app/api/cotacoes/route.js
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const fallbackCotacoes = {
     ouro: "415.50", prata: "5.20", platina: "165.30", paladio: "180.90",
-    atualizadoEm: new Date().toISOString()
+    atualizadoEm: new Date().toISOString(),
+    isFallback: true
   };
 
   try {
     const apiKey = process.env.GOLD_API_KEY;
     
     if (!apiKey) {
+      console.log("Chave da API não encontrada no ambiente.");
       return NextResponse.json(fallbackCotacoes);
     }
 
@@ -59,7 +63,8 @@ export async function GET() {
       platina: converterParaBRLporGrama(platinaData.price),
       paladio: converterParaBRLporGrama(paladioData.price),
       dolar: valorDolar.toFixed(2),
-      atualizadoEm: new Date().toISOString()
+      atualizadoEm: new Date().toISOString(),
+      isFallback: false
     };
 
     return NextResponse.json(cotacoes);
