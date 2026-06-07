@@ -9,7 +9,7 @@ import Link from 'next/link';
 const Hero = () => {
 
   const [loadVideo, setLoadVideo] = useState(false);
-  const videoId = 'ldgfDfpDo1w';
+  const videoId = 'VY128RgvSzY';
   
   return (
     <section className="bg-black text-white text-center py-12 px-4">

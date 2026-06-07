@@ -1,5 +1,5 @@
 // src/components/Learning.jsx
-import { FlaskConical, Gem, Warehouse, ShieldCheck, Beaker, Truck, Flame, Droplets, BarChart3, Recycle, Car, Film, Watch, Cpu, Sparkles } from 'lucide-react';
+import { FlaskConical, Gem, Warehouse, ShieldCheck, Beaker, Truck, Flame, Droplets, BarChart3, Recycle, Car, Film, Watch, Cpu, Sparkles, PlusCircle } from 'lucide-react';
 
 // Array com os dados dos módulos (refinados)
 const learningModules = [
@@ -20,6 +20,7 @@ const learningModules = [
   { icon: <Watch />, title: "Módulo 15: Prata de Baterias", description: "Descubra como extrair prata de baterias de relógios, uma fonte muitas vezes ignorada." },
   { icon: <Cpu />, title: "Módulo 16: Metais de Eletrônicos", description: "O passo a passo para recuperar metais preciosos de contatos eletrônicos e placas de circuito." },
   { icon: <Gem />, title: "Módulo 17: Ouro de Semijoias", description: "Aprenda a técnica para extrair e refinar ouro de semijoias e caixas de relógios." },
+  { icon: <PlusCircle />, title: "Módulos Extras: Atualizações Contínuas", description: "O mercado evolui e o curso também. Tenha acesso a novas aulas, técnicas avançadas e estudos de caso adicionados regularmente durante o seu acesso." },
 ];
 
 const Learning = () => {

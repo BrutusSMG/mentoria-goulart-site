@@ -6,15 +6,21 @@ const WhatsAppButton = () => {
   const numeroWhatsApp = "5541988706921"; 
   
   // Mensagem padrão que já vem escrita quando o cliente clica
-  const mensagem = "Olá! Estava no site do Garimpo Urbano e gostaria de tirar uma dúvida.";
-  
+  const mensagem = "Olá! Estava no site do Garimpo Urbano e gostaria de tirar uma dúvida.";  
   const linkWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem )}`;
+
+  const handleTrackClick = () => {
+    if (typeof window !== 'undefined' && window.fbq) {
+      window.fbq('track', 'Lead');
+    }
+  };
 
   return (
     <a
       href={linkWhatsApp}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={handleTrackClick}
       className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-[#25D366] text-white rounded-full shadow-lg shadow-[#25D366]/30 hover:bg-[#20ba56] hover:scale-110 transition-all duration-300 group"
       aria-label="Fale conosco no WhatsApp"
     >

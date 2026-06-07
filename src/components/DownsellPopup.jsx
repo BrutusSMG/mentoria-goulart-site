@@ -41,7 +41,7 @@ const DownsellPopup = ({ show, onClose }) => {
           <div className="bg-black p-6 rounded-lg border border-gray-700">
             <p className="text-xl font-bold text-green-500 mb-2">OFERTA EXCLUSIVA:</p>
             <p className="text-lg text-white mb-4">
-              Tenha acesso vitalício a <strong className="text-white">TODOS os 17 Módulos gravados</strong> do curso por um valor especial.
+              Tenha 12 meses de acesso a <strong className="text-white">TODOS os Módulos gravados</strong> do curso por um valor especial.
             </p>
             
             {/* Preço da Oferta de Downsell */}

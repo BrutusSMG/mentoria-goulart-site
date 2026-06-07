@@ -5,7 +5,7 @@ import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 
-const FB_PIXEL_ID = '1383830073227216'; // <-- COLOQUE SEU ID AQUI
+const FB_PIXEL_ID = '715929685674529'; // <-- COLOQUE SEU ID AQUI
 
 const FacebookPixel = () => {
   const pathname = usePathname();
