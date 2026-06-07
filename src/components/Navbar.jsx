@@ -7,21 +7,9 @@ import { Menu, X, ChevronDown } from 'lucide-react';
 
 const navItems = [
   { label: 'Início', href: '/' },
-  { 
-    label: 'Cursos',
-    children: [
-      { label: 'Garimpo Urbano - Mentoria Individual', href: '/mentoria' },
-      { label: 'Garimpo Urbano - Mentoria em Grupo', href: '/em-breve' },
-      { label: 'Curso Empreendedor 4.0', href: '/em-breve' },
-    ],
-  },
-  { 
-    label: 'E-books',
-    children: [
-      { label: 'Extração e Refino de Ouro e Prata', href: '/em-breve' },
-      { label: 'E-book Garimpo Urbano', href: '/em-breve' },
-    ],
-  },
+
+  { label: 'Produtos', href: '/produtos' },
+  
   { label: 'Contato', href: '/#contato' },
 ];
 
