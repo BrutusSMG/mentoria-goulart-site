@@ -108,7 +108,7 @@ const HomepageHero = () => {
             Conheça a Mentoria
           </Link>
           <Link 
-            href="#produtos"
+            href="/produtos"
             className="bg-zinc-800 text-white font-bold text-lg py-3 px-8 rounded-lg border border-zinc-700 hover:bg-zinc-700 transition-colors"
           >
             Ver Todos os Produtos
