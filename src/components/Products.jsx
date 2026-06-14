@@ -18,7 +18,7 @@ const productsList = [
     title: 'Curso Garimpo Urbano (Sem Mentoria)',
     type: 'Curso Online',
     price: 'R$ 997,00',
-    icon: <GraduationCap className="h-8 w-8 text-green-500" />,
+    icon: <GraduationCap className="h-8 w-8 text-yellow-500" />,
     highlight: false,
     link: '#',
   },
@@ -27,9 +27,9 @@ const productsList = [
     title: 'Curso de Eletrodeposição em Joias e Semi-Joias',
     type: 'Curso Online',
     price: 'R$ 147,00',
-    icon: <GraduationCap className="h-8 w-8 text-green-500" />,
+    icon: <GraduationCap className="h-8 w-8 text-yellow-500" />,
     highlight: false,
-    link: '#',
+    link: 'https://pay.hotmart.com/G47522939D?off=0g7ng2ki&lang=PT_BR&sck=HOTMART_PLATFORM&bid=1776100589487',
   },
   {
     id: 4,
@@ -38,7 +38,7 @@ const productsList = [
     price: 'R$ 198,00',
     icon: <BookOpen className="h-8 w-8 text-blue-400" />,
     highlight: false,
-    link: '#',
+    link: 'https://pay.hotmart.com/H50227464T?off=1jc71mav&lang=PT_BR&sck=HOTMART_PLATFORM&bid=1776100489055',
   },
   {
     id: 5,
@@ -47,7 +47,7 @@ const productsList = [
     price: 'R$ 198,00',
     icon: <BookOpen className="h-8 w-8 text-blue-400" />,
     highlight: false,
-    link: '#',
+    link: 'https://pay.hotmart.com/R76647642X?off=7aun8tl9&lang=PT_BR&sck=HOTMART_PLATFORM&bid=1776100665606',
   },
   {
     id: 6,
@@ -56,7 +56,7 @@ const productsList = [
     price: 'R$ 49,70',
     icon: <BookOpen className="h-8 w-8 text-blue-400" />,
     highlight: false,
-    link: '#',
+    link: 'https://pay.hotmart.com/X83735235N?off=8qc1w4b4&lang=PT_BR&sck=HOTMART_PLATFORM&bid=1776100531377',
   },
   {
     id: 7,
@@ -65,7 +65,7 @@ const productsList = [
     price: 'R$ 47,00',
     icon: <BookOpen className="h-8 w-8 text-blue-400" />,
     highlight: false,
-    link: '#',
+    link: 'https://pay.hotmart.com/W58672613R?off=9k4239wa&lang=PT_BR&sck=HOTMART_PLATFORM&bid=1776100631640',
   },
 ];
 
@@ -77,7 +77,7 @@ const Products = () => {
         {/* Cabeçalho da Seção */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4">
-            Nossos <span className="text-green-500">Produtos</span>
+            Nossos <span className="text-yellow-500">Produtos</span>
           </h2>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             Escolha o formato ideal para o seu momento e comece a lucrar com a metalurgia nobre.
@@ -92,7 +92,7 @@ const Products = () => {
               className={`relative flex flex-col bg-gray-900 rounded-2xl p-8 transition-transform duration-300 hover:-translate-y-2 ${
                 product.highlight 
                   ? 'border-2 border-yellow-500 shadow-2xl shadow-yellow-500/20 lg:scale-105 z-10' 
-                  : 'border border-gray-800 hover:border-green-500/50'
+                  : 'border border-gray-800 hover:border-yellow-500/50'
               }`}
             >
               {/* Selo de Destaque (Apenas para o produto principal) */}
