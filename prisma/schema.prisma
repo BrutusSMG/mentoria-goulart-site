@@ -12,12 +12,13 @@ datasource db {
 // Tabela para guardar o histórico de cotações
 model CotacaoHistorico {
   id           String   @id @default(cuid())
-  dolar        Float    // Valor do dólar no momento
-  ouro         Float    // Valor do ouro em BRL/grama
+  dolar        Float
+  ouro         Float
   prata        Float
   platina      Float
   paladio      Float
-  criadoEm     DateTime @default(now()) // Salva a data e hora exata automaticamente
+  rodio        Float?
+  criadoEm     DateTime @default(now())
 }
 
 model Lead {
