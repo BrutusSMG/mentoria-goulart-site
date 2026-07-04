@@ -101,7 +101,7 @@ const Hero = () => {
           </div>          
           <div className="mt-8">
             <Link 
-              href="https://pay.hotmart.com/Y38962738S?off=1a7iy0g9&ref=J105438092D&bid=1776465352908"
+              href="https://go.hotmart.com/J105438092D?dp=1"
               className="inline-block bg-[#d89900] text-black font-bold text-2xl md:text-3xl py-5 px-8 rounded-lg shadow-lg shadow-[#d89900]/50 hover:bg-[#c68a00] hover:scale-105 transition-all duration-300 ease-in-out animate-pulse"
             >
               QUERO APRENDER O MÉTODO

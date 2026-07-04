@@ -29,7 +29,7 @@ const productsList = [
     price: 'R$ 147,00',
     icon: <GraduationCap className="h-8 w-8 text-yellow-500" />,
     highlight: false,
-    link: 'https://pay.hotmart.com/G47522939D?off=0g7ng2ki&lang=PT_BR&sck=HOTMART_PLATFORM&bid=1776100589487',
+    link: 'https://go.hotmart.com/H106605361V?dp=1',
   },
   {
     id: 4,
@@ -38,7 +38,7 @@ const productsList = [
     price: 'R$ 198,00',
     icon: <BookOpen className="h-8 w-8 text-blue-400" />,
     highlight: false,
-    link: 'https://pay.hotmart.com/H50227464T?off=1jc71mav&lang=PT_BR&sck=HOTMART_PLATFORM&bid=1776100489055',
+    link: 'https://go.hotmart.com/B106605360L?dp=1',
   },
   {
     id: 5,
@@ -47,7 +47,7 @@ const productsList = [
     price: 'R$ 198,00',
     icon: <BookOpen className="h-8 w-8 text-blue-400" />,
     highlight: false,
-    link: 'https://pay.hotmart.com/R76647642X?off=7aun8tl9&lang=PT_BR&sck=HOTMART_PLATFORM&bid=1776100665606',
+    link: 'https://go.hotmart.com/V106605378M?dp=1',
   },
   {
     id: 6,
@@ -56,7 +56,7 @@ const productsList = [
     price: 'R$ 49,70',
     icon: <BookOpen className="h-8 w-8 text-blue-400" />,
     highlight: false,
-    link: 'https://pay.hotmart.com/X83735235N?off=8qc1w4b4&lang=PT_BR&sck=HOTMART_PLATFORM&bid=1776100531377',
+    link: 'https://go.hotmart.com/F106605366M?dp=1',
   },
   {
     id: 7,
@@ -65,7 +65,7 @@ const productsList = [
     price: 'R$ 47,00',
     icon: <BookOpen className="h-8 w-8 text-blue-400" />,
     highlight: false,
-    link: 'https://pay.hotmart.com/W58672613R?off=9k4239wa&lang=PT_BR&sck=HOTMART_PLATFORM&bid=1776100631640',
+    link: 'https://go.hotmart.com/Q106605376S?dp=1',
   },
 ];
 
