@@ -57,8 +57,7 @@ export async function POST(request) {
           <p>Boa leitura e bons estudos!</p>
             
 
-          <p>Um abraço,  
-<strong>Prof. José Goulart</strong></p>
+          <p>Um abraço, <strong>Prof. José Goulart</strong></p>
         </div>
       `
     } );

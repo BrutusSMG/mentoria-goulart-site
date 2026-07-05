@@ -143,10 +143,10 @@ const HomepageHero = () => {
       {/* --- CONTEÚDO PRINCIPAL DO HERO --- */}
       <div className="relative z-10 container mx-auto px-4 pt-20 md:pt-32">
         <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
-          Transforme Sucata em Riqueza.
+          Transforme resíduos eletrônicos em ativos valiosos.
         </h1>
         <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl mx-auto">
-          O portal completo para você dominar a recuperação de metais preciosos e construir um negócio lucrativo do zero.
+          Um portal de aprendizado sobre recuperação de metais preciosos e empreendedorismo sustentável.
         </p>
 
         <div className="flex justify-center items-center gap-4 flex-wrap">

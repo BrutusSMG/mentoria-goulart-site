@@ -14,49 +14,18 @@ const Hero = () => {
   return (
     <section className="bg-black text-white text-center py-12 px-4">
       <div className="container mx-auto flex flex-col items-center">
-        {/* Selo de Vagas Abertas */}
-        <div className="bg-[#d89900] text-black font-bold uppercase px-4 py-1 rounded-md mb-6">
-          Vagas Abertas
-        </div>
-
-        {/* Título Principal */}
-        <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-4 max-w-4xl">
-          Aprenda a lucrar com Ouro todos os dias
-        </h1>
-
-        {/* Subtítulo */}       
-        <div className="my-8 text-center">
-          <p className="text-xl md:text-2xl text-gray-300 mb-6">
-            Mesmo que você seja um completo iniciante, aprenda a encontrar e refinar metais preciosos em:
-          </p>
-          {/* Lista de Oportunidades */}
-          <div className="flex justify-center items-center gap-4 md:gap-8 flex-wrap text-lg">
-            <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
-              <Recycle className="w-5 h-5 text-[#d89900]" />
-              Lixo Eletrônico
-            </span>
-            <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
-              <Car className="w-5 h-5 text-[#d89900]" />
-              Catalisadores
-            </span>
-            <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
-              <Gem className="w-5 h-5 text-[#d89900]" />
-              Resíduos de Joalheria
-            </span>
-            <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
-              <Plus className="w-5 h-5 text-[#d89900]" />
-              ...e muito mais!
-            </span>
-          </div>
-        </div>
         
+
         {/* Container do Vídeo com proporção 16:9 */}
-        <div className="mt-10 w-full max-w-5xl p-6 md:p-8 border-2 border-gray-700 rounded-lg shadow-2xl shadow-green-500/10">
+        <div className="w-full max-w-5xl p-6 md:p-8 border-2 border-gray-700 rounded-lg shadow-2xl shadow-green-500/10">
           <div className="mb-8">
             <div className="flex flex-col items-center justify-center gap-4 mb-4">
-              <span className="text-2xl font-semibold tracking-wider text-gray-300">
-                O CURSO
-              </span>
+              
+              {/* Selo de Vagas Abertas */}
+              <div className="bg-[#d89900] text-black font-bold uppercase px-4 py-1 rounded-md">
+                Vagas Abertas
+              </div>
+              
               <Image
                 src="/GUText.png" // Certifique-se que o nome do arquivo corresponde
                 alt="Garimpo Urbano - Recuperação de Metais Preciosos"
@@ -66,7 +35,7 @@ const Hero = () => {
               />
             </div>
             <p className="text-lg md:text-xl text-gray-300 leading-relaxed max-w-3xl mx-auto">
-              É um treinamento <strong className="text-white">100% online</strong> com um objetivo claro: ensinar você a transformar sucata em um <strong className="text-white">negócio lucrativo em apenas 30 dias.</strong>
+              É um treinamento <strong className="text-white">100% online</strong> com um objetivo claro: <strong className="text-white">ensinar o método passo a passo</strong> para iniciar nesse mercado.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-2">
               <span className="font-semibold">Assista ao vídeo abaixo para entender</span>
@@ -108,6 +77,39 @@ const Hero = () => {
             </Link>
           </div>
         </div>
+
+        {/* Título Principal */}
+        <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4 mt-16 max-w-4xl">
+          Domine a técnica de recuperação de metais preciosos
+        </h1>
+
+        {/* Subtítulo */}       
+        <div className="my-8 text-center">
+          <p className="text-xl md:text-2xl text-gray-300 mb-6">
+            Mesmo que você seja um completo iniciante, aprenda a encontrar e refinar metais preciosos em:
+          </p>
+          {/* Lista de Oportunidades */}
+          <div className="flex justify-center items-center gap-4 md:gap-8 flex-wrap text-lg">
+            <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
+              <Recycle className="w-5 h-5 text-[#d89900]" />
+              Lixo Eletrônico
+            </span>
+            <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
+              <Car className="w-5 h-5 text-[#d89900]" />
+              Catalisadores
+            </span>
+            <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
+              <Gem className="w-5 h-5 text-[#d89900]" />
+              Resíduos de Joalheria
+            </span>
+            <span className="bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2">
+              <Plus className="w-5 h-5 text-[#d89900]" />
+              ...e muito mais!
+            </span>
+          </div>
+        </div>
+        
+        
       </div>
     </section>
    );

@@ -69,7 +69,7 @@ const LeadCapture = () => {
               Descubra o <span className="text-yellow-500">Mapa do Tesouro</span> no Garimpo Urbano
             </h1>
             <p className="text-lg text-gray-300 mb-8">
-              Baixe o e-book gratuito e aprenda como transformar lixo eletrônico em uma fonte lucrativa de Ouro, Prata e Platina, começando com zero investimento.
+              Baixe o e-book gratuito e aprenda como transformar lixo eletrônico em uma fonte lucrativa de Ouro, Prata e Platina, começando com os recursos que você já tem em mãos.
             </p>
             <div className="relative w-64 h-80 md:w-80 md:h-96 mx-auto md:mx-0 rounded-lg overflow-hidden shadow-2xl shadow-black">
               <Image 
@@ -114,6 +114,8 @@ const LeadCapture = () => {
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                   />
                 </div>
+                
+                {/*
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-1">WhatsApp (com DDD)</label>
                   <input 
@@ -131,6 +133,7 @@ const LeadCapture = () => {
                     </p>
                   )}
                 </div>
+                */}
 
                 <button 
                   type="submit" 

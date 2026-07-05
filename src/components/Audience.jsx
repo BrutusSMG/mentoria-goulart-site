@@ -6,7 +6,7 @@ import Image from 'next/image';
 const audienceItems = [
   {
     title: "Para o Iniciante Absoluto",
-    description: "Que busca uma fonte de renda sólida e quer começar com segurança, sem arriscar seu dinheiro com achismos."
+    description: "Comece com segurança e baixo investimento inicial. Aprenda o método passo a passo para transformar sucata eletrônica em ativo valioso, mesmo sem experiência prévia."
   },
   {
     title: "Para o Futuro Empreendedor",

@@ -26,7 +26,7 @@ const Guarantee = () => {
             {/* Coluna do Texto */}
             <div className="border-t-2 md:border-t-0 md:border-l-2 border-gray-700 pt-8 md:pt-0 md:pl-8">
               <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
-                Seu Risco é <span className="text-[#d89900]">ZERO</span>. O Compromisso é Todo Meu.
+                Garantia incondicional de satisfação por 7 dias. O Compromisso é Todo Meu.
               </h2>
               <p className="text-lg text-gray-300 leading-relaxed mb-6">
                 Eu tenho tanta confiança no método que desenvolvi que faço questão de assumir todo o risco por você.

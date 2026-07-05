@@ -32,7 +32,7 @@ const Opportunity = () => {
           {/* Coluna do Texto */}
           <div className="space-y-6 text-lg text-gray-300 leading-relaxed">
             <h3 className="text-3xl font-bold text-white border-l-4 border-[#d89900] pl-4">
-              A Mina de Ouro Escondida nas Cidades
+              Oportunidades inexploradas no setor de reciclagem nobre.
             </h3>
             <p>
               Diariamente, toneladas de sucatas ricas em metais preciosos são descartadas. Este é o <strong className="text-white">Garimpo Urbano</strong>: uma nova fronteira que nasceu no coração das grandes cidades.
@@ -41,7 +41,7 @@ const Opportunity = () => {
               Um Mercado com Demanda Explosiva
             </h3>
             <p>
-              A indústria precisa desesperadamente desses metais, mas <strong className="text-white">faltam profissionais qualificados.</strong> Os poucos que dominam essa atividade são escassos e, por isso, muito bem remunerados.
+              A indústria precisa desesperadamente desses metais, mas <strong className="text-white">faltam profissionais qualificados.</strong> Ou seja, profissão com alta demanda e poucos especialistas no mercado.
             </p>
             <h3 className="text-3xl font-bold text-white border-l-4 border-[#d89900] pl-4 mt-8">
               A Hora de Empreender é Agora
