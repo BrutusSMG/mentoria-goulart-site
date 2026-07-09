@@ -3,7 +3,7 @@
 
 const WhatsAppButton = () => {
   // Substitua pelo número real do suporte (com DDI 55 e o DDD)
-  const numeroWhatsApp = "5541988706921"; 
+  const numeroWhatsApp = "5541996207316"; 
   
   // Mensagem padrão que já vem escrita quando o cliente clica
   const mensagem = "Olá! Estava no site do Garimpo Urbano e gostaria de tirar uma dúvida.";  
