@@ -4,12 +4,30 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { origem, email, nome, assunto, mensagem } = data;
+    const { origem, email, nome, assunto, mensagem, telefone_secundario } = data;
 
-    // Validação básica
+    // --- 1. PROTEÇÃO CONTRA BOTS (HONEYPOT) ---
+    // Se o campo invisível foi preenchido, é um robô.
+    if (telefone_secundario) {
+      console.log(`[BOT BLOQUEADO] Tentativa de spam evitada.`);
+      // Retornamos sucesso para enganar o bot, assim ele acha que funcionou e vai embora,
+      // mas nós NÃO enviamos nada para o Brevo.
+      return NextResponse.json({ sucesso: true, mensagem: "Lead cadastrado com sucesso!" }, { status: 200 });
+    }
+
+    // --- 2. VALIDAÇÃO RIGOROSA DE E-MAIL ---
     if (!email) {
       return NextResponse.json({ sucesso: false, erro: "E-mail é obrigatório." }, { status: 400 });
     }
+
+    // Regex para formato básico de e-mail (texto@texto.texto)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    // Verifica se o formato é inválido OU se termina com erros comuns de digitação brasileiros
+    if (!emailRegex.test(email) || email.endsWith('.con') || email.endsWith('.com.brr')) {
+      return NextResponse.json({ sucesso: false, erro: "Por favor, insira um e-mail válido." }, { status: 400 });
+    }
+
 
     // 1. Lógica de Roteamento de Listas (Qual lista o lead vai entrar?)
     // Pega os IDs do arquivo .env.local (ou usa um padrão se não achar)

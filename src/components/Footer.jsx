@@ -35,7 +35,7 @@ const Footer = () => {
 
       if (response.ok && data.sucesso) {
         setStatus('success');
-        setFormData({ nome: '', email: '', assunto: '', mensagem: '' });
+        setFormData({ nome: '', email: '', assunto: '', mensagem: '', telefone_secundario: '' });
         setTimeout(() => setStatus('idle'), 5000);
       } else {
         setStatus('error');
@@ -171,7 +171,20 @@ const Footer = () => {
                       value={formData.mensagem}
                       onChange={handleChange}
                       className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-[#d89900] resize-none disabled:opacity-50"
-                    ></textarea>
+                    ></textarea>                    
+                    
+                    <div className="absolute -left-[9999px] opacity-0" aria-hidden="true">
+                      <label htmlFor="telefone_secundario">Não preencha este campo se você for humano</label>
+                      <input 
+                        type="text" 
+                        id="telefone_secundario" 
+                        name="telefone_secundario" 
+                        tabIndex="-1" 
+                        autoComplete="off"
+                        value={formData.telefone_secundario || ''}
+                        onChange={handleChange}
+                      />
+                    </div>
                     
                     {status === 'error' && (
                       <p className="text-red-500 text-xs">Erro ao enviar. Tente novamente.</p>
