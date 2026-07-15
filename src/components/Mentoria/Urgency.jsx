@@ -99,7 +99,7 @@ const Urgency = () => {
             
             {/* Coluna 1: Cronômetro Minimalista */}
             <div className="flex flex-col items-center lg:items-start bg-black/40 p-8 rounded-2xl w-full">
-              <div className="flex items-center gap-2 text-gray-400 mb-6 text-sm font-semibold uppercase tracking-wider">
+              <div className="flex items-center gap-1 text-gray-400 mb-6 text-sm font-semibold uppercase tracking-wider">
                 <CalendarClock className="w-4 h-4 text-[#d89900]" />
                 <span>Tempo Restante</span>
               </div>
