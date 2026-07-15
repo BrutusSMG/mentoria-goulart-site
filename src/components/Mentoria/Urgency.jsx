@@ -98,33 +98,35 @@ const Urgency = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-12">
             
             {/* Coluna 1: Cronômetro Minimalista */}
-            <div className="flex flex-col items-center lg:items-start bg-black/40 p-8 rounded-2xl w-full">
-              <div className="flex items-center gap-1 text-gray-400 mb-6 text-sm font-semibold uppercase tracking-wider">
+            <div className="flex flex-col items-center lg:items-start bg-black/40 p-6 md:p-8 rounded-2xl border border-zinc-800/50 w-full">
+              <div className="flex items-center gap-2 text-gray-400 mb-6 text-sm font-semibold uppercase tracking-wider">
                 <CalendarClock className="w-4 h-4 text-[#d89900]" />
                 <span>Tempo Restante</span>
               </div>
               
-              <div className="flex gap-4 md:gap-6">
+              {/* Reduzimos o gap e garantimos que não vaze da tela */}
+              <div className="flex gap-3 md:gap-4 w-full justify-center lg:justify-start">
                 <div className="flex flex-col items-center">
-                  <span className="text-3xl md:text-5xl font-black text-white tracking-tighter">{formatNumber(timeLeft.days)}</span>
+                  {/* Reduzimos de text-5xl para text-4xl no desktop */}
+                  <span className="text-3xl md:text-4xl font-black text-white tracking-tighter">{formatNumber(timeLeft.days)}</span>
                   <span className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-widest">Dias</span>
                 </div>
-                <span className="text-3xl md:text-5xl font-black text-zinc-700/50">:</span>
+                <span className="text-3xl md:text-4xl font-black text-zinc-700/50">:</span>
                 
                 <div className="flex flex-col items-center">
-                  <span className="text-3xl md:text-5xl font-black text-white tracking-tighter">{formatNumber(timeLeft.hours)}</span>
+                  <span className="text-3xl md:text-4xl font-black text-white tracking-tighter">{formatNumber(timeLeft.hours)}</span>
                   <span className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-widest">Horas</span>
                 </div>
-                <span className="text-3xl md:text-5xl font-black text-zinc-700/50">:</span>
+                <span className="text-3xl md:text-4xl font-black text-zinc-700/50">:</span>
                 
                 <div className="flex flex-col items-center">
-                  <span className="text-3xl md:text-5xl font-black text-white tracking-tighter">{formatNumber(timeLeft.minutes)}</span>
+                  <span className="text-3xl md:text-4xl font-black text-white tracking-tighter">{formatNumber(timeLeft.minutes)}</span>
                   <span className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-widest">Min</span>
                 </div>
-                <span className="text-3xl md:text-5xl font-black text-zinc-700/50">:</span>
+                <span className="text-3xl md:text-4xl font-black text-zinc-700/50">:</span>
                 
                 <div className="flex flex-col items-center">
-                  <span className="text-3xl md:text-5xl font-black text-[#d89900] tracking-tighter">{formatNumber(timeLeft.seconds)}</span>
+                  <span className="text-3xl md:text-4xl font-black text-[#d89900] tracking-tighter">{formatNumber(timeLeft.seconds)}</span>
                   <span className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-widest">Seg</span>
                 </div>
               </div>
