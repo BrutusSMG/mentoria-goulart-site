@@ -22,9 +22,9 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-black/80 backdrop-blur-sm border-b border-gray-700 sticky top-0 z-40">
+    <nav className="bg-black/80 backdrop-blur-sm sticky top-0 z-40">
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16 w-full">
+        <div className="flex justify-between items-center h-8 w-full">
           
           {/* 1. LADO ESQUERDO: NAVEGAÇÃO PARA DESKTOP */}
           <div className="hidden md:flex items-center space-x-6">

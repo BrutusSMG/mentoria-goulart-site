@@ -1,5 +1,9 @@
-// src/components/Learning.jsx
-import { FlaskConical, Gem, Warehouse, ShieldCheck, Beaker, Truck, Flame, Droplets, BarChart3, Recycle, Car, Film, Watch, Cpu, Sparkles, PlusCircle } from 'lucide-react';
+// src/components/Mentoria/Learning.jsx
+
+"use client"; // Necessário para usar o useState
+
+import React, { useState } from 'react';
+import { FlaskConical, Gem, Warehouse, ShieldCheck, Beaker, Truck, Flame, Droplets, BarChart3, Recycle, Car, Film, Watch, Cpu, Sparkles, PlusCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 // Array com os dados dos módulos (refinados)
 const learningModules = [
@@ -24,9 +28,19 @@ const learningModules = [
 ];
 
 const Learning = () => {
+  // Estado para controlar se mostra todos ou apenas alguns
+  const [showAll, setShowAll] = useState(false);
+  
+  // Quantidade de módulos para mostrar inicialmente (6 = 2 linhas no PC, 6 no celular)
+  const initialCount = 6;
+  
+  // Filtra os módulos baseados no estado
+  const visibleModules = showAll ? learningModules : learningModules.slice(0, initialCount);
+
   return (
     <section className="bg-[#171f35] py-16 md:py-24 px-4">
       <div className="container mx-auto max-w-7xl">
+        
         {/* Título da Seção */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white">
@@ -37,26 +51,51 @@ const Learning = () => {
           </p>
         </div>
 
-        {/* Grid de Módulos */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {learningModules.map((module, index) => (
-            <div key={index} className="bg-gray-700/80 p-6 rounded-lg border border-gray-800 flex items-start gap-5">
-              {/* Ícone */}
-              <div className="text-[#d89900] mt-1">
-                {React.cloneElement(module.icon, { className: "h-8 w-8" })}
+        {/* Container Relativo para o Efeito de Degradê */}
+        <div className="relative">
+          
+          {/* Grid de Módulos */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {visibleModules.map((module, index) => (
+              <div key={index} className="bg-gray-700/80 p-6 rounded-lg border border-gray-800 flex items-start gap-5 hover:border-[#d89900]/50 transition-colors duration-300">
+                <div className="text-[#d89900] mt-1 shrink-0">
+                  {React.cloneElement(module.icon, { className: "h-8 w-8" })}
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-lg mb-2">{module.title}</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">{module.description}</p>
+                </div>
               </div>
-              {/* Conteúdo */}
-              <div>
-                <h3 className="font-bold text-white text-lg mb-2">{module.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{module.description}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {/* Efeito de Esmaecimento (Fade Out) - Só aparece se estiver fechado */}
+          {!showAll && (
+            <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-[#171f35] to-transparent pointer-events-none"></div>
+          )}
         </div>
+
+        {/* Botão de Ver Mais / Ver Menos */}
+        <div className="mt-10 flex justify-center relative z-10">
+          <button 
+            onClick={() => setShowAll(!showAll)}
+            className="flex items-center gap-2 bg-transparent border-2 border-[#d89900] text-[#d89900] hover:bg-[#d89900] hover:text-black font-bold py-3 px-8 rounded-full transition-all duration-300"
+          >
+            {showAll ? (
+              <>
+                Mostrar Menos <ChevronUp className="w-5 h-5" />
+              </>
+            ) : (
+              <>
+                Ver Todos os {learningModules.length} Módulos <ChevronDown className="w-5 h-5" />
+              </>
+            )}
+          </button>
+        </div>
+
       </div>
     </section>
   );
 };
 
-import React from 'react';
 export default Learning;

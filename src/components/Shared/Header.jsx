@@ -10,7 +10,7 @@ const Header = () => {
           <Image
             src="/logo_fundoTransparentered.png"
             alt="Logo Garimpo Urbano"
-            width={200}
+            width={120}
             height={80}
             priority
             className="max-w-full h-auto object-contain"
