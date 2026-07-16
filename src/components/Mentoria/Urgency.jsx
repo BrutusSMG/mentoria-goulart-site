@@ -105,7 +105,7 @@ const Urgency = () => {
               </div>
               
               {/* Reduzimos o gap e garantimos que não vaze da tela */}
-              <div className="flex gap-1 md:gap-2 w-full justify-center lg:justify-start">
+              <div className="flex gap-2 md:gap-4 w-full justify-center lg:justify-start">
                 <div className="flex flex-col items-center">
                   {/* Reduzimos de text-5xl para text-4xl no desktop */}
                   <span className="text-3xl md:text-4xl font-black text-white tracking-tighter">{formatNumber(timeLeft.days)}</span>
