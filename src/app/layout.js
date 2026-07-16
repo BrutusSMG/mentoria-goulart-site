@@ -90,7 +90,9 @@ export default function RootLayout({ children }) {
         </Suspense>
         <Header />
         <Navbar />
-        {children}
+        <main className="grow">
+          {children}
+        </main>
         <Footer />
         <ExitIntentHandler />
         <WhatsAppButton />
