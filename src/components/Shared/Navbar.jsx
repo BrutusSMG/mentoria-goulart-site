@@ -1,9 +1,10 @@
-// src/components/Navbar.jsx
+// src/components/Shared/Navbar.jsx
 "use client";
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X, ChevronDown } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 const navItems = [
   { label: 'Início', href: '/' },
@@ -16,6 +17,11 @@ const navItems = [
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openSubMenu, setOpenSubMenu] = useState(null);
+  const pathname = usePathname();
+
+  if (pathname === '/mentoria') {
+    return null; // Não renderiza o Navbar na página /mentoria
+  }
 
   const handleSubMenuToggle = (label) => {
     setOpenSubMenu(openSubMenu === label ? null : label);

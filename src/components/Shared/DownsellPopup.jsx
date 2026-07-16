@@ -1,4 +1,4 @@
-// src/components/DownsellPopup.jsx
+// src/components/Shared/DownsellPopup.jsx
 "use client";
 
 import Link from 'next/link';

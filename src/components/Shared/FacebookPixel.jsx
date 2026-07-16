@@ -1,4 +1,4 @@
-// src/components/FacebookPixel.jsx
+// src/components/Shared/FacebookPixel.jsx
 "use client";
 
 import Script from 'next/script';
