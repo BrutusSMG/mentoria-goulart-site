@@ -5,14 +5,44 @@ import { useState, useEffect } from 'react';
 import { Timer, Users, Star, CalendarClock, ShieldCheck, ArrowRight } from 'lucide-react';
 
 // ============================================================================
-// ⚙️ CONFIGURAÇÕES DA CAMPANHA (Escassez Dinâmica)
+// ⚙️ CONFIGURAÇÕES DA CAMPANHA (Escassez Evergreen)
+// Cada visitante tem seu próprio prazo, iniciado no primeiro acesso
+// e persistido no navegador (localStorage).
 // ============================================================================
+
 const CAMPAIGN_SETTINGS = {
-  startDate: '2026-07-09T06:00:00-03:00', // Data de início da contagem regressiva
-  targetDate: '2026-07-23T05:59:59-03:00', // Data de término da contagem regressiva
-  totalSpots: 30, // Total de vagas disponíveis
-  startSpotsLeft: 25, // Vagas restantes no início da campanha
-  endSpotsLeft: 2, // Vagas restantes no final da campanha (quando o tempo acabar)
+  durationHours: 72,     // Duração da janela individual de cada visitante
+  totalSpots: 30,        // Total de vagas exibidas
+  startSpotsLeft: 25,    // Vagas restantes no início da janela
+  endSpotsLeft: 2,       // Vagas restantes no fim da janela
+};
+
+const STORAGE_KEY = 'gu_evergreen_deadline';
+
+// Recupera (ou cria) o prazo individual do visitante
+const getDeadline = () => {
+  const durationMs = CAMPAIGN_SETTINGS.durationHours * 60 * 60 * 1000;
+  const now = Date.now();
+
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const deadline = parseInt(saved, 10);
+      // Prazo válido e ainda no futuro: mantém
+      if (!isNaN(deadline) && deadline > now) {
+        return deadline;
+      }
+    }
+  } catch (e) {
+    // localStorage indisponível (modo privado etc.): usa prazo em memória
+  }
+
+  // Sem prazo válido: inicia um novo ciclo agora
+  const newDeadline = now + durationMs;
+  try {
+    localStorage.setItem(STORAGE_KEY, String(newDeadline));
+  } catch (e) { /* ignora */ }
+  return newDeadline;
 };
 // ============================================================================
 
@@ -25,28 +55,33 @@ const Urgency = () => {
     percentage: Math.round(((CAMPAIGN_SETTINGS.totalSpots - CAMPAIGN_SETTINGS.startSpotsLeft) / CAMPAIGN_SETTINGS.totalSpots) * 100)
   });
 
-  const formattedDate = new Date(CAMPAIGN_SETTINGS.targetDate).toLocaleDateString('pt-BR', {
-    day: 'numeric',
-    month: 'long'
-  });
-
   useEffect(() => {
-    const start = new Date(CAMPAIGN_SETTINGS.startDate).getTime();
-    const end = new Date(CAMPAIGN_SETTINGS.targetDate).getTime();
+    const durationMs = CAMPAIGN_SETTINGS.durationHours * 60 * 60 * 1000;
+    let end = getDeadline();
+    let start = end - durationMs;
 
     const calculateData = () => {
-      const now = new Date().getTime();
-      
-      const difference = end - now;
-      if (difference > 0) {
-        setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((difference % (1000 * 60)) / 1000),
-        });
+      const now = Date.now();
+      let difference = end - now;
+
+      // Prazo expirou: reinicia o ciclo silenciosamente
+      if (difference <= 0) {
+        end = Date.now() + durationMs;
+        start = end - durationMs;
+        try {
+          localStorage.setItem(STORAGE_KEY, String(end));
+        } catch (e) { /* ignora */ }
+        difference = end - Date.now();
       }
 
+      setTimeLeft({
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((difference % (1000 * 60)) / 1000),
+      });
+
+      // Interpolação das vagas sobre a janela individual (mesma lógica de antes)
       let timeProgress = (now - start) / (end - start);
       timeProgress = Math.max(0, Math.min(1, timeProgress)); 
       
@@ -54,12 +89,11 @@ const Urgency = () => {
       const currentLeft = Math.round(CAMPAIGN_SETTINGS.startSpotsLeft - (spotsDrop * timeProgress));
       
       const currentTaken = CAMPAIGN_SETTINGS.totalSpots - currentLeft;
-      const currentPercentage = Math.round((currentTaken / CAMPAIGN_SETTINGS.totalSpots) * 100);
-
+      
       setSpotsData({
         left: currentLeft,
         taken: currentTaken,
-        percentage: currentPercentage
+        percentage: Math.round((currentTaken / CAMPAIGN_SETTINGS.totalSpots) * 100),
       });
     };
 
@@ -90,7 +124,7 @@ const Urgency = () => {
               A Mentoria Individual exige tempo e dedicação.
             </h2>
             <p className="text-gray-400 text-lg max-w-3xl mx-auto leading-relaxed">
-              Para garantir que o Prof. Goulart consiga acompanhar de perto o seu projeto e tirar todas as suas dúvidas, esta turma foi limitada a <strong className="text-gray-200">{CAMPAIGN_SETTINGS.totalSpots} vagas</strong>. As inscrições encerram em <strong className="text-[#d89900]">{formattedDate}</strong>.
+              Para garantir que o Prof. Goulart consiga acompanhar de perto o seu projeto e tirar todas as suas dúvidas, esta turma foi limitada a <strong className="text-gray-200">{CAMPAIGN_SETTINGS.totalSpots} vagas</strong>. Sua condição especial expira quando o cronômetro abaixo zerar.
             </p>
           </div>
 

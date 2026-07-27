@@ -1,12 +1,12 @@
 import { Geist } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
-import ExitIntentHandler from "@/components/Shared/ExitIntentHandler";
-import Header from "@/components/Shared/Header"; 
-import Navbar from "@/components/Shared/Navbar"; 
-import Footer from "@/components/Shared/Footer";
-import WhatsAppButton from "@/components/Shared/WhatsAppButton";
-import FacebookPixel from "@/components/Shared/FacebookPixel";
+import ExitIntentHandler from "@/components/shared/ExitIntentHandler";
+import Header from "@/components/shared/Header"; 
+import Navbar from "@/components/shared/Navbar"; 
+import Footer from "@/components/shared/Footer";
+import WhatsAppButton from "@/components/shared/WhatsAppButton";
+import FacebookPixel from "@/components/shared/FacebookPixel";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

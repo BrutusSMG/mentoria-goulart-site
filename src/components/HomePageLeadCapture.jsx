@@ -57,7 +57,7 @@ const HomePageLeadCapture = () => {
         </div>
 
         {/* Lado Direito: Formulário ou Mensagem de Sucesso */}
-        <div className="md:w-1/2 w-full bg-black p-8 rounded-2xl border border-zinc-800 shadow-2xl min-h-[300px] flex flex-col justify-center">
+        <div className="md:w-1/2 w-full bg-black p-8 rounded-2xl border border-zinc-800 shadow-2xl min-h-75 flex flex-col justify-center">
           
           {status === 'success' ? (
             <div className="text-center animate-fade-in">

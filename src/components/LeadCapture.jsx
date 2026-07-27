@@ -77,6 +77,8 @@ const LeadCapture = () => {
                 alt="Capa do E-book O Mapa do Tesouro"
                 fill
                 className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
               />
             </div>
           </div>
