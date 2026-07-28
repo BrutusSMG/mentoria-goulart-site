@@ -1,6 +1,8 @@
 // src/components/Shared/WhatsAppButton.jsx
 "use client";
 
+import { trackContact } from '@/utils/tracking';
+
 const WhatsAppButton = () => {
   // Substitua pelo número real do suporte (com DDI 55 e o DDD)
   const numeroWhatsApp = "5541996207316"; 
@@ -10,9 +12,7 @@ const WhatsAppButton = () => {
   const linkWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem )}`;
 
   const handleTrackClick = () => {
-    if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', 'Lead');
-    }
+    trackContact();    
   };
 
   return (

@@ -1,6 +1,7 @@
 // src/components/Shared/FacebookPixel.jsx
 "use client";
 
+import { captureUtms } from '@/utils/utm';
 import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
@@ -15,6 +16,7 @@ const FacebookPixel = () => {
   // e a cada troca de página. O snippet de init abaixo NÃO dispara mais
   // PageView, evitando a contagem duplicada.
   useEffect(() => {
+    captureUtms();
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'PageView');
     }

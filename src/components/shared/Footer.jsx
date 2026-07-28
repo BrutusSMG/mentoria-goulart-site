@@ -4,6 +4,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { trackContact } from '@/utils/tracking';
 
 const Footer = () => {
   const [formData, setFormData] = useState({
@@ -35,6 +36,7 @@ const Footer = () => {
 
       if (response.ok && data.sucesso) {
         setStatus('success');
+        trackContact();
         setFormData({ nome: '', email: '', assunto: '', mensagem: '', telefone_secundario: '' });
         setTimeout(() => setStatus('idle'), 5000);
       } else {
