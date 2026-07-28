@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { origem, email, nome, assunto, mensagem, telefone_secundario } = data;
+    const { origem, email, nome, assunto, mensagem, telefone_secundario, utms={} } = data;
 
     // --- 1. PROTEÇÃO CONTRA BOTS (HONEYPOT) ---
     // Se o campo invisível foi preenchido, é um robô.
@@ -56,6 +56,9 @@ export async function POST(request) {
         // O Brevo exige que os atributos padrão sejam em MAIÚSCULO
         NOME: nome || "",
         ORIGEM_LEAD: origem || "Site Garimpo Urbano",
+        UTM_SOURCE: utms.source || "",
+        UTM_MEDIUM: utms.medium || "",
+        UTM_CAMPAIGN: utms.campaign || "",
       }
     };
 

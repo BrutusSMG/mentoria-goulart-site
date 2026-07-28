@@ -9,7 +9,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { nome, email, whatsapp } = body;
+    const { nome, email, whatsapp, utms={} } = body;
 
     if (!nome || !email || !whatsapp) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
@@ -23,13 +23,23 @@ export async function POST(request) {
         nome: nome, 
         whatsapp: whatsapp,
         // Se ele se cadastrou de novo, resetamos o status para false
-        baixouEbook: false 
+        baixouEbook: false,
+        utmSouce: utms.utm_source || null,
+        utmMedium: utms.utm_medium || null,
+        utmCampaign: utms.utm_campaign || null,
+        utmTerm: utms.utm_term || null,
+        utmContent: utms.utm_content || null
       },
       create: { 
         nome, 
         email, 
         whatsapp,
-        baixouEbook: false
+        baixouEbook: false,
+        utmSource: utms.utm_source || null,
+        utmMedium: utms.utm_medium || null,
+        utmCampaign: utms.utm_campaign || null,
+        utmTerm: utms.utm_term || null,
+        utmContent: utms.utm_content || null
       }
     });
 
