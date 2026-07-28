@@ -1,8 +1,8 @@
-// src/components/Mentoria/Urgency.jsx
+// src/components/mentoria/Urgency.jsx
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Timer, Users, Star, CalendarClock, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Users, Star, CalendarClock, ShieldCheck, ArrowRight } from 'lucide-react';
 
 // ============================================================================
 // ⚙️ CONFIGURAÇÕES DA CAMPANHA (Escassez Evergreen)

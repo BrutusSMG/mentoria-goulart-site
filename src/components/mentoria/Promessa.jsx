@@ -1,4 +1,4 @@
-// src/components/Mentoria/SecondaryPromise.jsx
+// src/components/mentoria/SecondaryPromise.jsx
 
 import Image from 'next/image';
 import { Cpu, Car, Gem, Recycle, PlaySquare, MessageCircle, BookOpen, Award, Sparkles } from 'lucide-react';

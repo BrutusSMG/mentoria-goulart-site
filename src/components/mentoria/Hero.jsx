@@ -1,4 +1,4 @@
-// src/components/Mentoria/Hero.jsx
+// src/components/mentoria/Hero.jsx
 
 "use client";
 import { useState, useEffect } from 'react';

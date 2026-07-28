@@ -1,4 +1,4 @@
-// src/components/Mentoria/VideoTestimonials.jsx
+// src/components/mentoria/VideoTestimonials.jsx
 
 "use client";
 

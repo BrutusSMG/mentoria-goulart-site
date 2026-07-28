@@ -1,4 +1,4 @@
-// src/components/Bonus.jsx
+// src/components/mentoria/Bonus.jsx
 import React from 'react';
 import { BookMarked, GraduationCap, Rocket } from 'lucide-react';
 import { Gift } from 'lucide-react'; 

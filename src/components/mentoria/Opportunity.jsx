@@ -1,4 +1,4 @@
-// src/components/Opportunity.jsx
+// src/components/mentoria/Opportunity.jsx
 import Image from 'next/image';
 
 const Opportunity = () => {

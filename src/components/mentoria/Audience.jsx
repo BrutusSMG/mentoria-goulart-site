@@ -1,4 +1,4 @@
-// src/components/Audience.jsx
+// src/components/mentoria/Audience.jsx
 import { CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 

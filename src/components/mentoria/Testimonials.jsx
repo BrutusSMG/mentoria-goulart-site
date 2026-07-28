@@ -1,4 +1,4 @@
-// src/components/Testimonials.jsx
+// src/components/mentoria/Testimonials.jsx
 "use client";
 
 import React, { useCallback } from 'react';

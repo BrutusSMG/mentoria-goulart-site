@@ -1,4 +1,4 @@
-// src/components/Mentoria/Offer.jsx
+// src/components/mentoria/Offer.jsx
 import Link from 'next/link';
 import { Check, Package, BookMarked, GraduationCap, Rocket } from 'lucide-react';
 

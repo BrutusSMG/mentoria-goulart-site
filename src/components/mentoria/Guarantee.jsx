@@ -1,4 +1,4 @@
-// src/components/Guarantee.jsx
+// src/components/mentoria/Guarantee.jsx
 import Image from 'next/image';
 import { ShieldCheck } from 'lucide-react'; // Ícone de escudo para reforçar a segurança
 

@@ -1,4 +1,4 @@
-// src/components/Author.jsx
+// src/components/mentoria/Author.jsx
 import Image from 'next/image';
 import { HeartHandshake } from 'lucide-react';
 

@@ -1,4 +1,4 @@
-// src/components/Mentoria/Learning.jsx
+// src/components/mentoria/Learning.jsx
 
 "use client"; // Necessário para usar o useState
 

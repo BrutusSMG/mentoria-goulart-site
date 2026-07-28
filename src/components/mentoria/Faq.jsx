@@ -1,4 +1,4 @@
-// src/components/Faq.jsx
+// src/components/mentoria/Faq.jsx
 "use client"; 
 
 import { useState } from 'react'; 
