@@ -1,4 +1,6 @@
 // src/app/quase-la/page.js
+export const dynamic = 'force-dynamic';
+
 import Link from 'next/link';
 import { Mail, ArrowRight, AlertTriangle } from 'lucide-react';
 

@@ -1,4 +1,5 @@
 // src/app/produtos/page.js
+export const dynamic = 'force-dynamic';
 import Products from '@/components/Products';
 
 // Otimização de SEO para a página de produtos

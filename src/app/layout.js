@@ -1,3 +1,5 @@
+// src/app/layout.js
+export const dynamic = 'force-dynamic';
 import { Geist } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
