@@ -5,14 +5,15 @@ import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 
-const FB_PIXEL_ID = '715929685674529'; // <-- COLOQUE SEU ID AQUI
+const FB_PIXEL_ID = process.env.NEXT_PUBLIC_FB_PIXEL_ID || '715929685674529';
 
 const FacebookPixel = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Esse useEffect garante que o evento 'PageView' seja disparado toda vez 
-  // que o usuário trocar de página (ex: da Home para a Mentoria)
+  // Única fonte de PageView: dispara no primeiro carregamento (mount)
+  // e a cada troca de página. O snippet de init abaixo NÃO dispara mais
+  // PageView, evitando a contagem duplicada.
   useEffect(() => {
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'PageView');
@@ -22,7 +23,7 @@ const FacebookPixel = () => {
   return (
     <Script
       id="fb-pixel"
-      strategy="afterInteractive" // Carrega logo após a página ficar interativa (não trava o site)
+      strategy="afterInteractive"
       dangerouslySetInnerHTML={{
         __html: `
           !function(f,b,e,v,n,t,s)
@@ -34,7 +35,6 @@ const FacebookPixel = () => {
           s.parentNode.insertBefore(t,s)}(window, document,'script',
           'https://connect.facebook.net/en_US/fbevents.js' );
           fbq('init', '${FB_PIXEL_ID}');
-          fbq('track', 'PageView');
         `,
       }}
     />
