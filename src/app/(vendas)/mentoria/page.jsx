@@ -1,4 +1,7 @@
 // src/app/page.js
+
+export const dynamic = 'force-dynamic';
+
 import Hero from '@/components/mentoria/Hero.jsx';
 import Promessa from '@/components/mentoria/Promessa.jsx';
 import Testimonials from '@/components/mentoria/Testimonials.jsx';

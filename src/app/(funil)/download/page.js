@@ -1,4 +1,6 @@
 // src/app/download/page.js
+export const dynamic = 'force-dynamic';
+
 "use client"; // Agora é um client component para podermos usar funções de clique
 
 import { Suspense } from 'react';

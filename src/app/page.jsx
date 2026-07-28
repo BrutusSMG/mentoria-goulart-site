@@ -1,5 +1,6 @@
 // src/app/page.jsx
 
+export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import HomepageHero from '@/components/HomepageHero';
 import HomePageProducts from '@/components/HomePageProducts';
