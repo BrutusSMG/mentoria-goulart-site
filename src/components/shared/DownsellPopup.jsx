@@ -1,6 +1,7 @@
 // src/components/Shared/DownsellPopup.jsx
 "use client";
 
+import { trackInitiateCheckout } from '@/utils/tracking';
 import Link from 'next/link';
 import { X, AlertTriangle, Package } from 'lucide-react';
 
@@ -54,7 +55,8 @@ const DownsellPopup = ({ show, onClose }) => {
 
             {/* Botão de CTA para a nova oferta */}
             <Link 
-              href="https://pay.hotmart.com/Y38962738S?off=mku66p4r&ref=J105438092D&bid=1777080674185" 
+              href="https://pay.hotmart.com/Y38962738S?off=mku66p4r&ref=J105438092D" 
+              onClick={() => trackInitiateCheckout('Curso Sem Mentoria (Downsell)', 997)}
               className="block w-full bg-[#d89900] text-white font-bold text-xl py-4 px-6 rounded-lg hover:bg-[#c68a00] transition-colors"
             >
               QUERO O CURSO AGORA!

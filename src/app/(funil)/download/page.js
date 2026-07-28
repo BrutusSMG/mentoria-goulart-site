@@ -1,8 +1,7 @@
 // src/app/download/page.js
 "use client"; // Agora é um client component para podermos usar funções de clique
 
-
-
+import { trackCompleteRegistration } from '@/utils/tracking';
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -27,7 +26,7 @@ function DownloadContent() {
       }
     }
     
-    // Abre o PDF em uma nova aba
+    trackCompleteRegistration();
     window.open('/mapa-do-tesouro.pdf', '_blank');
   };
 

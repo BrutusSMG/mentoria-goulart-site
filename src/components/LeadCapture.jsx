@@ -1,10 +1,12 @@
 // src/components/LeadCapture.jsx
 "use client";
 
+import { getUtms } from '@/utils/utm';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Download, Lock, AlertCircle } from 'lucide-react';
+import { trackLead } from '@/utils/tracking';
 
 const LeadCapture = () => {
   const router = useRouter();
@@ -43,7 +45,7 @@ const LeadCapture = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, utms: getUtms() }),
       });
 
       if (!response.ok) {
@@ -51,6 +53,7 @@ const LeadCapture = () => {
       }
 
       // Se deu tudo certo, redireciona para a página de aviso
+      trackLead('Isca Digital - Ebook (form completo)');
       router.push('/quase-la');
     } catch (err) {
       setError('Ocorreu um erro ao processar seu pedido. Tente novamente.');

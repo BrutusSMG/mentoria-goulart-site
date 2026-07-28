@@ -1,7 +1,9 @@
 // src/components/HomePageLeadCapture.jsx
 "use client";
 
+import { getUtms } from '@/utils/utm';
 import { useState } from 'react';
+import { trackLead } from '@/utils/tracking';
 
 const HomePageLeadCapture = () => {
   const [email, setEmail] = useState('');
@@ -19,14 +21,17 @@ const HomePageLeadCapture = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          ...FormData,
+          utms: getUtms(),
           origem: 'Isca Digital - Ebook', // Essa origem avisa a API para usar a lista do E-book
-          email: email
+          email: email,
         }),
       });
 
       const data = await response.json();
 
       if (response.ok && data.sucesso) {
+        trackLead('Isca Digital - Ebook (newsletter)');
         setStatus('success');
         setEmail('');
       } else {

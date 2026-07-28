@@ -2,6 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
+import TrackViewContent from '@/components/mentoria/TrackViewContent.jsx';
 import Hero from '@/components/mentoria/Hero.jsx';
 import Promessa from '@/components/mentoria/Promessa.jsx';
 import Testimonials from '@/components/mentoria/Testimonials.jsx';
@@ -19,6 +20,7 @@ import VideoTestimonials from '@/components/mentoria/VideoTestimonials';
 export default function Home() {
   return (
     <main>
+      <TrackViewContent />
       <Hero />
       <Promessa />
       <Opportunity />
