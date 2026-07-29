@@ -14,27 +14,9 @@ const LeadCapture = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Função para criar a máscara do WhatsApp: (99) 99999-9999
-  const handlePhoneChange = (e) => {
-    let value = e.target.value.replace(/\D/g, ''); // Remove tudo que não é número
-    
-    if (value.length <= 11) {
-      value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
-      value = value.replace(/(\d{5})(\d)/, '$1-$2');
-    }
-    
-    setFormData({ ...formData, whatsapp: value });
-    setError(''); // Limpa o erro ao digitar
-  };
-
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (formData.whatsapp.length < 15) {
-      setError('Por favor, insira um número de WhatsApp válido com DDD.');
-      return;
-    }
 
     setIsLoading(true);
 
@@ -118,27 +100,13 @@ const LeadCapture = () => {
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                   />
-                </div>
-                
-                {/*
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">WhatsApp (com DDD)</label>
-                  <input 
-                    type="tel" 
-                    required
-                    maxLength="15"
-                    className={`w-full bg-gray-900 border ${error ? 'border-red-500' : 'border-gray-700'} rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors`}
-                    placeholder="(11) 99999-9999"
-                    value={formData.whatsapp}
-                    onChange={handlePhoneChange}
-                  />
-                  {error && (
-                    <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="h-3 w-3" /> {error}
-                    </p>
-                  )}
-                </div>
-                */}
+                </div>                               
+
+                {error && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" /> {error}
+                  </p>
+                )}
 
                 <button 
                   type="submit" 
