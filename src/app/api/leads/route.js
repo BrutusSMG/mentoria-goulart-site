@@ -24,7 +24,7 @@ export async function POST(request) {
         whatsapp: whatsapp,
         // Se ele se cadastrou de novo, resetamos o status para false
         baixouEbook: false,
-        utmSouce: utms.utm_source || null,
+        utmSource: utms.utm_source || null,
         utmMedium: utms.utm_medium || null,
         utmCampaign: utms.utm_campaign || null,
         utmTerm: utms.utm_term || null,

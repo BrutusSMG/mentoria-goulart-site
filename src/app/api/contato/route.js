@@ -56,9 +56,9 @@ export async function POST(request) {
         // O Brevo exige que os atributos padrão sejam em MAIÚSCULO
         NOME: nome || "",
         ORIGEM_LEAD: origem || "Site Garimpo Urbano",
-        UTM_SOURCE: utms.source || "",
-        UTM_MEDIUM: utms.medium || "",
-        UTM_CAMPAIGN: utms.campaign || "",
+        UTM_SOURCE: utms.utm_source || "",
+        UTM_MEDIUM: utms.utm_medium || "",
+        UTM_CAMPAIGN: utms.utm_campaign || "",
       }
     };
 

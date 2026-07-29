@@ -21,7 +21,6 @@ const HomePageLeadCapture = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...FormData,
           utms: getUtms(),
           origem: 'Isca Digital - Ebook', // Essa origem avisa a API para usar a lista do E-book
           email: email,
