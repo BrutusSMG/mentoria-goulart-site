@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { trackLead } from '@/utils/tracking';
 
 const HomePageLeadCapture = () => {
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle'); // 'idle', 'loading', 'success', 'error'
 
@@ -14,16 +15,18 @@ const HomePageLeadCapture = () => {
     setStatus('loading');
 
     try {
-      // Faz a chamada para a nossa API centralizada
-      const response = await fetch('/api/contato', {
+      // Fluxo unificado: /api/leads salva no banco, envia o e-book
+      // por e-mail (Resend) e registra na lista do Brevo.
+      const response = await fetch('/api/leads', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          utms: getUtms(),
-          origem: 'Isca Digital - Ebook', // Essa origem avisa a API para usar a lista do E-book
+          nome: nome,
           email: email,
+          origem: 'Isca Digital - Ebook', // Essa origem avisa a API para usar a lista do E-book
+          utms: getUtms(),
         }),
       });
 
@@ -87,6 +90,16 @@ const HomePageLeadCapture = () => {
                 Para onde devemos enviar seu E-book?
               </h3>
               <form onSubmit={handleSubscribe} className="flex flex-col gap-4">
+                <input
+                  type="text"
+                  placeholder="Seu primeiro nome"
+                  required
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  disabled={status === 'loading'}
+                  className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white focus:outline-none focus:border-[#d89900] focus:ring-1 focus:ring-[#d89900] transition-colors disabled:opacity-50"
+                />
+
                 <input 
                   type="email" 
                   placeholder="Digite seu melhor e-mail" 
@@ -95,6 +108,16 @@ const HomePageLeadCapture = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={status === 'loading'}
                   className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-700 text-white focus:outline-none focus:border-[#d89900] focus:ring-1 focus:ring-[#d89900] transition-colors disabled:opacity-50"
+                />
+
+                <input
+                  type="text"
+                  name="telefone_secundario"
+                  tabIndex="-1"
+                  autoComplete="off"
+                  className="hidden"
+                  aria-hidden="true"
+                  onChange={(e) => setHoneypot(e.target.value)}
                 />
                 
                 {status === 'error' && (

@@ -25,7 +25,7 @@ model Lead {
   id          String   @id @default(cuid())
   nome        String
   email       String   @unique
-  whatsapp    String
+  whatsapp    String?
   baixouEbook Boolean  @default(false)
   utmSource   String?
   utmMedium   String?

@@ -9,11 +9,21 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { nome, email, whatsapp, utms={} } = body;
+    const { nome, email, whatsapp, utms={}, telefone_secundario, origem } = body;
+    if (telefone_secundario) {
+      console.log('[BOT BLOQUEADO] Tentativa de spam em /api/leads.');
+      return NextResponse.json({ success: true }, { status: 200 });
+    }
 
-    if (!nome || !email || !whatsapp) {
+    if (!nome || !email) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email) || email.endsWith('.con') || email.endsWith('.com.brr')) {
+      return NextResponse.json({ error: 'E-mail inválido' }, { status: 400 });
+    }
+
 
     // 1. Salva ou Atualiza o Lead no Banco de Dados
     // Usamos upsert para não dar erro se o mesmo e-mail tentar baixar de novo
@@ -21,7 +31,8 @@ export async function POST(request) {
       where: { email: email },
       update: { 
         nome: nome, 
-        whatsapp: whatsapp,
+        // Só sobrescreve o WhatsApp se um novo valor foi informado
+        ...(whatsapp ? { whatsapp } : {}),
         // Se ele se cadastrou de novo, resetamos o status para false
         baixouEbook: false,
         utmSource: utms.utm_source || null,
@@ -33,7 +44,7 @@ export async function POST(request) {
       create: { 
         nome, 
         email, 
-        whatsapp,
+        whatsapp: whatsapp || '',   // campo é obrigatório no schema; vazio quando não informado
         baixouEbook: false,
         utmSource: utms.utm_source || null,
         utmMedium: utms.utm_medium || null,
@@ -73,7 +84,41 @@ export async function POST(request) {
       `
     } );
 
+    // 4. Registra o contato na lista do Brevo (e-mail marketing)
+    // Não bloqueante: se o Brevo falhar, o lead JÁ recebeu o e-book pelo Resend,
+    // então apenas registramos o erro em log — o usuário não é penalizado.
+    try {
+      const listIdEbook = parseInt(process.env.BREVO_LIST_ID_EBOOK || '6');
+      const brevoResponse = await fetch('https://api.brevo.com/v3/contacts', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'api-key': process.env.BREVO_API_KEY,
+        },
+        body: JSON.stringify({
+          email: email,
+          listIds: [listIdEbook],
+          updateEnabled: true,
+          attributes: {
+            NOME: nome || '',
+            ORIGEM_LEAD: origem || 'Isca Digital - Ebook',
+            UTM_SOURCE: utms.utm_source || '',
+            UTM_MEDIUM: utms.utm_medium || '',
+            UTM_CAMPAIGN: utms.utm_campaign || '',
+          },
+        } ),
+      });
+      if (!brevoResponse.ok) {
+        const brevoData = await brevoResponse.json();
+        console.error('[BREVO] Falha ao registrar lead (não bloqueante):', brevoData);
+      }
+    } catch (brevoError) {
+      console.error('[BREVO] Erro na chamada (não bloqueante):', brevoError);
+    }
+
     return NextResponse.json({ success: true, leadId: lead.id });
+
   } catch (error) {
     console.error('Erro ao processar lead:', error);
     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 });
