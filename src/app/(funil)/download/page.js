@@ -12,23 +12,12 @@ function DownloadContent() {
   const searchParams = useSearchParams();
   const leadId = searchParams.get('leadId');
 
-  const handleDownloadClick = async () => {
-    // Se tivermos o ID do lead, avisamos o banco que ele baixou!
-    if (leadId) {
-      try {
-        await fetch('/api/leads/download', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ leadId })
-        });
-      } catch (error) {
-        console.error("Erro ao registrar download", error);
-      }
-    }
-    
+   const handleDownloadClick = () => {
     trackCompleteRegistration();
-    window.open('/mapa-do-tesouro.pdf', '_blank');
+    // A rota valida o leadId no banco e entrega o PDF
+    window.open(`/api/ebook?leadId=${leadId || ''}`, '_blank');
   };
+
 
   return (
     <div className="max-w-2xl w-full bg-gray-900 p-8 md:p-12 rounded-2xl border border-green-500/30 text-center shadow-2xl shadow-green-500/10">
