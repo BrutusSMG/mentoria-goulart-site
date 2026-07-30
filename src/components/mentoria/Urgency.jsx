@@ -108,7 +108,7 @@ const Urgency = () => {
     <section className="bg-[#171f35] py-24 px-4 relative overflow-hidden">
       
       {/* Luz de fundo mais suave e elegante */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#d89900]/10 blur-[150px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-75 bg-[#d89900]/10 blur-[150px] rounded-full pointer-events-none"></div>
 
       <div className="container mx-auto max-w-5xl relative z-10">
         
@@ -124,7 +124,7 @@ const Urgency = () => {
               A Mentoria Individual exige tempo e dedicação.
             </h2>
             <p className="text-gray-400 text-lg max-w-3xl mx-auto leading-relaxed">
-              Para garantir que o Prof. Goulart consiga acompanhar de perto o seu projeto e tirar todas as suas dúvidas, esta turma foi limitada a <strong className="text-gray-200">{CAMPAIGN_SETTINGS.totalSpots} vagas</strong>. Sua condição especial expira quando o cronômetro abaixo zerar.
+              Para garantir que o Prof. Goulart consiga acompanhar de perto o seu projeto e tirar todas as suas dúvidas, as vagas com acompanhamento individual são limitadas. A condição especial desta página é reservada para você por tempo limitado - e expira quando o cronômetro abaixo zerar.
             </p>
           </div>
 
@@ -163,32 +163,6 @@ const Urgency = () => {
                   <span className="text-3xl md:text-4xl font-black text-[#d89900] tracking-tighter">{formatNumber(timeLeft.seconds)}</span>
                   <span className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-widest">Seg</span>
                 </div>
-              </div>
-            </div>
-
-            {/* Coluna 2: Barra de Vagas Premium */}
-            <div className="flex flex-col justify-center w-full bg-black/40 p-8 rounded-2xl border border-zinc-800/50">
-              <div className="flex justify-between items-end mb-5">
-                <div className="flex items-center gap-2 text-gray-400 text-sm font-semibold uppercase tracking-wider">
-                  <Users className="w-4 h-4 text-[#d89900]" />
-                  <span>Status da Turma</span>
-                </div>
-                <span className="text-2xl font-black text-white">{spotsData.percentage}%</span>
-              </div>
-              
-              {/* Barra mais fina e elegante */}
-              <div className="w-full bg-gray-800 rounded-full h-4 mb-5 overflow-hidden border border-gray-700">
-                <div 
-                  className="bg-[#d89900] h-full rounded-full relative transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(216,153,0,0.5)]"
-                  style={{ width: `${spotsData.percentage}%` }}
-                ></div>
-              </div>
-              
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500">{spotsData.taken} de {CAMPAIGN_SETTINGS.totalSpots} preenchidas</span>
-                <span className="text-gray-300 flex items-center gap-2">
-                  Restam <strong className="text-[#d89900] text-lg animate-pulse">{spotsData.left} vagas</strong>
-                </span>
               </div>
             </div>
 
