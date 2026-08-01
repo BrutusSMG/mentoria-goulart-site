@@ -104,7 +104,7 @@ const SecondaryPromise = () => {
               <div className="relative z-10 rounded-2xl shadow-2xl overflow-hidden">
                 
                 <Image 
-                  src="/image1.png" 
+                  src="/promess.webp"
                   alt="Dificuldade no aprendizado de refino" 
                   width={600} 
                   height={400} 

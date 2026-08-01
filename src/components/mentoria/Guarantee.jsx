@@ -14,7 +14,7 @@ const Guarantee = () => {
             {/* Coluna da Imagem (Selo) */}
             <div className="shrink-0 text-center">
               <Image
-                src="/selo-garantia.png"
+                src="/selo-garantia.webp"
                 alt="Selo de Garantia Incondicional de 7 dias"
                 width={200}
                 height={200}

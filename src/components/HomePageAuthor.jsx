@@ -14,7 +14,7 @@ const HomePageAuthor = () => {
             
             <div className="relative aspect-square md:aspect-4/5 w-full max-w-md mx-auto rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl">
               <Image 
-                src="/ProfGoulart.png" 
+                src="/ProfGoulart.webp" 
                 alt="Professor José Goulart Filho" 
                 fill
                 className="object-cover object-top"

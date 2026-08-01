@@ -23,7 +23,7 @@ const Author = () => {
           <div className="shrink-0">
             <div className="relative w-48 h-48 md:w-46 md:h-46 rounded-full overflow-hidden shadow-2xl shadow-green-500/20 border-4 border-gray-700">
               <Image
-                src="/autor.png"
+                src="/autor.webp"
                 alt="Foto de José Goulart Filho"
                 width={100} // Ajuste a LARGURA da sua imagem de autor
                 height={100} // Ajuste a ALTURA da sua imagem de autor

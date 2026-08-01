@@ -46,7 +46,7 @@ export const metadata = {
     siteName: "Garimpo Urbano",
     images: [
       {
-        url: "/og-image.jpg", // A imagem que vai aparecer no WhatsApp (vamos falar dela abaixo )
+        url: "/og-image-new.jpg", // A imagem que vai aparecer no WhatsApp (vamos falar dela abaixo )
         width: 1200,
         height: 630,
         alt: "Garimpo Urbano - Transforme Sucata em Riqueza",
@@ -59,7 +59,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Garimpo Urbano | Recuperação de Metais Preciosos",
     description: "Aprenda o passo a passo para extrair e refinar ouro, prata, platina e paládio de sucatas e resíduos.",
-    images: ["/og-image.jpg"],
+    images: ["/og-image-new.jpg"],
   },
   
   // Instruções para o Google (Permite indexar tudo)

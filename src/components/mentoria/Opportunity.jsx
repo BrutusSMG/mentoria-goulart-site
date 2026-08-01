@@ -21,7 +21,7 @@ const Opportunity = () => {
           {/* Coluna da Imagem */}
           <div className="w-full h-50 md:h-full relative rounded-lg overflow-hidden shadow-lg">
             <Image
-              src="/garimpo-urbano-sucata.png" // Use o nome da sua imagem
+              src="/opportunity.webp"
               alt="Sucata eletrônica rica em metais preciosos"
               fill
               className="object-cover"
