@@ -1,4 +1,4 @@
-// src/components/Shared/WhatsAppButton.jsx
+// src/components/shared/WhatsAppButton.jsx
 "use client";
 
 import { trackContact } from '@/utils/tracking';

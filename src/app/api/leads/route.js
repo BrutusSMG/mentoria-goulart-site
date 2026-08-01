@@ -10,11 +10,18 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const { nome, email, whatsapp, utms={}, telefone_secundario, origem } = body;
+
+    // --- PROTEÇÃO CONTRA BOTS (HONEYPOT) ---
+    // Mesmo padrão da /api/contato: se o campo invisível veio preenchido, é robô.
+    // Respondemos sucesso para enganá-lo, mas não fazemos nada.
     if (telefone_secundario) {
       console.log('[BOT BLOQUEADO] Tentativa de spam em /api/leads.');
       return NextResponse.json({ success: true }, { status: 200 });
     }
 
+    // --- VALIDAÇÃO ---
+    // Nome e e-mail são obrigatórios; WhatsApp agora é opcional
+    // (o formulário da home só pede nome e e-mail).
     if (!nome || !email) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
     }
@@ -24,9 +31,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'E-mail inválido' }, { status: 400 });
     }
 
-
     // 1. Salva ou Atualiza o Lead no Banco de Dados
-    // Usamos upsert para não dar erro se o mesmo e-mail tentar baixar de novo
     const lead = await prisma.lead.upsert({
       where: { email: email },
       update: { 
@@ -56,7 +61,7 @@ export async function POST(request) {
 
     // 2. Cria o link exclusivo com o ID do lead
     // Em produção, isso será o seu domínio oficial
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mentoriagarimpourbano.com.br';
     const linkExclusivo = `${baseUrl}/download?leadId=${lead.id}`;
 
     // 3. Dispara o e-mail com o link exclusivo

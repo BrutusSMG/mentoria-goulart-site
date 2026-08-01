@@ -1,4 +1,4 @@
-// src/components/Shared/Footer.jsx
+// src/components/shared/Footer.jsx
 "use client";
 
 import Image from 'next/image';

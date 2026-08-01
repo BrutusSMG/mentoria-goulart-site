@@ -1,4 +1,4 @@
-// src/components/Shared/FacebookPixel.jsx
+// src/components/shared/FacebookPixel.jsx
 "use client";
 
 import { captureUtms } from '@/utils/utm';

@@ -1,4 +1,4 @@
-// src/components/Shared/DownsellPopup.jsx
+// src/components/shared/DownsellPopup.jsx
 "use client";
 
 import { trackInitiateCheckout } from '@/utils/tracking';

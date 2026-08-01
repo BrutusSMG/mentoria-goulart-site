@@ -1,4 +1,4 @@
-// src/components/Shared/ExitIntentHandler.jsx
+// src/components/shared/ExitIntentHandler.jsx
 "use client";
 
 import { useState, useEffect } from 'react';

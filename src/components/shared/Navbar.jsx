@@ -1,4 +1,4 @@
-// src/components/Shared/Navbar.jsx
+// src/components/shared/Navbar.jsx
 "use client";
 
 import { useState } from 'react';

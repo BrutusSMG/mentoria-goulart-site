@@ -37,6 +37,7 @@ const LeadCapture = () => {
       // Se deu tudo certo, redireciona para a página de aviso
       trackLead('Isca Digital - Ebook (form completo)');
       router.push('/quase-la');
+      
     } catch (err) {
       setError('Ocorreu um erro ao processar seu pedido. Tente novamente.');
       setIsLoading(false);

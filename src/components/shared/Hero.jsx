@@ -1,4 +1,4 @@
-// src/components/Hero.jsx
+// src/components/shared/Hero.jsx
 
 "use client";
 import { useState } from 'react';

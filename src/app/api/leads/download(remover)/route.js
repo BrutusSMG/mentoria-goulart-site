@@ -11,12 +11,6 @@ export async function POST(request) {
       return NextResponse.json({ error: 'ID não fornecido' }, { status: 400 });
     }
 
-    // Atualiza o lead no banco informando que ele baixou o e-book
-    await prisma.lead.update({
-      where: { id: leadId },
-      data: { baixouEbook: true }
-    });
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Erro ao registrar download:', error);

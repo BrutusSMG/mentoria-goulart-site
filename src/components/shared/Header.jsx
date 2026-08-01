@@ -1,3 +1,4 @@
+// src/components/shared/Header.jsx
 'use client';
 
 import Image from 'next/image';
