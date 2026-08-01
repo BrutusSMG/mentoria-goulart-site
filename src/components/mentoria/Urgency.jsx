@@ -128,44 +128,48 @@ const Urgency = () => {
             </p>
           </div>
 
-          {/* Grid de Urgência (Lado a Lado) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-12">
-            
-            {/* Coluna 1: Cronômetro Minimalista */}
-            <div className="flex flex-col items-center lg:items-start bg-black/40 p-6 md:p-8 rounded-2xl border border-zinc-800/50 w-full">
+          {/* Container centralizado (substituímos o Grid por um Flex centralizado) */}
+          <div className="flex justify-center mb-12 w-full">
+
+            {/* Coluna Única: Cronômetro Minimalista (Removi o lg:items-start e adicionei max-w-2xl para não ficar largo demais) */}
+            <div className="flex flex-col items-center bg-black/40 p-6 md:p-8 rounded-2xl border border-zinc-800/50 w-full max-w-2xl">
+              
               <div className="flex items-center gap-2 text-gray-400 mb-6 text-sm font-semibold uppercase tracking-wider">
                 <CalendarClock className="w-4 h-4 text-[#d89900]" />
                 <span>Tempo Restante</span>
               </div>
               
-              {/* Reduzimos o gap e garantimos que não vaze da tela */}
-              <div className="flex gap-2 md:gap-4 w-full justify-center lg:justify-start">
+              {/* Unidades do timer (Removi o lg:justify-start para manter sempre no centro) */}
+              <div className="flex gap-2 md:gap-4 w-full justify-center">
+                
                 <div className="flex flex-col items-center">
-                  {/* Reduzimos de text-5xl para text-4xl no desktop */}
                   <span className="text-3xl md:text-4xl font-black text-white tracking-tighter">{formatNumber(timeLeft.days)}</span>
                   <span className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-widest">Dias</span>
                 </div>
+                
                 <span className="text-3xl md:text-4xl font-black text-zinc-700/50">:</span>
                 
                 <div className="flex flex-col items-center">
                   <span className="text-3xl md:text-4xl font-black text-white tracking-tighter">{formatNumber(timeLeft.hours)}</span>
                   <span className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-widest">Horas</span>
                 </div>
+                
                 <span className="text-3xl md:text-4xl font-black text-zinc-700/50">:</span>
                 
                 <div className="flex flex-col items-center">
                   <span className="text-3xl md:text-4xl font-black text-white tracking-tighter">{formatNumber(timeLeft.minutes)}</span>
                   <span className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-widest">Min</span>
                 </div>
+                
                 <span className="text-3xl md:text-4xl font-black text-zinc-700/50">:</span>
                 
                 <div className="flex flex-col items-center">
                   <span className="text-3xl md:text-4xl font-black text-[#d89900] tracking-tighter">{formatNumber(timeLeft.seconds)}</span>
                   <span className="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-widest">Seg</span>
                 </div>
+                
               </div>
             </div>
-
           </div>
 
           {/* Botão de CTA com Micro-copy */}
