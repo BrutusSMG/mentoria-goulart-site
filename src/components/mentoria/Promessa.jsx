@@ -110,6 +110,7 @@ const SecondaryPromise = () => {
                   height={400} 
                   className="w-full h-auto object-cover block"
                   style={{ width: '100%', height: 'auto' }}
+                  sizes="(max-width: 768px) 100vw, 600px"
                 />
 
                 {/* A Vinheta Escura (Usando style para controle total) */}
