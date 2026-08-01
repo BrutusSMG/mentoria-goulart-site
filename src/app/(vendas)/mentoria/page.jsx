@@ -2,17 +2,17 @@
 
 export const dynamic = 'force-dynamic';
 
-import TrackViewContent from '@/components/mentoria/TrackViewContent.jsx';
-import Hero from '@/components/mentoria/Hero.jsx';
-import Promessa from '@/components/mentoria/Promessa.jsx';
-import Testimonials from '@/components/mentoria/Testimonials.jsx';
-import Audience from '@/components/mentoria/Audience.jsx';
-import Learning from '@/components/mentoria/Learning.jsx';
-import Bonus from '@/components/mentoria/Bonus.jsx';
-import Urgency from '@/components/mentoria/Urgency.jsx';
-import Guarantee from '@/components/mentoria/Guarantee.jsx';
-import Offer from '@/components/mentoria/Offer.jsx';
-import Faq from '@/components/mentoria/Faq.jsx';
+import TrackViewContent from '@/components/mentoria/TrackViewContent';
+import Hero from '@/components/mentoria/Hero';
+import Promessa from '@/components/mentoria/Promessa';
+import Testimonials from '@/components/mentoria/Testimonials';
+import Audience from '@/components/mentoria/Audience';
+import Learning from '@/components/mentoria/Learning';
+import Bonus from '@/components/mentoria/Bonus';
+import Urgency from '@/components/mentoria/Urgency';
+import Guarantee from '@/components/mentoria/Guarantee';
+import Offer from '@/components/mentoria/Offer';
+import Faq from '@/components/mentoria/Faq';
 import Author from '@/components/mentoria/Author';
 import Opportunity from '@/components/mentoria/Opportunity';
 import VideoTestimonials from '@/components/mentoria/VideoTestimonials';

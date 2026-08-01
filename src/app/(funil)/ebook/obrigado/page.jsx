@@ -23,7 +23,7 @@ export default function ObrigadoPage() {
 
         {/* Botão de Download Direto */}
         <a 
-          href="/caminho-do-seu-arquivo/ebook-garimpo-urbano.pdf" 
+          href="/api/ebook?leadId={{leadId}}" 
           download
           target="_blank"
           rel="noopener noreferrer"
