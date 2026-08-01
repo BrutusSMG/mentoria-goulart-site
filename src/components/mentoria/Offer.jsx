@@ -61,7 +61,7 @@ const Offer = () => {
           {/* Botão de CTA */}
           <div className="mt-10">
             <Link 
-              href="https://pay.hotmart.com/Y38962738S?off=1a7iy0g9&ref=J105438092D"
+              href="https://go.hotmart.com/J105438092D?dp=1"
               onClick={() => trackInitiateCheckout('Curso + Mentoria', 2497)}
               className="bg-[#d89900] text-white font-bold text-2xl md:text-3xl py-5 px-8 rounded-lg shadow-lg shadow-[#d89900]/50 hover:bg-[#c68a00] hover:scale-105 transition-all duration-300 ease-in-out inline-block"
             >
