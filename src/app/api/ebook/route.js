@@ -1,5 +1,6 @@
 // src/app/api/ebook/route.js
 // Entrega o PDF do e-book somente para leads cadastrados (gate real da isca).
+
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';

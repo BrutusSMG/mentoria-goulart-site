@@ -69,7 +69,7 @@ const SecondaryPromise = () => {
     <section className="bg-zinc-950 text-white py-20 px-4 relative overflow-hidden">
       
       {/* Efeito de luz de fundo sutil */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#d89900]/5 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-200 h-100 bg-[#d89900]/5 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="container mx-auto max-w-6xl relative z-10">
         

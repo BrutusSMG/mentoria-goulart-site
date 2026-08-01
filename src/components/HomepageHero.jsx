@@ -4,6 +4,51 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
+// ✅ Componente extraído para FORA do HomepageHero (resolve o erro "Cannot create components during render")
+const CotacaoItems = ({ cotacoes, formatarUS, gerarTooltip }) => (
+  <div className="flex gap-12 px-6 items-center w-max">
+    <span className="text-gray-300 font-medium text-sm">
+      Dólar: <strong className="text-green-400">R$ {formatarUS(cotacoes?.dolar)}</strong>
+    </span>
+    
+    <span 
+      className="text-gray-300 font-medium text-sm cursor-help" 
+      title={gerarTooltip(cotacoes?.ouro)}
+    >
+      Ouro: <strong className="text-[#d89900]">US$ {formatarUS(cotacoes?.ouro)} <span className="text-xs font-normal text-gray-500">/oz</span></strong>
+    </span>
+    
+    <span 
+      className="text-gray-300 font-medium text-sm cursor-help" 
+      title={gerarTooltip(cotacoes?.prata)}
+    >
+      Prata: <strong className="text-gray-100">US$ {formatarUS(cotacoes?.prata)} <span className="text-xs font-normal text-gray-500">/oz</span></strong>
+    </span>
+    
+    <span 
+      className="text-gray-300 font-medium text-sm cursor-help" 
+      title={gerarTooltip(cotacoes?.platina)}
+    >
+      Platina: <strong className="text-blue-200">US$ {formatarUS(cotacoes?.platina)} <span className="text-xs font-normal text-gray-500">/oz</span></strong>
+    </span>
+    
+    <span 
+      className="text-gray-300 font-medium text-sm cursor-help" 
+      title={gerarTooltip(cotacoes?.paladio)}
+    >
+      Paládio: <strong className="text-purple-200">US$ {formatarUS(cotacoes?.paladio)} <span className="text-xs font-normal text-gray-500">/oz</span></strong>
+    </span>
+
+    {/* Ródio */}
+    <span 
+      className="text-gray-300 font-medium text-sm cursor-help" 
+      title={gerarTooltip(cotacoes?.rodio)}
+    >
+      Ródio: <strong className="text-rose-200">US$ {formatarUS(cotacoes?.rodio)} <span className="text-xs font-normal text-gray-500">/oz</span></strong>
+    </span>
+  </div>
+);
+
 const HomepageHero = () => {
   const [cotacoes, setCotacoes] = useState(null);
 
@@ -45,51 +90,6 @@ const HomepageHero = () => {
   // Formatador para garantir 2 casas decimais na tela
   const formatarUS = (valor) => valor ? parseFloat(valor).toFixed(2) : '---';
 
-  // Criamos um componente interno para os itens da cotação para facilitar a duplicação
-  const CotacaoItems = () => (
-    <div className="flex gap-12 px-6 items-center w-max">
-      <span className="text-gray-300 font-medium text-sm">
-        Dólar: <strong className="text-green-400">R$ {formatarUS(cotacoes?.dolar)}</strong>
-      </span>
-      
-      <span 
-        className="text-gray-300 font-medium text-sm cursor-help" 
-        title={gerarTooltip(cotacoes?.ouro)}
-      >
-        Ouro: <strong className="text-[#d89900]">US$ {formatarUS(cotacoes?.ouro)} <span className="text-xs font-normal text-gray-500">/oz</span></strong>
-      </span>
-      
-      <span 
-        className="text-gray-300 font-medium text-sm cursor-help" 
-        title={gerarTooltip(cotacoes?.prata)}
-      >
-        Prata: <strong className="text-gray-100">US$ {formatarUS(cotacoes?.prata)} <span className="text-xs font-normal text-gray-500">/oz</span></strong>
-      </span>
-      
-      <span 
-        className="text-gray-300 font-medium text-sm cursor-help" 
-        title={gerarTooltip(cotacoes?.platina)}
-      >
-        Platina: <strong className="text-blue-200">US$ {formatarUS(cotacoes?.platina)} <span className="text-xs font-normal text-gray-500">/oz</span></strong>
-      </span>
-      
-      <span 
-        className="text-gray-300 font-medium text-sm cursor-help" 
-        title={gerarTooltip(cotacoes?.paladio)}
-      >
-        Paládio: <strong className="text-purple-200">US$ {formatarUS(cotacoes?.paladio)} <span className="text-xs font-normal text-gray-500">/oz</span></strong>
-      </span>
-
-      {/* NOVO: Ródio adicionado aqui */}
-      <span 
-        className="text-gray-300 font-medium text-sm cursor-help" 
-        title={gerarTooltip(cotacoes?.rodio)}
-      >
-        Ródio: <strong className="text-rose-200">US$ {formatarUS(cotacoes?.rodio)} <span className="text-xs font-normal text-gray-500">/oz</span></strong>
-      </span>
-    </div>
-  );
-
   return (
     <section className="relative bg-black text-white text-center pt-0 pb-24 md:pb-40 overflow-hidden flex flex-col">
       
@@ -114,14 +114,14 @@ const HomepageHero = () => {
           {/* O segredo do loop infinito: 2 blocos idênticos que deslizam 50% da largura total */}
           <div className="animate-marquee">
             <div className="flex">
-              <CotacaoItems />
-              <CotacaoItems />
-              <CotacaoItems />
+              <CotacaoItems cotacoes={cotacoes} formatarUS={formatarUS} gerarTooltip={gerarTooltip} />
+              <CotacaoItems cotacoes={cotacoes} formatarUS={formatarUS} gerarTooltip={gerarTooltip} />
+              <CotacaoItems cotacoes={cotacoes} formatarUS={formatarUS} gerarTooltip={gerarTooltip} />
             </div>
             <div className="flex">
-              <CotacaoItems />
-              <CotacaoItems />
-              <CotacaoItems />
+              <CotacaoItems cotacoes={cotacoes} formatarUS={formatarUS} gerarTooltip={gerarTooltip} />
+              <CotacaoItems cotacoes={cotacoes} formatarUS={formatarUS} gerarTooltip={gerarTooltip} />
+              <CotacaoItems cotacoes={cotacoes} formatarUS={formatarUS} gerarTooltip={gerarTooltip} />
             </div>
           </div>
         </div>

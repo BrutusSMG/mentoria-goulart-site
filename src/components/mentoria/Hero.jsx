@@ -151,7 +151,7 @@ const Hero = () => {
       {/* ========================================================================= */}
       {isModalOpen && (
         <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black p-4 md:p-8"
+          className="fixed inset-0 z-9999 flex items-center justify-center bg-black p-4 md:p-8"
           onClick={() => setIsModalOpen(false)} 
         >
           <div 

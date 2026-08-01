@@ -1,6 +1,4 @@
-// src/app/page.js
-
-export const dynamic = 'force-dynamic';
+// src/app/(vendas)/mentoria/page.jsx
 
 import TrackViewContent from '@/components/mentoria/TrackViewContent';
 import Hero from '@/components/mentoria/Hero';

@@ -1,4 +1,4 @@
-
+// src/app/(funil)/ebook/page.jsx
 
 import EbookLeadCapture from '@/components/EbookLeadCapture'; // Seu componente atualizado com o Nome
 

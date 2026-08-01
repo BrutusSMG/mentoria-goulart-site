@@ -1,4 +1,5 @@
 // src/components/Products.jsx
+
 import Link from 'next/link';
 import { BookOpen, GraduationCap, Star } from 'lucide-react';
 

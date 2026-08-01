@@ -1,4 +1,4 @@
-import EbookLeadCapture from '@/components/EbookLeadCapture'; // Seu componente atualizado com o Nome
+//import EbookLeadCapture from '@/components/EbookLeadCapture'; // Seu componente atualizado com o Nome
 
 export default function EbookLandingPage() {
   return (
@@ -40,7 +40,8 @@ export default function EbookLandingPage() {
         {/* Lado Direito: O seu componente de formulário */}
         <div className="md:w-1/2 w-full">
           {/* Aqui entra o seu componente que faz o POST para a API e o router.push('/obrigado') */}
-          <EbookLeadCapture /> 
+          {/* <EbookLeadCapture />  */}
+          <p className="text-gray-400">Formulário em manutenção.</p>
         </div>
 
       </div>

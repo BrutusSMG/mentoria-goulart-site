@@ -1,6 +1,8 @@
 // src/components/shared/Navbar.jsx
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X, ChevronDown } from 'lucide-react';

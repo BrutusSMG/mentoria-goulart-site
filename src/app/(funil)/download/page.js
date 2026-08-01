@@ -1,5 +1,5 @@
 // src/app/download/page.js
-"use client"; // Agora é um client component para podermos usar funções de clique
+"use client";
 
 import { trackCompleteRegistration } from '@/utils/tracking';
 import { Suspense } from 'react';

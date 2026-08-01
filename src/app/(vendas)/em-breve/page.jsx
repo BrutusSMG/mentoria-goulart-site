@@ -1,4 +1,4 @@
-// src/app/em-breve/page.jsx
+// src/app/(vendas)/em-breve/page.jsx
 "use client";
 
 import Link from 'next/link';
@@ -44,7 +44,7 @@ export default function EmBrevePage() {
     <main className="min-h-[80vh] flex items-center justify-center bg-black px-4 py-20 relative overflow-hidden">
       {/* Efeito de luz dourada no fundo */}
       <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#d89900] rounded-full blur-[120px] opacity-10 pointer-events-none"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 bg-[#d89900] rounded-full blur-[120px] opacity-10 pointer-events-none"
         aria-hidden="true"
       />
 
@@ -79,7 +79,7 @@ export default function EmBrevePage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-grow">
+              <div className="relative grow">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-500" />
                 </div>

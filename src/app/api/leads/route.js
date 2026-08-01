@@ -1,5 +1,7 @@
 // src/app/api/leads/route.js
+
 export const dynamic = 'force-dynamic';
+
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'; // Importando a conexão com o banco

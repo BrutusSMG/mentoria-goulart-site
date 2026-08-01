@@ -1,12 +1,11 @@
 // src/app/quase-la/page.js
-export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { Mail, ArrowRight, AlertTriangle } from 'lucide-react';
 
 export const metadata = {
   title: 'Falta só um passo! | Garimpo Urbano',
-  robots: 'noindex, nofollow',
+  robots: { index: false },
 };
 
 export default function QuaseLaPage() {
