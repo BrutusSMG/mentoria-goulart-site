@@ -38,7 +38,7 @@ const WhatsAppButton = () => {
         <span className="text-sm font-bold text-[#25D366]">Fale com o Prof. Goulart</span>
         
         {/* Triângulo (setinha) do balão apontando para o botão do WhatsApp */}
-        <div className="absolute top-1/2 -right-2 -translate-y-1/2 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-[8px] border-l-white drop-shadow-sm"></div>
+        <div className="absolute top-1/2 -right-2 -translate-y-1/2 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-l-8 border-l-white drop-shadow-sm"></div>
       </div>
     </a>
   );

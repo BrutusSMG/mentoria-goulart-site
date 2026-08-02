@@ -5,11 +5,15 @@ import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
 import WhatsAppButton from '@/components/shared/WhatsAppButton';
 
+const BARE_ROUTES = ['/ebook', '/conteudo', '/download', '/obrigado'];
+
 export default function LayoutShell({ children, isBarePage: isBareFromServer }) {
   const pathname = usePathname();
 
-  // Combina: prop do server (cookie) OU pathname do client
-  const isBarePage = isBareFromServer || pathname.startsWith('/ebook') || pathname.startsWith('/conteudo');
+  const isBarePage = 
+    isBareFromServer || 
+    getCookie('x-bare-page') === '1' ||
+    BARE_ROUTES.some(route => pathname.startsWith(route));
 
   if (isBarePage) {
     return <>{children}</>;
