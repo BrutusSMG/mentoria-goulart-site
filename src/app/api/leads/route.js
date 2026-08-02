@@ -110,7 +110,7 @@ export async function POST(request) {
                       </p>
 
                       <p style="color:#d4d4d4; font-size:16px; line-height:1.6; margin:0 0 30px 0;">
-                        Neste material, você vai descobrir como equipamentos eletrônicos descartados todos os dias escondem <strong style="color:#d89900;">ouro, prata, paládio e platina</strong> — e como transformar isso em oportunidade real.
+                        Neste material, você vai descobrir como equipamentos eletrônicos descartados todos os dias escondem <strong style="color:#d89900;">ouro, prata, paládio e platina</strong> - e como transformar isso em oportunidade real.
                       </p>
 
                       <!-- Botão CTA -->
