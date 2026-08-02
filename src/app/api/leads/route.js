@@ -68,27 +68,103 @@ export async function POST(request) {
 
     // 3. Dispara o e-mail com o link exclusivo
     const data = await resend.emails.send({
-      from: 'Prof. José Goulart <contato@mentoriagarimpourbano.com.br>',
+      from: 'Prof. Goulart <contato@mentoriagarimpourbano.com.br>',
       to: email,
-      subject: 'Seu E-book Chegou: O Mapa do Tesouro 🗺️',
+      subject: 'Seu E-book Chegou: O Maior Garimpo do Século XXI 🗺️',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-          <h2 style="color: #16a34a;">Olá, ${nome}!</h2>
-          <p>Que bom ter você com a gente. Como prometido, aqui está o seu acesso ao e-book <strong>"O Mapa do Tesouro"</strong>.</p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${linkExclusivo}" style="background-color: #eab308; color: #000; padding: 15px 25px; text-decoration: none; font-weight: bold; border-radius: 5px; display: inline-block;">
-              BAIXAR MEU E-BOOK AGORA
-            </a>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin:0; padding:0; background-color:#0a0a0a; font-family:Arial, Helvetica, sans-serif;">
+          <!-- Preheader oculto -->
+          <div style="display:none; max-height:0; overflow:hidden; color:#0a0a0a;">
+            ${nome}, seu e-book está pronto para download. Clique para acessar agora.
           </div>
-          
-          <p>Neste material, você vai descobrir como transformar lixo eletrônico em uma fonte lucrativa de Ouro, Prata e Platina.</p>
-          <p>Boa leitura e bons estudos!</p>
-            
 
-          <p>Um abraço, <strong>Prof. José Goulart</strong></p>
-        </div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a; padding:40px 20px;">
+            <tr>
+              <td align="center">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px; width:100%;">
+                  
+                  <!-- Logo -->
+                  <tr>
+                    <td align="center" style="padding-bottom:30px;">
+                      <img src="https://mentoriagarimpourbano.com.br/logo_fundoTransparentered.png" alt="Garimpo Urbano" width="150" style="display:block;">
+                    </td>
+                  </tr>
+
+                  <!-- Card principal -->
+                  <tr>
+                    <td style="background-color:#171717; border-radius:16px; border:1px solid #2a2a2a; padding:40px 35px;">
+                      
+                      <!-- Saudação -->
+                      <h2 style="color:#ffffff; font-size:24px; margin:0 0 20px 0;">
+                        Olá, ${nome}! 👋
+                      </h2>
+                      
+                      <p style="color:#d4d4d4; font-size:16px; line-height:1.6; margin:0 0 15px 0;">
+                        Que bom ter você com a gente. Como prometido, aqui está o seu acesso exclusivo ao e-book <strong style="color:#ffffff;">"O Maior Garimpo do Século XXI"</strong>.
+                      </p>
+
+                      <p style="color:#d4d4d4; font-size:16px; line-height:1.6; margin:0 0 30px 0;">
+                        Neste material, você vai descobrir como equipamentos eletrônicos descartados todos os dias escondem <strong style="color:#d89900;">ouro, prata, paládio e platina</strong> — e como transformar isso em oportunidade real.
+                      </p>
+
+                      <!-- Botão CTA -->
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td align="center" style="padding:10px 0 30px 0;">
+                            <a href="${linkExclusivo}" target="_blank" style="background-color:#d89900; color:#000000; padding:16px 32px; text-decoration:none; font-weight:bold; font-size:16px; border-radius:8px; display:inline-block; box-shadow:0 0 20px rgba(216,153,0,0.3 );">
+                              📥 BAIXAR MEU E-BOOK AGORA
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Separador -->
+                      <hr style="border:none; border-top:1px solid #2a2a2a; margin:20px 0;">
+
+                      <!-- Próximos passos -->
+                      <p style="color:#a3a3a3; font-size:14px; line-height:1.6; margin:0 0 10px 0;">
+                        <strong style="color:#d89900;">⚡ Próximos passos:</strong> Nos próximos dias, vou te enviar um <strong style="color:#ffffff;">Capítulo Extra exclusivo</strong> direto no seu e-mail com informações que não estão no e-book. Fique de olho!
+                      </p>
+
+                      <p style="color:#d4d4d4; font-size:16px; line-height:1.6; margin:20px 0 0 0;">
+                        Boa leitura e bons estudos!
+                      </p>
+
+                      <p style="color:#d4d4d4; font-size:16px; margin:15px 0 0 0;">
+                        Um abraço,  
+
+                        <strong style="color:#ffffff;">Prof. José Goulart</strong>
+                      </p>
+
+                    </td>
+                  </tr>
+
+                  <!-- Rodapé -->
+                  <tr>
+                    <td align="center" style="padding-top:30px;">
+                      <p style="color:#525252; font-size:12px; margin:0;">
+                        © ${new Date().getFullYear()} Mentoria Garimpo Urbano. Todos os direitos reservados.
+                      </p>
+                      <p style="color:#525252; font-size:12px; margin:5px 0 0 0;">
+                        Você recebeu este e-mail porque se cadastrou para receber o e-book gratuito.
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `
+
     } );
 
     // 4. Registra o contato na lista do Brevo (e-mail marketing)
