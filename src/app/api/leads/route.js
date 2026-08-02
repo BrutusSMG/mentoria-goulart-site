@@ -139,7 +139,7 @@ export async function POST(request) {
                       <p style="color:#d4d4d4; font-size:16px; margin:15px 0 0 0;">
                         Um abraço,  
 
-                        <strong style="color:#ffffff;">Prof. José Goulart</strong>
+                        <strong style="color:#ffffff;">Prof. Goulart</strong>
                       </p>
 
                     </td>
