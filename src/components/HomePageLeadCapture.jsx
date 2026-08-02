@@ -32,7 +32,7 @@ const HomePageLeadCapture = () => {
 
       const data = await response.json();
 
-      if (response.ok && data.sucesso) {
+      if (response.ok && (data.sucesso || data.success)) {
         trackLead('Isca Digital - Ebook (newsletter)');
         setStatus('success');
         setEmail('');

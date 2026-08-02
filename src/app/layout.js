@@ -9,6 +9,7 @@ import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 import WhatsAppButton from "@/components/shared/WhatsAppButton";
 import FacebookPixel from "@/components/shared/FacebookPixel";
+import { headers } from "next/headers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -76,6 +77,9 @@ export const metadata = {
   },
 };
 
+const headersList = await headers();
+const isEbookPage = headersList.get('x-is-ebook') === 'true';
+
 export default function RootLayout({ children }) {
   return (
     <html
@@ -90,14 +94,14 @@ export default function RootLayout({ children }) {
         <Suspense fallback={null}>
           <FacebookPixel />
         </Suspense>
-        <Header />
-        <Navbar />
+        {!isEbookPage && <Header />}
+        {!isEbookPage && <Navbar />}
         <main className="grow">
           {children}
         </main>
-        <Footer />
-        <ExitIntentHandler />
-        <WhatsAppButton />
+        {!isEbookPage && <Footer />}
+        {!isEbookPage && <ExitIntentHandler />}
+        {!isEbookPage && <WhatsAppButton />}
       </body>
     </html>
   );
