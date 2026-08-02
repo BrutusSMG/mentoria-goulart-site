@@ -70,7 +70,7 @@ export async function POST(request) {
     const data = await resend.emails.send({
       from: 'Prof. Goulart <contato@mentoriagarimpourbano.com.br>',
       to: email,
-      subject: 'Seu E-book Chegou: O Maior Garimpo do Século XXI 🗺️',
+      subject: 'Seu E-book Chegou: Como transformar lixo eletrônico em OURO 🗺️',
       html: `
         <!DOCTYPE html>
         <html>
@@ -106,7 +106,7 @@ export async function POST(request) {
                       </h2>
                       
                       <p style="color:#d4d4d4; font-size:16px; line-height:1.6; margin:0 0 15px 0;">
-                        Que bom ter você com a gente. Como prometido, aqui está o seu acesso exclusivo ao e-book <strong style="color:#ffffff;">"O Maior Garimpo do Século XXI"</strong>.
+                        Que bom ter você com a gente. Como prometido, aqui está o seu acesso exclusivo ao e-book <strong style="color:#ffffff;">"Como transformar lixo eletrônico em OURO"</strong>.
                       </p>
 
                       <p style="color:#d4d4d4; font-size:16px; line-height:1.6; margin:0 0 30px 0;">
@@ -137,7 +137,7 @@ export async function POST(request) {
                       </p>
 
                       <p style="color:#d4d4d4; font-size:16px; margin:15px 0 0 0;">
-                        Um abraço,  
+                        Um abraço, <br />
 
                         <strong style="color:#ffffff;">Prof. Goulart</strong>
                       </p>

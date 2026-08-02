@@ -12,8 +12,11 @@ export default function EbookLandingPage() {
             E-book 100% Gratuito
           </span>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
-            O Maior Garimpo do Século XXI Não Está nas Montanhas...
+            Como transformar lixo eletrônico em <span className="text-[#d89900]">OURO</span>
           </h1>
+          <p className="text-gray-400 text-lg mb-8">
+            Descubra como extrair Ouro, Prata e outros Metais Preciosos de resíduos eletrônicos e industriais. O passo a passo inicial do Professor Goulart para você começar do zero.
+          </p>
           <p className="text-gray-400 text-lg mb-8">
             Descubra como extrair Ouro, Prata e outros Metais Preciosos de resíduos eletrônicos e industriais. O passo a passo inicial do Professor Goulart para você começar do zero.
           </p>

@@ -52,15 +52,15 @@ const LeadCapture = () => {
           {/* Coluna da Esquerda: A Capa e a Promessa */}
           <div className="w-full md:w-1/2 text-center md:text-left">
             <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
-              Descubra o <span className="text-yellow-500">Mapa do Tesouro</span> no Garimpo Urbano
+              Descubra Como transformar lixo eletrônico em <span className="text-yellow-500">OURO</span>
             </h1>
             <p className="text-lg text-gray-300 mb-8">
               Baixe o e-book gratuito e aprenda como transformar lixo eletrônico em uma fonte lucrativa de Ouro, Prata e Platina, começando com os recursos que você já tem em mãos.
             </p>
             <div className="relative w-64 h-80 md:w-80 md:h-96 mx-auto md:mx-0 rounded-lg overflow-hidden shadow-2xl shadow-black">
               <Image 
-                src="/capa-ebook.png" 
-                alt="Capa do E-book O Mapa do Tesouro"
+                src="/capa.jpg" 
+                alt="Capa do E-book Como transformar lixo eletrônico em OURO"
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"

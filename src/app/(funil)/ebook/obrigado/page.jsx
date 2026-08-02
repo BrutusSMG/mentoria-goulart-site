@@ -20,7 +20,7 @@ export default function ObrigadoPage() {
         </h1>
 
         <p className="text-lg text-gray-300 mb-6">
-          O link exclusivo para baixar o seu e-book <strong>&quot;O Maior Garimpo do Século XXI&quot;</strong> acabou de ser enviado para o seu e-mail.
+          O link exclusivo para baixar o seu e-book <strong>&quot;Como transformar lixo eletrônico em OURO&quot;</strong> acabou de ser enviado para o seu e-mail.
         </p>
 
         {/* Instruções */}

@@ -19,7 +19,7 @@ export default function QuaseLaPage() {
           Falta só um passo!
         </h1>
         <p className="text-lg text-gray-300 mb-6">
-          O link para baixar o seu e-book <strong>&quot;O Mapa do Tesouro&quot;</strong> acabou de ser enviado para o seu e-mail.
+          O link para baixar o seu e-book <strong>&quot;Como transformar lixo eletrônico em ouro&quot;</strong> acabou de ser enviado para o seu e-mail.
         </p>
 
         <div className="bg-black/50 border border-gray-800 rounded-lg p-6 mb-8 text-left">

@@ -56,8 +56,9 @@ export default function EbookLandingPage() {
         <Image 
           src="/logo_fundoTransparentered.png" 
           alt="Garimpo Urbano" 
-          width={150} 
-          height={50} 
+          width="150" 
+          height="50"
+          className="w-auto h-auto"
           priority
         />
       </header>
@@ -71,7 +72,7 @@ export default function EbookLandingPage() {
             E-book Gratuito
           </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-            O Maior Garimpo do Século XXI <span className="text-[#d89900]">Não Está nas Montanhas</span>
+            Como transformar lixo eletrônico em <span className="text-[#d89900]">OURO</span>
           </h1>
           <p className="text-xl text-gray-300 mb-8">
             Descubra como equipamentos eletrônicos descartados todos os dias escondem 

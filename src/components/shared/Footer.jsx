@@ -176,7 +176,7 @@ const Footer = () => {
                       className="w-full px-3 py-2 rounded bg-[#1a1a1a] border border-gray-700 text-sm text-white focus:outline-none focus:border-[#d89900] resize-none disabled:opacity-50"
                     ></textarea>                    
                     
-                    <div className="absolute -left-[9999px] opacity-0" aria-hidden="true">
+                    <div className="absolute -left-2499.75 opacity-0" aria-hidden="true">
                       <label htmlFor="telefone_secundario">Não preencha este campo se você for humano</label>
                       <input 
                         type="text" 

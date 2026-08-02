@@ -27,7 +27,7 @@ function DownloadContent() {
         Parabéns! Seu e-book está liberado.
       </h1>
       <p className="text-lg text-gray-300 mb-8">
-        Clique no botão abaixo para baixar o PDF &quot;O Mapa do Tesouro&quot; e começar sua jornada no Garimpo Urbano.
+        Clique no botão abaixo para baixar o PDF &quot;Como transformar lixo eletrônico em OURO&quot; e começar sua jornada no Garimpo Urbano.
       </p>
 
       {/* Botão que dispara a função de rastreio e abre o PDF */}

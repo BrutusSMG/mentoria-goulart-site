@@ -31,14 +31,14 @@ export async function GET(request) {
     });
 
     // Lê e entrega o PDF
-    const filePath = path.join(process.cwd(), 'private', 'mapa-do-tesouro.pdf');
+    const filePath = path.join(process.cwd(), 'private', 'como-transformar-lixo-eletronico-em-ouro.pdf');
     const fileBuffer = await readFile(filePath);
 
     return new NextResponse(fileBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'inline; filename="mapa-do-tesouro.pdf"',
+        'Content-Disposition': 'inline; filename="como-transformar-lixo-eletronico-em-ouro.pdf"',
         'Cache-Control': 'private, no-store',
       },
     });
