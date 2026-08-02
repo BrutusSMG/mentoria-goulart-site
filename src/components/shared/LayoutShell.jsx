@@ -5,11 +5,11 @@ import Navbar from '@/components/shared/Navbar';
 import Footer from '@/components/shared/Footer';
 import WhatsAppButton from '@/components/shared/WhatsAppButton';
 
-export default function LayoutShell({ children }) {
+export default function LayoutShell({ children, isBarePage: isBareFromServer }) {
   const pathname = usePathname();
-  
-  // Páginas que NÃO devem ter navbar/footer (landing pages de tráfego pago)
-  const isBarePage = pathname.startsWith('/ebook') || pathname.startsWith('/conteudo');
+
+  // Combina: prop do server (cookie) OU pathname do client
+  const isBarePage = isBareFromServer || pathname.startsWith('/ebook') || pathname.startsWith('/conteudo');
 
   if (isBarePage) {
     return <>{children}</>;

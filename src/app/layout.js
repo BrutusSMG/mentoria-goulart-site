@@ -10,6 +10,7 @@ import Footer from "@/components/shared/Footer";
 import WhatsAppButton from "@/components/shared/WhatsAppButton";
 import FacebookPixel from "@/components/shared/FacebookPixel";
 import LayoutShell from "@/components/shared/LayoutShell";
+import { cookies } from 'next/headers';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -77,7 +78,10 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const cookieStore = await cookies();
+  const isBarePage = cookieStore.get('x-bare-page')?.value === '1';
+
   return (
     <html
       lang="pt-BR"
@@ -91,7 +95,7 @@ export default function RootLayout({ children }) {
         <Suspense fallback={null}>
           <FacebookPixel />
         </Suspense>
-        <LayoutShell>
+        <LayoutShell isBarePage={isBarePage}>
           <main className="grow">
             {children}
           </main>
