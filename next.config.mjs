@@ -10,6 +10,7 @@ const nextConfig = {
         pathname: '/vi/**',
       },
     ],
+    qualities: [40, 60, 75],
   },
 
   async headers( ) {
