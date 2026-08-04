@@ -157,7 +157,7 @@ export default function EbookLandingPage() {
               {/* Glow effect */}
               <div className="absolute inset-0 bg-linear-to-s from-[#d89900]/20 to-transparent rounded-2xl blur-2xl"></div>
               <Image 
-                src="/capa3D.png"
+                src="/capa-ebook-3D.png"
                 alt="Mockup 3D do E-book"
                 width={300}
                 height={420}
@@ -505,7 +505,7 @@ export default function EbookLandingPage() {
               <div className="relative">
                 <div className="absolute inset-0 bg-linear-to-r from-[#d89900]/30 to-transparent rounded-2xl blur-3xl"></div>
                 <Image 
-                  src="/capa3D.png"
+                  src="/capa-ebook-3D.png"
                   alt="Mockup do E-book"
                   width={380}
                   height={500}
