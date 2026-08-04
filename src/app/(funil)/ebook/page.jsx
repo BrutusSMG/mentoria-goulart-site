@@ -6,7 +6,7 @@ import { getUtms } from '@/utils/utm';
 import { trackLead } from '@/utils/tracking';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, ChevronUp, BookOpen, Lightbulb, Users, Award, Shield, Zap, Sparkles, TrendingUp, Lock } from 'lucide-react';
+import { ChevronDown, Loader2, ChevronUp, BookOpen, Lightbulb, Users, Award, Shield, Zap, Sparkles, TrendingUp, Lock, MapPin, DollarSign, Wrench, Globe, Target, Rocket, Briefcase, Search } from 'lucide-react';
 
 export default function EbookLandingPage() {
   const [nome, setNome] = useState('');
@@ -230,12 +230,9 @@ export default function EbookLandingPage() {
                   className="w-full bg-linear-to-r from-[#d89900] to-[#F7FA83] text-black font-black text-lg py-4 rounded-lg hover:shadow-[0_0_40px_rgba(216,153,0,0.6)] transition-all disabled:opacity-70 mt-2 flex justify-center items-center shadow-[0_0_20px_rgba(216,153,0,0.4)] hover:scale-105 transform"
                 >
                   {status === 'loading' ? (
-                    <svg className="animate-spin h-6 w-6 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                    <Loader2 className="animate-spin h-6 w-6 text-black" />
                   ) : (
-                    "🎁 QUERO RECEBER O E-BOOK"
+                    "QUERO RECEBER O E-BOOK"
                   )}
                 </button>
                 
@@ -249,21 +246,21 @@ export default function EbookLandingPage() {
             {/* Benefícios em cards pequenos */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 animate-slide-up" style={{ animationDelay: '0.4s' }}>
               <div className="flex items-start gap-3 p-3 bg-zinc-900/50 rounded-lg border border-zinc-800 hover:border-[#d89900]/50 transition-colors">
-                <span className="text-[#d89900] text-xl shrink-0">📍</span>
+                <MapPin className="w-5 h-5 text-[#d89900] shrink-0 mt-0.5" />
                 <div className="text-sm">
                   <strong className="text-white block text-xs">Onde encontrar</strong>
                   <span className="text-gray-400 text-xs">Fontes de sucata rica em metais</span>
                 </div>
               </div>
               <div className="flex items-start gap-3 p-3 bg-zinc-900/50 rounded-lg border border-zinc-800 hover:border-[#d89900]/50 transition-colors">
-                <span className="text-[#d89900] text-xl shrink-0">💰</span>
+                <DollarSign className="w-5 h-5 text-[#d89900] shrink-0 mt-0.5" />
                 <div className="text-sm">
                   <strong className="text-white block text-xs">Sem investimento</strong>
                   <span className="text-gray-400 text-xs">Como começar do zero</span>
                 </div>
               </div>              
               <div className="flex items-start gap-3 p-3 bg-zinc-900/50 rounded-lg border border-zinc-800 hover:border-[#d89900]/50 transition-colors">
-                <span className="text-[#d89900] text-xl shrink-0">⚡</span>
+                	<Zap className="w-5 h-5 text-[#d89900] shrink-0 mt-0.5" />
                 <div className="text-sm">
                   <strong className="text-white block text-xs">Acesso imediato</strong>
                   <span className="text-gray-400 text-xs">Por email</span>
@@ -422,15 +419,15 @@ export default function EbookLandingPage() {
             {/* Lista com ícones */}
             <div className="space-y-4">
               {[
-                { emoji: '🎯', text: 'Quer conhecer um mercado em crescimento' },
-                { emoji: '💡', text: 'Busca gerar uma nova fonte de renda' },
-                { emoji: '🌍', text: 'Deseja trabalhar com sustentabilidade' },
-                { emoji: '🔍', text: 'Quer entender o valor dos resíduos eletrônicos' },
-                { emoji: '🚀', text: 'Procura oportunidades pouco conhecidas' },
-                { emoji: '💼', text: 'Quer começar um negócio com baixo investimento' }
+                { icon: Target,   text: 'Quer conhecer um mercado em crescimento' },
+                { icon: Lightbulb, text: 'Busca gerar uma nova fonte de renda' },
+                { icon: Globe,    text: 'Deseja trabalhar com sustentabilidade' },
+                { icon: Search,   text: 'Quer entender o valor dos resíduos eletrônicos' },
+                { icon: Rocket,   text: 'Procura oportunidades pouco conhecidas' },
+                { icon: Briefcase, text: 'Quer começar um negócio com baixo investimento' },
               ].map((item, idx) => (
                 <div key={idx} className="flex items-center gap-4 p-4 bg-zinc-900/50 rounded-lg border border-zinc-800 hover:border-[#d89900]/50 transition-colors group">
-                  <span className="text-3xl">{item.emoji}</span>
+                  <item.icon className="w-6 h-6 text-[#d89900] shrink-0" />
                   <p className="text-gray-300 text-lg group-hover:text-[#d89900] transition-colors">{item.text}</p>
                 </div>
               ))}
@@ -465,7 +462,7 @@ export default function EbookLandingPage() {
               <div className="relative">
                 <div className="absolute inset-0 bg-linear-to-r from-[#d89900]/20 to-transparent rounded-2xl blur-3xl"></div>
                 <Image 
-                  src="/autor.webp"
+                  src="/prof_Goulart.webp"
                   alt="Professor Goulart"
                   width={350}
                   height={400}
@@ -488,6 +485,10 @@ export default function EbookLandingPage() {
                   &quot;O maior garimpo do século XXI não está nas montanhas. Está nas cidades. E você pode ser parte dessa transformação.&ldquo;
                 </p>
               </div>
+
+              <p className="text-gray-500 text-sm mt-8 leading-relaxed">
+                Você vai conhecer melhor a trajetória do Prof. Goulart nos próximos dias - por enquanto, o mais importante é dar o primeiro passo.
+              </p>
               
             </div>
           </div>
@@ -556,12 +557,12 @@ export default function EbookLandingPage() {
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { icon: '✅', title: 'Download Gratuito', desc: '100% gratuito, sem cobranças ocultas ou cartão de crédito' },
-              { icon: '🔒', title: 'Sem Compromisso', desc: 'Você pode ler no seu tempo, sem pressão' },
-              { icon: '⚡', title: 'Acesso Imediato', desc: 'Receba no seu e-mail em segundos' }
+              { icon: <Award className="w-12 h-12 text-[#d89900] mx-auto mb-4" />, title: 'Download Gratuito', desc: '100% gratuito, sem cobranças ocultas ou cartão de crédito' },
+              { icon: <Lock className="w-12 h-12 text-[#d89900] mx-auto mb-4" />,  title: 'Sem Compromisso',  desc: 'Você pode ler no seu tempo, sem pressão' },
+              { icon: <Zap className="w-12 h-12 text-[#d89900] mx-auto mb-4" />,   title: 'Acesso Imediato',  desc: 'Receba no seu e-mail em segundos' },
             ].map((item, idx) => (
               <div key={idx} className="text-center p-8 bg-black rounded-xl border border-zinc-800 hover:border-[#d89900]/50 transition-colors group">
-                <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">{item.icon}</div>
+                {item.icon}
                 <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
                 <p className="text-gray-400">{item.desc}</p>
               </div>
