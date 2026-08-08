@@ -35,3 +35,22 @@ model Lead {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+// Enum para os perfis de acesso do painel admin
+enum Role {
+  ADMIN
+  PARCEIRO
+  FORNECEDOR
+}
+
+// Tabela de usuários do painel admin
+model AdminUser {
+  id        String   @id @default(cuid())
+  nome      String
+  email     String   @unique
+  senha     String   // Senha hasheada (bcrypt)
+  role      Role     @default(PARCEIRO)
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,44 @@
+// src/app/(admin)/admin/layout.jsx
+import { getServerSession } from "next-auth/next";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
+export default async function AdminLayout({ children }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect('/admin-login');  // ← era '/admin/login', corrigido para '/admin-login'
+  }
+
+  return (
+    <div className="min-h-screen bg-zinc-950 text-white flex">
+      <aside className="w-64 bg-black border-r border-zinc-900 flex flex-col shrink-0">
+        <div className="p-6 border-b border-zinc-900">
+          <h2 className="text-[#d89900] font-bold text-xl">Garimpo Urbano</h2>
+          <p className="text-xs text-zinc-500">Painel Administrativo</p>
+        </div>
+        <nav className="flex-1 p-4">
+          <ul className="space-y-2">
+            <li>
+              <a href="/admin" className="block p-3 rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 transition-colors">
+                Dashboard
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <div className="p-4 border-t border-zinc-900">
+          <p className="text-sm text-zinc-400">{session.user.name}</p>
+          <p className="text-xs text-zinc-600">{session.user.role}</p>
+        </div>
+      </aside>
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <header className="h-16 bg-black border-b border-zinc-900 flex items-center px-6 shrink-0">
+          <h1 className="font-bold text-lg">Visão Geral</h1>
+        </header>
+        <div className="p-8 flex-1 overflow-y-auto">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
+}
