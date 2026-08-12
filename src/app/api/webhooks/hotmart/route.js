@@ -71,6 +71,15 @@ export async function POST(req) {
     return resposta({ error: "JSON inválido" }, 400);
   }
 
+  // Diagnóstico seguro: não registra e-mail, documento, endereço ou token.
+  console.info("Webhook Hotmart recebido", {
+    versaoRota: "2026-08-11-v3",
+    possuiIdEvento: Boolean(payload?.id),
+    evento: payload?.event || null,
+    possuiTransacao: Boolean(payload?.data?.purchase?.transaction),
+    produtoId: payload?.data?.product?.id ?? null,
+  });
+
   const hotmartEventId = String(payload?.id || "").trim();
   const evento = String(payload?.event || "").trim();
   const dados = payload?.data || {};
@@ -89,15 +98,15 @@ export async function POST(req) {
   const produtoNome = String(produto.name || "Produto não identificado").trim();
   const status = String(compra.status || evento || "STATUS_NAO_INFORMADO").trim();
 
-  if (!hotmartEventId || !evento || !transacaoCodigo || !produtoId) {
-    return resposta(
-      { error: "Evento incompleto: id, event, product.id e purchase.transaction são obrigatórios" },
-      400,
-    );
-  }
+  // Somente o ID único e o tipo de evento são indispensáveis para auditar a chamada.
+  if (!hotmartEventId || !evento) {
+    console.warn("Webhook Hotmart sem identificador ou evento", {
+      versaoRota: "2026-08-11-v3",
+      possuiIdEvento: Boolean(hotmartEventId),
+      possuiEvento: Boolean(evento),
+    });
 
-  if (!produtoPermitido(produtoId)) {
-    return resposta({ received: true, ignored: true }, 200);
+    return resposta({ error: "Evento sem identificador ou tipo" }, 400);
   }
 
   const duplicado = await prisma.hotmartWebhookEvent.findUnique({
@@ -107,6 +116,35 @@ export async function POST(req) {
 
   if (duplicado) {
     return resposta({ received: true, duplicate: true }, 200);
+  }
+
+  // Alguns eventos não carregam uma transação completa. Eles são auditados e
+  // respondidos com 200 para evitar retentativas infinitas, mas não viram venda.
+  if (!transacaoCodigo || !produtoId) {
+    await prisma.hotmartWebhookEvent.create({
+      data: {
+        hotmartEventId,
+        evento,
+        versao: payload?.version ? String(payload.version) : null,
+        transacaoCodigo: transacaoCodigo || null,
+        produtoId: produtoId || null,
+        criadoNaHotmartEm: dataHotmart(payload?.creation_date),
+        processadoEm: new Date(),
+      },
+    });
+
+    console.warn("Evento Hotmart recebido sem dados completos de transação", {
+      versaoRota: "2026-08-11-v3",
+      evento,
+      possuiTransacao: Boolean(transacaoCodigo),
+      possuiProduto: Boolean(produtoId),
+    });
+
+    return resposta({ received: true, ignored: true, reason: "Dados de transação ausentes" }, 200);
+  }
+
+  if (!produtoPermitido(produtoId)) {
+    return resposta({ received: true, ignored: true }, 200);
   }
 
   const emailComprador = emailNormalizado(comprador.email);
