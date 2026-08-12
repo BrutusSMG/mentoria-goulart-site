@@ -79,7 +79,13 @@ export async function POST(req) {
   const comprador = dados.buyer || {};
 
   const transacaoCodigo = String(compra.transaction || "").trim();
-  const produtoId = String(produto.id || "").trim();
+
+  // O teste oficial da Hotmart pode enviar product.id como 0.
+  // Portanto, não use || aqui, pois 0 é um valor válido para fins de teste.
+  const produtoId = produto.id === null || produto.id === undefined
+    ? ""
+    : String(produto.id).trim();
+
   const produtoNome = String(produto.name || "Produto não identificado").trim();
   const status = String(compra.status || evento || "STATUS_NAO_INFORMADO").trim();
 
