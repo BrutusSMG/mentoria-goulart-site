@@ -21,6 +21,7 @@ model CotacaoHistorico {
   criadoEm     DateTime @default(now())
 }
 
+// Tabela para guardar os leads do site
 model Lead {
   id          String   @id @default(cuid())
   nome        String
@@ -34,6 +35,7 @@ model Lead {
   utmTerm     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  transacoesHotmart HotmartTransaction[]
 }
 
 // Enum para os perfis de acesso do painel admin
@@ -53,4 +55,79 @@ model AdminUser {
   ativo     Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Tabela para gerenciar os valores das sucatas
+model SucataItem {
+  id            String   @id @default(cuid())
+  nome          String   // Ex: Placa de Celular
+  categoria     String   // Ex: Eletrônicos, Catalisadores
+  valorKg       Float    // Valor por KG em Reais
+  metais        String   // Metais presentes (ex: Ouro, Prata)
+  imagemUrl     String?  // Opcional: link para imagem
+  ativo         Boolean  @default(true)
+  ultimaAtualizacao DateTime @default(now()) @updatedAt
+  atualizadoPor String?  // ID do AdminUser que atualizou
+}
+
+// Tabela para gerenciar os depoimentos
+model Depoimento {
+  id        String   @id @default(cuid())
+  nome      String   // Nome do aluno
+  texto     String   @db.Text
+  videoUrl  String?  // Opcional: link do YouTube/Vimeo
+  imagemUrl String?  // Opcional: foto do aluno
+  aprovado  Boolean  @default(false) // Para moderação
+  destaque  Boolean  @default(false) // Aparecer na home
+  createdAt DateTime @default(now())
+}
+
+// Auditoria e idempotência dos eventos recebidos da Hotmart.
+// Não armazena o payload completo para evitar guardar dados sensíveis desnecessários.
+model HotmartWebhookEvent {
+  id                 String   @id @default(cuid())
+  hotmartEventId     String   @unique
+  evento             String
+  versao             String?
+  transacaoCodigo    String?
+  produtoId          String?
+  criadoNaHotmartEm  DateTime?
+  recebidoEm         DateTime @default(now())
+  processadoEm       DateTime?
+  erroProcessamento  String?
+
+  @@index([transacaoCodigo])
+  @@index([produtoId])
+  @@index([evento])
+}
+
+// Estado mais recente de cada transação Hotmart.
+// O código da transação impede que o mesmo pedido gere uma venda duplicada.
+model HotmartTransaction {
+  id                  String   @id @default(cuid())
+  transacaoCodigo     String   @unique
+  leadId              String?
+  emailComprador      String?
+  produtoId           String
+  produtoUcode        String?
+  produtoNome         String
+  status              String
+  valorBruto          Decimal  @db.Decimal(12, 2)
+  moeda               String   @default("BRL")
+  formaPagamento      String?
+  parcelas            Int?
+  origemSrc           String?
+  origemSck           String?
+  origemXcod          String?
+  aprovadoEm          DateTime?
+  criadoEm            DateTime @default(now())
+  atualizadoEm        DateTime @updatedAt
+
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([leadId])
+  @@index([emailComprador])
+  @@index([produtoId])
+  @@index([status])
+  @@index([criadoEm])
 }

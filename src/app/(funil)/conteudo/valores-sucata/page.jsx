@@ -1,5 +1,4 @@
 // src/app/(funil)/conteudo/valores-sucata/page.jsx
-
 import { redirect } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
@@ -8,25 +7,25 @@ const prisma = new PrismaClient();
 
 export const metadata = {
   title: 'Tabela de Valores | Garimpo Urbano',
-  robots: 'noindex, nofollow', // Impede indexação pelo Google
+  robots: 'noindex, nofollow',
 };
 
 export default async function ValoresSucataPage({ searchParams }) {
   const { email } = await searchParams;
 
-  // Proteção: sem e-mail → redireciona
-  if (!email) {
-    redirect('/');
-  }
+  if (!email) redirect('/');
 
-  // Proteção: e-mail não cadastrado → redireciona
   const lead = await prisma.lead.findUnique({
     where: { email: email.toLowerCase() }
   });
 
-  if (!lead) {
-    redirect('/');
-  }
+  if (!lead) redirect('/');
+
+  // Busca os itens ativos do banco, ordenados por categoria
+  const sucatas = await prisma.sucataItem.findMany({
+    where: { ativo: true },
+    orderBy: [{ categoria: 'asc' }, { nome: 'asc' }],
+  });
 
   return (
     <div className="min-h-screen bg-black text-white py-20 px-4">
@@ -43,7 +42,7 @@ export default async function ValoresSucataPage({ searchParams }) {
         </p>
 
         {/* TABELA DE VALORES */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden mb-10">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden mb-4">
           <table className="w-full text-left">
             <thead className="bg-zinc-800">
               <tr>
@@ -53,48 +52,32 @@ export default async function ValoresSucataPage({ searchParams }) {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-zinc-800">
-                <td className="p-4">Processadores Cerâmicos (Pentium Pro, 486)</td>
-                <td className="p-4 text-sm text-gray-400">Ouro, Prata</td>
-                <td className="p-4 text-right text-green-400 font-bold">R$ 800 – R$ 1.500</td>
-              </tr>
-              <tr className="border-b border-zinc-800">
-                <td className="p-4">Processadores Plásticos (Pentium, Core)</td>
-                <td className="p-4 text-sm text-gray-400">Ouro</td>
-                <td className="p-4 text-right text-green-400 font-bold">R$ 150 – R$ 400</td>
-              </tr>
-              <tr className="border-b border-zinc-800">
-                <td className="p-4">Placas de Celular (sem bateria/tela)</td>
-                <td className="p-4 text-sm text-gray-400">Ouro, Prata, Paládio</td>
-                <td className="p-4 text-right text-green-400 font-bold">R$ 80 – R$ 150</td>
-              </tr>
-              <tr className="border-b border-zinc-800">
-                <td className="p-4">Memórias RAM (contatos dourados)</td>
-                <td className="p-4 text-sm text-gray-400">Ouro</td>
-                <td className="p-4 text-right text-green-400 font-bold">R$ 100 – R$ 200</td>
-              </tr>
-              <tr className="border-b border-zinc-800">
-                <td className="p-4">Placas-mãe de PC/Servidor</td>
-                <td className="p-4 text-sm text-gray-400">Ouro, Prata, Paládio</td>
-                <td className="p-4 text-right text-green-400 font-bold">R$ 30 – R$ 80</td>
-              </tr>
-              <tr className="border-b border-zinc-800">
-                <td className="p-4">Radiografias (chapas de raio-X)</td>
-                <td className="p-4 text-sm text-gray-400">Prata</td>
-                <td className="p-4 text-right text-green-400 font-bold">R$ 8 – R$ 15</td>
-              </tr>
-              <tr>
-                <td className="p-4">Velas de Ignição (platina/irídio)</td>
-                <td className="p-4 text-sm text-gray-400">Platina, Irídio</td>
-                <td className="p-4 text-right text-green-400 font-bold">R$ 3 – R$ 8 / unidade</td>
-              </tr>
+              {sucatas.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="p-8 text-center text-zinc-500">
+                    Tabela em atualização. Volte em breve.
+                  </td>
+                </tr>
+              ) : (
+                sucatas.map((item, idx) => (
+                  <tr key={item.id} className={idx < sucatas.length - 1 ? 'border-b border-zinc-800' : ''}>
+                    <td className="p-4">{item.nome}</td>
+                    <td className="p-4 text-sm text-gray-400">{item.metais}</td>
+                    <td className="p-4 text-right text-green-400 font-bold">
+                      R$ {item.valorKg.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
 
         <p className="text-sm text-zinc-500 mb-10">
-          * Valores de referência (jul/2026) que variam conforme cotação do dólar e do metal. 
-          Classificação correta do material pode aumentar significativamente o valor de venda.
+          * Valores de referência que variam conforme cotação do dólar e do metal.
+          Atualizado em: {sucatas[0]?.ultimaAtualizacao
+            ? new Date(sucatas[0].ultimaAtualizacao).toLocaleDateString('pt-BR')
+            : '—'}
         </p>
 
         {/* INSIGHT + CTA */}

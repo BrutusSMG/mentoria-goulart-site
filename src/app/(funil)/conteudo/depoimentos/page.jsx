@@ -1,5 +1,4 @@
 // src/app/(funil)/conteudo/depoimentos/page.jsx
-
 import { redirect } from 'next/navigation';
 import { PrismaClient } from '@prisma/client';
 import Link from 'next/link';
@@ -11,35 +10,22 @@ export const metadata = {
   robots: 'noindex, nofollow',
 };
 
-// Lista de vídeos (atualize aqui quando tiver novos depoimentos)
-const depoimentos = [
-  {
-    nome: "Aluno 1 — Campo Grande, MS",
-    descricao: "Começou coletando sucata e hoje tem um caminhão cheio de material todos os dias.",
-    youtubeId: "SEU_VIDEO_ID_1", // Substitua pelo ID real do YouTube
-  },
-  {
-    nome: "Aluno 2 — São Paulo, SP",
-    descricao: "Saiu do zero e em 6 meses já recuperava ouro em casa com segurança.",
-    youtubeId: "SEU_VIDEO_ID_2",
-  },
-  // Adicione mais depoimentos conforme necessário
-];
-
 export default async function DepoimentosPage({ searchParams }) {
   const { email } = await searchParams;
 
-  if (!email) {
-    redirect('/');
-  }
+  if (!email) redirect('/');
 
   const lead = await prisma.lead.findUnique({
     where: { email: email.toLowerCase() }
   });
 
-  if (!lead) {
-    redirect('/');
-  }
+  if (!lead) redirect('/');
+
+  // Busca depoimentos aprovados do banco, destaques primeiro
+  const depoimentos = await prisma.depoimento.findMany({
+    where: { aprovado: true },
+    orderBy: [{ destaque: 'desc' }, { createdAt: 'desc' }],
+  });
 
   return (
     <div className="min-h-screen bg-black text-white py-20 px-4">
@@ -55,26 +41,35 @@ export default async function DepoimentosPage({ searchParams }) {
           em oportunidade — e estão colhendo os resultados.
         </p>
 
-        {/* GRID DE VÍDEOS */}
-        <div className="space-y-10 mb-16">
-          {depoimentos.map((dep, index) => (
-            <div key={index} className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-              <div className="aspect-video">
-                <iframe
-                  src={`https://www.youtube.com/embed/${dep.youtubeId}`}
-                  title={dep.nome}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+        {/* GRID DE DEPOIMENTOS */}
+        {depoimentos.length === 0 ? (
+          <div className="text-center py-16 text-zinc-500">
+            <p>Novos depoimentos em breve.</p>
+          </div>
+        ) : (
+          <div className="space-y-10 mb-16">
+            {depoimentos.map((dep) => (
+              <div key={dep.id} className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                {/* Vídeo do YouTube (se tiver) */}
+                {dep.videoUrl && (
+                  <div className="aspect-video">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${dep.videoUrl}`}
+                      title={dep.nome}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                 )}
+                <div className="p-6">
+                  <h3 className="text-xl font-bold mb-2">{dep.nome}</h3>
+                  <p className="text-gray-400">{dep.texto}</p>
+                </div>
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-bold mb-2">{dep.nome}</h3>
-                <p className="text-gray-400">{dep.descricao}</p>
-              </div>
-            </div>
-           ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* CTA */}
         <div className="bg-linear-to-r from-zinc-900 to-zinc-800 border border-zinc-700 p-8 rounded-lg text-center">
