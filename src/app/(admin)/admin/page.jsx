@@ -1,23 +1,49 @@
 // src/app/(admin)/admin/page.jsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
   BookOpenCheck,
-  Download,
+  CircleDollarSign,
+  CreditCard,
+  ExternalLink,
   Loader2,
+  MailCheck,
+  MousePointerClick,
+  ShoppingCart,
   TrendingUp,
   UserRoundPlus,
   UsersRound,
 } from "lucide-react";
 
 function formatarData(data) {
+  if (!data) return "Não informado";
+
+  const valor = new Date(data);
+  if (Number.isNaN(valor.getTime())) return "Não informado";
+
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
     timeStyle: "short",
-  }).format(new Date(data));
+  }).format(valor);
+}
+
+function formatarMoeda(valor, moeda = "BRL") {
+  try {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: moeda || "BRL",
+    }).format(Number(valor || 0));
+  } catch {
+    return `${moeda || ""} ${Number(valor || 0).toFixed(2)}`.trim();
+  }
+}
+
+function percentual(numerador, denominador) {
+  if (!denominador) return 0;
+  return Number(((numerador / denominador) * 100).toFixed(1));
 }
 
 function CardMetrica({ titulo, valor, descricao, Icon, cor = "text-[#d89900]" }) {
@@ -35,38 +61,71 @@ function CardMetrica({ titulo, valor, descricao, Icon, cor = "text-[#d89900]" })
   );
 }
 
+function LinhaFunil({ titulo, valor, percentualLargura, cor = "bg-[#d89900]" }) {
+  return (
+    <div>
+      <div className="flex justify-between gap-3 text-sm">
+        <span className="text-zinc-400">{titulo}</span>
+        <strong className="text-white">{valor.toLocaleString("pt-BR")}</strong>
+      </div>
+      <div className="h-2 bg-zinc-800 rounded-full mt-2 overflow-hidden">
+        <div className={`h-full ${cor} rounded-full transition-all`} style={{ width: `${Math.min(Math.max(percentualLargura, 0), 100)}%` }} />
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboardPage() {
-  const [dados, setDados] = useState(null);
+  const [dashboard, setDashboard] = useState(null);
+  const [integracoes, setIntegracoes] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
 
   useEffect(() => {
     let ativo = true;
 
-    async function carregarDashboard() {
+    async function carregarDados() {
       try {
-        const resposta = await fetch("/api/admin/dashboard", {
-          cache: "no-store",
-        });
-        const payload = await resposta.json();
+        const [dashboardResposta, integracoesResposta] = await Promise.all([
+          fetch("/api/admin/dashboard", { cache: "no-store" }),
+          fetch("/api/admin/integracoes/resumo", { cache: "no-store" }),
+        ]);
 
-        if (!resposta.ok) {
-          throw new Error(payload.error || "Não foi possível carregar o dashboard.");
+        const [dashboardPayload, integracoesPayload] = await Promise.all([
+          dashboardResposta.json(),
+          integracoesResposta.json(),
+        ]);
+
+        if (!dashboardResposta.ok) {
+          throw new Error(dashboardPayload.error || "Não foi possível carregar as métricas de leads.");
         }
 
-        if (ativo) setDados(payload);
+        if (!integracoesResposta.ok) {
+          throw new Error(integracoesPayload.error || "Não foi possível carregar as métricas das integrações.");
+        }
+
+        if (ativo) {
+          setDashboard(dashboardPayload);
+          setIntegracoes(integracoesPayload);
+        }
       } catch (error) {
-        if (ativo) setErro(error.message);
+        if (ativo) setErro(error.message || "Não foi possível carregar o dashboard.");
       } finally {
         if (ativo) setLoading(false);
       }
     }
 
-    void carregarDashboard();
+    void carregarDados();
+
     return () => {
       ativo = false;
     };
   }, []);
+
+  const receitaPrincipal = useMemo(() => {
+    const receitas = integracoes?.hotmart?.receitaPorMoeda || [];
+    return receitas.find((item) => item.moeda === "BRL") || receitas[0] || { moeda: "BRL", valor: 0 };
+  }, [integracoes]);
 
   if (loading) {
     return (
@@ -76,7 +135,7 @@ export default function AdminDashboardPage() {
     );
   }
 
-  if (erro || !dados) {
+  if (erro || !dashboard || !integracoes) {
     return (
       <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 flex items-start gap-3">
         <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
@@ -88,8 +147,13 @@ export default function AdminDashboardPage() {
     );
   }
 
-  const { resumo, funil, leadsRecentes } = dados;
-  const larguraDownload = `${Math.min(resumo.taxaDownload, 100)}%`;
+  const { resumo, funil, leadsRecentes } = dashboard;
+  const { hotmart, brevo } = integracoes;
+  const totalLeads = resumo.totalLeads || 0;
+  const taxaDownload = resumo.taxaDownload || 0;
+  const taxaVendaSobreLeads = hotmart.conversaoLeadVenda || 0;
+  const taxaAbertura = percentual(brevo.campanhas.aberturasUnicas, brevo.campanhas.entregues);
+  const taxaClique = percentual(brevo.campanhas.cliquesUnicos, brevo.campanhas.entregues);
 
   return (
     <div className="space-y-8">
@@ -98,22 +162,32 @@ export default function AdminDashboardPage() {
           <p className="text-[#d89900] uppercase tracking-wider font-bold text-xs">Visão geral</p>
           <h2 className="text-3xl font-black text-white mt-2">Dashboard</h2>
           <p className="text-zinc-500 text-sm mt-2">
-            Indicadores de captação e entrega do e-book, atualizados a partir do banco de dados.
+            Indicadores do banco próprio, eventos Hotmart e métricas disponíveis da Brevo.
           </p>
         </div>
-        <Link
-          href="/admin/leads"
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#d89900] px-4 py-2.5 text-sm font-bold text-black transition-colors hover:bg-[#F7FA83]"
-        >
-          <UsersRound className="w-4 h-4" />
-          Ver todos os leads
-        </Link>
+
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/admin/leads"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm font-bold text-zinc-200 transition-colors hover:border-[#d89900] hover:text-[#d89900]"
+          >
+            <UsersRound className="w-4 h-4" />
+            Leads
+          </Link>
+          <Link
+            href="/admin/transacoes"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#d89900] px-4 py-2.5 text-sm font-bold text-black transition-colors hover:bg-[#F7FA83]"
+          >
+            <ShoppingCart className="w-4 h-4" />
+            Transações
+          </Link>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
         <CardMetrica
           titulo="Total de leads"
-          valor={resumo.totalLeads.toLocaleString("pt-BR")}
+          valor={totalLeads.toLocaleString("pt-BR")}
           descricao="Contatos capturados no banco"
           Icon={UsersRound}
           cor="text-blue-400"
@@ -126,57 +200,143 @@ export default function AdminDashboardPage() {
           cor="text-green-400"
         />
         <CardMetrica
-          titulo="Taxa de download"
-          valor={`${resumo.taxaDownload.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}%`}
-          descricao="Entre todos os leads cadastrados"
+          titulo="Vendas aprovadas"
+          valor={hotmart.vendasAprovadas.toLocaleString("pt-BR")}
+          descricao={`${hotmart.leadsConvertidos.toLocaleString("pt-BR")} lead${hotmart.leadsConvertidos === 1 ? "" : "s"} identificado${hotmart.leadsConvertidos === 1 ? "" : "s"}`}
+          Icon={ShoppingCart}
+          cor="text-[#d89900]"
+        />
+        <CardMetrica
+          titulo="Receita bruta"
+          valor={formatarMoeda(receitaPrincipal.valor, receitaPrincipal.moeda)}
+          descricao="Somente compras aprovadas ou completas"
+          Icon={CircleDollarSign}
+          cor="text-emerald-400"
+        />
+        <CardMetrica
+          titulo="Conversão lead → venda"
+          valor={`${taxaVendaSobreLeads.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}%`}
+          descricao="Apenas quando o e-mail da compra coincide com um lead"
           Icon={TrendingUp}
           cor="text-purple-400"
         />
         <CardMetrica
-          titulo="Novos nos últimos 7 dias"
+          titulo="Novos leads em 7 dias"
           valor={resumo.leadsUltimosSeteDias.toLocaleString("pt-BR")}
           descricao="Captações recentes"
           Icon={UserRoundPlus}
-          cor="text-[#d89900]"
+          cor="text-orange-400"
         />
       </div>
 
       <section className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-6">
         <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6">
           <div className="flex items-center gap-2">
-            <Download className="w-5 h-5 text-[#d89900]" />
-            <h3 className="font-bold text-white">Funil do e-book</h3>
+            <TrendingUp className="w-5 h-5 text-[#d89900]" />
+            <h3 className="font-bold text-white">Funil principal</h3>
           </div>
 
           <div className="mt-7 space-y-5">
-            <div>
-              <div className="flex justify-between gap-3 text-sm">
-                <span className="text-zinc-400">Leads captados</span>
-                <strong className="text-white">{funil.captados.toLocaleString("pt-BR")}</strong>
-              </div>
-              <div className="h-2 bg-zinc-800 rounded-full mt-2 overflow-hidden">
-                <div className="h-full w-full bg-zinc-600 rounded-full" />
-              </div>
-            </div>
+            <LinhaFunil titulo="Leads captados" valor={funil.captados} percentualLargura={100} cor="bg-zinc-500" />
+            <LinhaFunil titulo="E-book baixado" valor={funil.baixaramEbook} percentualLargura={taxaDownload} cor="bg-green-500" />
+            <LinhaFunil titulo="Leads com compra identificada" valor={hotmart.leadsConvertidos} percentualLargura={taxaVendaSobreLeads} cor="bg-[#d89900]" />
+          </div>
 
-            <div>
-              <div className="flex justify-between gap-3 text-sm">
-                <span className="text-zinc-400">E-book baixado</span>
-                <strong className="text-green-400">{funil.baixaramEbook.toLocaleString("pt-BR")}</strong>
-              </div>
-              <div className="h-2 bg-zinc-800 rounded-full mt-2 overflow-hidden">
-                <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: larguraDownload }} />
-              </div>
+          <div className="grid grid-cols-2 gap-3 mt-6">
+            <div className="rounded-lg border border-red-500/15 bg-red-500/5 p-4">
+              <p className="text-xs text-zinc-500">Reembolsos</p>
+              <p className="text-xl font-black text-red-300 mt-1">{hotmart.reembolsos.toLocaleString("pt-BR")}</p>
             </div>
-
-            <div className="flex justify-between items-center bg-black/30 border border-zinc-800 rounded-lg p-4">
-              <span className="text-sm text-zinc-400">Aguardando download</span>
-              <strong className="text-[#d89900]">{funil.aguardandoDownload.toLocaleString("pt-BR")}</strong>
+            <div className="rounded-lg border border-red-500/15 bg-red-500/5 p-4">
+              <p className="text-xs text-zinc-500">Chargebacks</p>
+              <p className="text-xl font-black text-red-300 mt-1">{hotmart.chargebacks.toLocaleString("pt-BR")}</p>
             </div>
           </div>
 
           <p className="text-xs text-zinc-600 leading-relaxed mt-6">
-            Métricas de abertura de e-mail, clique e compra serão adicionadas depois da integração com Brevo e Hotmart.
+            A receita considera o status atual de cada transação. Reembolsos e chargebacks não entram como venda aprovada.
+          </p>
+        </div>
+
+        <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
+          <div className="flex items-center justify-between gap-4 p-6 border-b border-zinc-800">
+            <div>
+              <h3 className="font-bold text-white">Produtos com vendas aprovadas</h3>
+              <p className="text-sm text-zinc-500 mt-1">Agrupamento automático pelos eventos recebidos da Hotmart.</p>
+            </div>
+            <Link href="/admin/transacoes" className="inline-flex items-center gap-1 text-sm font-bold text-[#d89900] hover:text-[#F7FA83]">
+              Ver transações
+              <ExternalLink className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {hotmart.vendasPorProduto.length === 0 ? (
+            <div className="p-10 text-center text-sm text-zinc-500">
+              Nenhuma venda aprovada foi recebida ainda. Os testes da Hotmart podem aparecer aqui se forem enviados como compra aprovada.
+            </div>
+          ) : (
+            <div className="divide-y divide-zinc-800">
+              {hotmart.vendasPorProduto.slice(0, 6).map((produto) => (
+                <div key={`${produto.produtoId}-${produto.moeda}`} className="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-white truncate">{produto.produtoNome || `Produto ${produto.produtoId}`}</p>
+                    <p className="text-xs text-zinc-600 mt-1">{produto.vendas.toLocaleString("pt-BR")} venda{produto.vendas === 1 ? "" : "s"} aprovada{produto.vendas === 1 ? "" : "s"}</p>
+                  </div>
+                  <strong className="text-[#d89900] whitespace-nowrap">{formatarMoeda(produto.receita, produto.moeda)}</strong>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-6">
+        <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6">
+          <div className="flex items-center gap-2">
+            <MailCheck className="w-5 h-5 text-[#d89900]" />
+            <h3 className="font-bold text-white">Brevo</h3>
+          </div>
+
+          {!brevo.configurado ? (
+            <div className="mt-5 rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 text-sm text-amber-200">
+              {brevo.mensagem}
+            </div>
+          ) : (
+            <>
+              {brevo.mensagem ? (
+                <p className="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-sm text-amber-200">{brevo.mensagem}</p>
+              ) : null}
+
+              <div className="grid grid-cols-2 gap-3 mt-5">
+                <div className="rounded-lg bg-black/30 border border-zinc-800 p-4">
+                  <p className="text-xs text-zinc-500">Lista do e-book</p>
+                  <p className="text-xl font-black text-white mt-1">
+                    {brevo.lista.contatos === null ? "—" : brevo.lista.contatos.toLocaleString("pt-BR")}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-black/30 border border-zinc-800 p-4">
+                  <p className="text-xs text-zinc-500">Campanhas em 30 dias</p>
+                  <p className="text-xl font-black text-white mt-1">
+                    {brevo.campanhas.quantidade === null ? "—" : brevo.campanhas.quantidade.toLocaleString("pt-BR")}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <div className="rounded-lg bg-black/30 border border-zinc-800 p-4">
+                  <p className="text-xs text-zinc-500">Abertura única</p>
+                  <p className="text-xl font-black text-white mt-1">{taxaAbertura.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}%</p>
+                </div>
+                <div className="rounded-lg bg-black/30 border border-zinc-800 p-4">
+                  <p className="text-xs text-zinc-500">Clique único</p>
+                  <p className="text-xl font-black text-white mt-1">{taxaClique.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}%</p>
+                </div>
+              </div>
+            </>
+          )}
+
+          <p className="text-xs text-zinc-600 leading-relaxed mt-5">
+            A automação do e-book é gerida pela Brevo. As estatísticas acima representam campanhas que a API disponibiliza e podem não refletir todos os disparos automatizados.
           </p>
         </div>
 

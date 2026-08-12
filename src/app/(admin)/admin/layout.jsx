@@ -33,6 +33,14 @@ export default async function AdminLayout({ children }) {
               </a>
             </li>
             <li>
+              <a
+                href="/admin/transacoes"
+                className="block p-3 rounded-lg text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors"
+              >
+                Transações
+              </a>
+            </li>
+            <li>
               <a href="/admin/sucatas" className="block p-3 rounded-lg text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors">
                 Valores de Sucata
               </a>
@@ -42,12 +50,6 @@ export default async function AdminLayout({ children }) {
                 Depoimentos
               </a>
             </li>
-            <li>
-              <a href="/admin/leads" className="block p-3 rounded-lg text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors">
-                Leads
-              </a>
-            </li>
-
           </ul>
         </nav>
         <div className="p-4 border-t border-zinc-900">
