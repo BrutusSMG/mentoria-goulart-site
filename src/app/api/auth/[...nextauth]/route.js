@@ -56,6 +56,9 @@ export const authOptions = {
     },
     async session({ session, token }) {
       if (session?.user) {
+        // token.sub é o ID retornado pelo CredentialsProvider.
+        // A API de alteração de senha usa esse ID para atualizar somente a própria conta.
+        session.user.id = token.sub;
         session.user.role = token.role;
         session.user.mustChangePassword = Boolean(token.mustChangePassword);
       }
