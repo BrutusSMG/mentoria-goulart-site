@@ -1,34 +1,31 @@
 // src/app/api/admin/depoimentos/route.js
-import { PrismaClient } from "@prisma/client";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
-const prisma = new PrismaClient();
+import { prisma, obterAcessoModulo, respostaAcessoNegado } from "@/lib/admin-permissoes";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session) return Response.json({ error: "Não autorizado" }, { status: 401 });
+  const acesso = await obterAcessoModulo("DEPOIMENTOS");
+  if (!acesso.permitido) return respostaAcessoNegado(acesso);
 
   const depoimentos = await prisma.depoimento.findMany({
     orderBy: [{ destaque: "desc" }, { createdAt: "desc" }],
   });
-  return Response.json(depoimentos);
+
+  return Response.json(depoimentos, { headers: { "Cache-Control": "private, no-store" } });
 }
 
 export async function POST(req) {
-  const session = await getServerSession(authOptions);
-  if (!session) return Response.json({ error: "Não autorizado" }, { status: 401 });
+  const acesso = await obterAcessoModulo("DEPOIMENTOS");
+  if (!acesso.permitido) return respostaAcessoNegado(acesso);
 
   const body = await req.json();
-  const dep = await prisma.depoimento.create({
-    data: {
-      nome: body.nome,
-      texto: body.texto,
-      videoUrl: body.videoUrl || null,
-      imagemUrl: body.imagemUrl || null,
-      aprovado: body.aprovado ?? false,
-      destaque: body.destaque ?? false,
-    },
-  });
-  return Response.json(dep);
+  const dados = {
+    nome: String(body.nome || "").trim(),
+    texto: String(body.texto || "").trim(),
+    videoUrl: body.videoUrl ? String(body.videoUrl).trim() : null,
+    imagemUrl: body.imagemUrl ? String(body.imagemUrl).trim() : null,
+    aprovado: acesso.ehAdmin ? Boolean(body.aprovado) : false,
+    destaque: acesso.ehAdmin ? Boolean(body.destaque) : false,
+  };
+
+  const depoimento = await prisma.depoimento.create({ data: dados });
+  return Response.json(depoimento, { status: 201 });
 }

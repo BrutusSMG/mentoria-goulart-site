@@ -1,29 +1,34 @@
 // src/app/api/admin/sucatas/[id]/route.js
-import { PrismaClient } from "@prisma/client";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
-const prisma = new PrismaClient();
+import { prisma, obterAcessoAdmin, obterAcessoModulo, respostaAcessoNegado } from "@/lib/admin-permissoes";
 
 export async function PUT(req, { params }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return Response.json({ error: "Não autorizado" }, { status: 401 });
+  const acesso = await obterAcessoModulo("SUCATAS");
+  if (!acesso.permitido) return respostaAcessoNegado(acesso);
 
+  const { id } = await params;
   const body = await req.json();
+
   const item = await prisma.sucataItem.update({
-    where: { id: params.id },
+    where: { id },
     data: {
-      ...body,
-      atualizadoPor: session.user.email,
+      nome: String(body.nome || "").trim(),
+      categoria: String(body.categoria || "").trim(),
+      valorKg: Number(body.valorKg),
+      metais: String(body.metais || "").trim(),
+      imagemUrl: body.imagemUrl ? String(body.imagemUrl).trim() : null,
+      ativo: body.ativo ?? true,
+      atualizadoPor: acesso.conta.id,
     },
   });
+
   return Response.json(item);
 }
 
 export async function DELETE(req, { params }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return Response.json({ error: "Não autorizado" }, { status: 401 });
+  const acesso = await obterAcessoAdmin();
+  if (!acesso.permitido) return respostaAcessoNegado(acesso);
 
-  await prisma.sucataItem.delete({ where: { id: params.id } });
+  const { id } = await params;
+  await prisma.sucataItem.delete({ where: { id } });
   return Response.json({ success: true });
 }

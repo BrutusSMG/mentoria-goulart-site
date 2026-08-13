@@ -22,12 +22,20 @@ function senhaValida(senha) {
 async function exigirAdmin() {
   const session = await getServerSession(authOptions);
 
-  if (!session) return { erro: respostaPrivada({ error: "Não autorizado" }, 401) };
-  if (session.user?.role !== "ADMIN") {
+  if (!session?.user?.id) {
+    return { erro: respostaPrivada({ error: "Não autorizado" }, 401) };
+  }
+
+  const contaAtual = await prisma.adminUser.findUnique({
+    where: { id: session.user.id },
+    select: { ativo: true, role: true },
+  });
+
+  if (!contaAtual?.ativo || contaAtual.role !== "ADMIN") {
     return { erro: respostaPrivada({ error: "Acesso restrito a administradores" }, 403) };
   }
 
-  return { session };
+  return { session, contaAtual };
 }
 
 const camposSeguros = {
@@ -36,6 +44,8 @@ const camposSeguros = {
   email: true,
   role: true,
   ativo: true,
+  podeGerenciarSucatas: true,
+  podeGerenciarDepoimentos: true,
   mustChangePassword: true,
   passwordChangedAt: true,
   createdAt: true,
@@ -67,6 +77,10 @@ export async function PATCH(req, { params }) {
     if (!ROLES_VALIDOS.includes(role)) {
       return respostaPrivada({ error: "Perfil de acesso inválido." }, 400);
     }
+    const podeGerenciarSucatas =
+      role === "PARCEIRO" && body?.podeGerenciarSucatas === true;
+    const podeGerenciarDepoimentos =
+      role === "PARCEIRO" && body?.podeGerenciarDepoimentos === true;
 
     if (editandoPropriaConta && (role !== alvo.role || ativo !== alvo.ativo)) {
       return respostaPrivada(
@@ -90,7 +104,13 @@ export async function PATCH(req, { params }) {
       }
     }
 
-    const dadosAtualizacao = { nome, role, ativo };
+    const dadosAtualizacao = {
+      nome,
+      role,
+      ativo,
+      podeGerenciarSucatas,
+      podeGerenciarDepoimentos,
+    };
 
     if (senhaTemporaria !== undefined && senhaTemporaria !== "") {
       if (!senhaValida(senhaTemporaria)) {

@@ -53,6 +53,8 @@ model AdminUser {
   senha              String
   role               Role     @default(PARCEIRO)
   ativo              Boolean  @default(true)
+  podeGerenciarSucatas     Boolean  @default(false)
+  podeGerenciarDepoimentos Boolean  @default(false)
   mustChangePassword Boolean  @default(false)
   passwordChangedAt  DateTime?
   createdAt          DateTime @default(now())

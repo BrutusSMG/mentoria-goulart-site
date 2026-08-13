@@ -1,26 +1,37 @@
 // src/app/api/admin/depoimentos/[id]/route.js
-import { PrismaClient } from "@prisma/client";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
-const prisma = new PrismaClient();
+import { prisma, obterAcessoAdmin, obterAcessoModulo, respostaAcessoNegado } from "@/lib/admin-permissoes";
 
 export async function PUT(req, { params }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return Response.json({ error: "Não autorizado" }, { status: 401 });
+  const acesso = await obterAcessoModulo("DEPOIMENTOS");
+  if (!acesso.permitido) return respostaAcessoNegado(acesso);
 
+  const { id } = await params;
   const body = await req.json();
-  const dep = await prisma.depoimento.update({
-    where: { id: params.id },
-    data: body,
-  });
-  return Response.json(dep);
+  const atual = await prisma.depoimento.findUnique({ where: { id } });
+
+  if (!atual) return Response.json({ error: "Depoimento não encontrado." }, { status: 404 });
+
+  const dados = {
+    nome: body.nome === undefined ? atual.nome : String(body.nome).trim(),
+    texto: body.texto === undefined ? atual.texto : String(body.texto).trim(),
+    videoUrl: body.videoUrl === undefined ? atual.videoUrl : (body.videoUrl ? String(body.videoUrl).trim() : null),
+    imagemUrl: body.imagemUrl === undefined ? atual.imagemUrl : (body.imagemUrl ? String(body.imagemUrl).trim() : null),
+  };
+
+  if (acesso.ehAdmin) {
+    dados.aprovado = body.aprovado === undefined ? atual.aprovado : Boolean(body.aprovado);
+    dados.destaque = body.destaque === undefined ? atual.destaque : Boolean(body.destaque);
+  }
+
+  const depoimento = await prisma.depoimento.update({ where: { id }, data: dados });
+  return Response.json(depoimento);
 }
 
 export async function DELETE(req, { params }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return Response.json({ error: "Não autorizado" }, { status: 401 });
+  const acesso = await obterAcessoAdmin();
+  if (!acesso.permitido) return respostaAcessoNegado(acesso);
 
-  await prisma.depoimento.delete({ where: { id: params.id } });
+  const { id } = await params;
+  await prisma.depoimento.delete({ where: { id } });
   return Response.json({ success: true });
 }

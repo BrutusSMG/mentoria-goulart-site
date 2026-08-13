@@ -71,6 +71,8 @@ const dadosIniciais = {
   senhaTemporaria: "",
   confirmarSenha: "",
   ativo: true,
+  podeGerenciarSucatas: false,
+  podeGerenciarDepoimentos: false,
 };
 
 export default function UsuariosPage() {
@@ -143,6 +145,8 @@ export default function UsuariosPage() {
       senhaTemporaria: "",
       confirmarSenha: "",
       ativo: usuario.ativo,
+      podeGerenciarSucatas: Boolean(usuario.podeGerenciarSucatas),
+      podeGerenciarDepoimentos: Boolean(usuario.podeGerenciarDepoimentos),
     });
     setModal("editar");
   }
@@ -181,12 +185,17 @@ export default function UsuariosPage() {
             email: form.email,
             role: form.role,
             senhaTemporaria: form.senhaTemporaria,
+            podeGerenciarSucatas: form.podeGerenciarSucatas,
+            podeGerenciarDepoimentos: form.podeGerenciarDepoimentos,
+
           }
         : {
             nome: form.nome,
             role: form.role,
             ativo: form.ativo,
             senhaTemporaria: form.senhaTemporaria || undefined,
+            podeGerenciarSucatas: form.podeGerenciarSucatas,
+            podeGerenciarDepoimentos: form.podeGerenciarDepoimentos,
           };
 
       const resposta = await fetch(url, {
@@ -274,6 +283,7 @@ export default function UsuariosPage() {
               <tr>
                 <th className="p-4 font-semibold">Conta</th>
                 <th className="p-4 font-semibold">Perfil</th>
+                <th className="p-4 font-semibold">Módulos</th>
                 <th className="p-4 font-semibold">Situação</th>
                 <th className="p-4 font-semibold">Senha</th>
                 <th className="p-4 font-semibold">Criação</th>
@@ -282,7 +292,7 @@ export default function UsuariosPage() {
             </thead>
             <tbody className="divide-y divide-zinc-800">
               {loading ? (
-                <tr><td colSpan={6} className="p-12 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-[#d89900]" /></td></tr>
+                <tr><td colSpan={7} className="p-12 text-center"><Loader2 className="mx-auto h-6 w-6 animate-spin text-[#d89900]" /></td></tr>
               ) : usuarios.length ? (
                 usuarios.map((usuario) => (
                   <tr key={usuario.id} className="transition-colors hover:bg-zinc-800/40">
@@ -291,6 +301,19 @@ export default function UsuariosPage() {
                       <p className="mt-1 text-sm text-zinc-500">{usuario.email}</p>
                     </td>
                     <td className="p-4"><span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-bold ${classePerfil(usuario.role)}`}>{usuario.role}</span></td>
+                    <td className="p-4">
+                      {usuario.role === "ADMIN" ? (
+                        <span className="text-sm text-[#d89900]">Acesso total</span>
+                      ) : usuario.role === "PARCEIRO" ? (
+                        <div className="flex flex-wrap gap-1">
+                          {usuario.podeGerenciarSucatas ? <span className="rounded bg-zinc-800 px-2 py-1 text-xs text-zinc-300">Sucatas</span> : null}
+                          {usuario.podeGerenciarDepoimentos ? <span className="rounded bg-zinc-800 px-2 py-1 text-xs text-zinc-300">Depoimentos</span> : null}
+                          {!usuario.podeGerenciarSucatas && !usuario.podeGerenciarDepoimentos ? <span className="text-sm text-zinc-600">Nenhum</span> : null}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-zinc-600">Nenhum</span>
+                      )}
+                    </td>
                     <td className="p-4">
                       <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${usuario.ativo ? "bg-green-500/15 text-green-400" : "bg-red-500/15 text-red-300"}`}>
                         {usuario.ativo ? "Ativa" : "Desativada"}
@@ -312,7 +335,7 @@ export default function UsuariosPage() {
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan={6}><EstadoVazio titulo="Nenhuma conta cadastrada" descricao="Crie a primeira conta administrativa para este painel." /></td></tr>
+                <tr><td colSpan={7}><EstadoVazio titulo="Nenhuma conta cadastrada" descricao="Crie a primeira conta administrativa para este painel." /></td></tr>
               )}
             </tbody>
           </table>
@@ -371,6 +394,41 @@ function CamposFormulario({ form, alterarCampo, criando }) {
           {PERFIS.map((perfil) => <option key={perfil} value={perfil}>{perfil}</option>)}
         </select>
       </label>
+      {form.role === "PARCEIRO" ? (
+        <fieldset className="sm:col-span-2 rounded-lg border border-zinc-800 bg-black/30 p-4">
+          <legend className="px-1 text-sm font-bold text-white">Módulos autorizados</legend>
+          <p className="mt-1 text-xs leading-relaxed text-zinc-500">
+            O parceiro verá e poderá criar/editar somente os módulos marcados. Aprovação, destaque e exclusão continuam exclusivos do ADMIN.
+          </p>
+
+          <label className="mt-4 flex items-center justify-between gap-4 rounded-lg border border-zinc-800 p-3 cursor-pointer">
+            <span>
+              <span className="block text-sm font-medium text-zinc-200">Valores de sucata</span>
+              <span className="block mt-1 text-xs text-zinc-500">Criar, editar, ativar e inativar itens.</span>
+            </span>
+            <input
+              type="checkbox"
+              checked={form.podeGerenciarSucatas}
+              onChange={(event) => alterarCampo("podeGerenciarSucatas", event.target.checked)}
+              className="h-5 w-5 accent-[#d89900]"
+            />
+          </label>
+
+          <label className="mt-3 flex items-center justify-between gap-4 rounded-lg border border-zinc-800 p-3 cursor-pointer">
+            <span>
+              <span className="block text-sm font-medium text-zinc-200">Depoimentos</span>
+              <span className="block mt-1 text-xs text-zinc-500">Criar e editar conteúdo, sem publicar ou excluir.</span>
+            </span>
+            <input
+              type="checkbox"
+              checked={form.podeGerenciarDepoimentos}
+              onChange={(event) => alterarCampo("podeGerenciarDepoimentos", event.target.checked)}
+              className="h-5 w-5 accent-[#d89900]"
+            />
+          </label>
+        </fieldset>
+      ) : null}
+
       {criando ? (
         <>
           <SenhaInput label="Senha temporária" value={form.senhaTemporaria} onChange={(valor) => alterarCampo("senhaTemporaria", valor)} />

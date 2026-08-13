@@ -1,35 +1,33 @@
 // src/app/api/admin/sucatas/route.js
-import { PrismaClient } from "@prisma/client";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
-const prisma = new PrismaClient();
+import { prisma, obterAcessoModulo, respostaAcessoNegado } from "@/lib/admin-permissoes";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session) return Response.json({ error: "Não autorizado" }, { status: 401 });
+  const acesso = await obterAcessoModulo("SUCATAS");
+  if (!acesso.permitido) return respostaAcessoNegado(acesso);
 
   const sucatas = await prisma.sucataItem.findMany({
     orderBy: [{ categoria: "asc" }, { nome: "asc" }],
   });
-  return Response.json(sucatas);
+
+  return Response.json(sucatas, { headers: { "Cache-Control": "private, no-store" } });
 }
 
 export async function POST(req) {
-  const session = await getServerSession(authOptions);
-  if (!session) return Response.json({ error: "Não autorizado" }, { status: 401 });
+  const acesso = await obterAcessoModulo("SUCATAS");
+  if (!acesso.permitido) return respostaAcessoNegado(acesso);
 
   const body = await req.json();
   const item = await prisma.sucataItem.create({
     data: {
-      nome: body.nome,
-      categoria: body.categoria,
-      valorKg: body.valorKg,
-      metais: body.metais,
-      imagemUrl: body.imagemUrl || null,
+      nome: String(body.nome || "").trim(),
+      categoria: String(body.categoria || "").trim(),
+      valorKg: Number(body.valorKg),
+      metais: String(body.metais || "").trim(),
+      imagemUrl: body.imagemUrl ? String(body.imagemUrl).trim() : null,
       ativo: body.ativo ?? true,
-      atualizadoPor: session.user.email,
+      atualizadoPor: acesso.conta.id,
     },
   });
-  return Response.json(item);
+
+  return Response.json(item, { status: 201 });
 }
