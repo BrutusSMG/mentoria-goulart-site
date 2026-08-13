@@ -7,7 +7,7 @@ import Footer from '@/components/shared/Footer';
 import WhatsAppButton from '@/components/shared/WhatsAppButton';
 
 // Lista de rotas que não devem ter Header/Navbar/Footer
-const BARE_ROUTES = ['/ebook', '/conteudo', '/download', '/obrigado', '/admin', '/admin-login'];
+const BARE_ROUTES = ['/ebook', '/conteudo', '/download', '/obrigado', '/admin', '/admin-login', '/alterar-senha'];
 
 export default function LayoutShell({ children, isBarePage: isBareFromServer }) {
   const pathname = usePathname();

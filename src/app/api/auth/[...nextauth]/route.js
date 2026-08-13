@@ -36,7 +36,8 @@ export const authOptions = {
             id: user.id,
             email: user.email,
             name: user.nome,
-            role: user.role
+            role: user.role,
+            mustChangePassword: user.mustChangePassword,
           };
 
         } catch (error) {
@@ -49,12 +50,14 @@ export const authOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
+        token.mustChangePassword = user.mustChangePassword;
       }
       return token;
     },
     async session({ session, token }) {
       if (session?.user) {
         session.user.role = token.role;
+        session.user.mustChangePassword = Boolean(token.mustChangePassword);
       }
       return session;
     }

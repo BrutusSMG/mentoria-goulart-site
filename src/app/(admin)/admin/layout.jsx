@@ -10,6 +10,10 @@ export default async function AdminLayout({ children }) {
     redirect('/admin-login');  // ← era '/admin/login', corrigido para '/admin-login'
   }
 
+   if (session.user?.mustChangePassword) {
+    redirect("/alterar-senha");
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex">
       <aside className="w-64 bg-black border-r border-zinc-900 flex flex-col shrink-0">
