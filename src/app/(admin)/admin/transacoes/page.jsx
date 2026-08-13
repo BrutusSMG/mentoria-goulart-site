@@ -227,7 +227,7 @@ export default function TransacoesPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-[1120px] w-full text-left">
+            <table className="min-w-280 w-full text-left">
               <thead className="bg-zinc-800/70 text-zinc-400 text-xs uppercase tracking-wide">
                 <tr>
                   <th className="p-4 font-semibold">Transação / comprador</th>

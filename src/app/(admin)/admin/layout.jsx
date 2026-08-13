@@ -40,6 +40,16 @@ export default async function AdminLayout({ children }) {
                 Transações
               </a>
             </li>
+            {session.user.role === "ADMIN" ? (
+              <li>
+                <a
+                  href="/admin/usuarios"
+                  className="block p-3 rounded-lg text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors"
+                >
+                  Usuários
+                </a>
+              </li>
+            ) : null}
             <li>
               <a href="/admin/sucatas" className="block p-3 rounded-lg text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors">
                 Valores de Sucata
