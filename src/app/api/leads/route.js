@@ -8,6 +8,18 @@ import { prisma } from '@/lib/prisma'; // Importando a conexão com o banco
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+function escaparHtml(valor = "") {
+  const caracteres = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  };
+
+  return String(valor).replace(/[&<>"']/g, (caractere) => caracteres[caractere]);
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -32,6 +44,8 @@ export async function POST(request) {
     if (!emailRegex.test(email) || email.endsWith('.con') || email.endsWith('.com.brr')) {
       return NextResponse.json({ error: 'E-mail inválido' }, { status: 400 });
     }
+
+    const nomeSeguro = escaparHtml(nome.trim());
 
     // 1. Salva ou Atualiza o Lead no Banco de Dados
     const lead = await prisma.lead.upsert({
@@ -63,14 +77,14 @@ export async function POST(request) {
 
     // 2. Cria o link exclusivo com o ID do lead
     // Em produção, isso será o seu domínio oficial
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mentoriagarimpourbano.com.br';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.mentoriagarimpourbano.com.br';
     const linkExclusivo = `${baseUrl}/download?leadId=${lead.id}`;
 
     // 3. Dispara o e-mail com o link exclusivo
     const data = await resend.emails.send({
       from: 'Prof. Goulart <contato@mentoriagarimpourbano.com.br>',
       to: email,
-      subject: 'Seu E-book Chegou: Como transformar lixo eletrônico em OURO 🗺️',
+      subject: 'Seu E-book Chegou: Como transformar lixo eletrônico em OURO',
       html: `
         <!DOCTYPE html>
         <html>
@@ -92,7 +106,7 @@ export async function POST(request) {
                   <!-- Logo -->
                   <tr>
                     <td align="center" style="padding-bottom:30px;">
-                      <img src="https://mentoriagarimpourbano.com.br/logo_fundoTransparentered.png" alt="Garimpo Urbano" width="150" style="display:block;">
+                      <img src="https://www.mentoriagarimpourbano.com.br/logo_fundoTransparentered.png" alt="Garimpo Urbano" width="150" style="display:block;">
                     </td>
                   </tr>
 
@@ -102,7 +116,7 @@ export async function POST(request) {
                       
                       <!-- Saudação -->
                       <h2 style="color:#ffffff; font-size:24px; margin:0 0 20px 0;">
-                        Olá, ${nome}! 👋
+                        Olá, ${nomeSeguro}.
                       </h2>
                       
                       <p style="color:#d4d4d4; font-size:16px; line-height:1.6; margin:0 0 15px 0;">
@@ -118,7 +132,7 @@ export async function POST(request) {
                         <tr>
                           <td align="center" style="padding:10px 0 30px 0;">
                             <a href="${linkExclusivo}" target="_blank" style="background-color:#d89900; color:#000000; padding:16px 32px; text-decoration:none; font-weight:bold; font-size:16px; border-radius:8px; display:inline-block; box-shadow:0 0 20px rgba(216,153,0,0.3 );">
-                              📥 BAIXAR MEU E-BOOK AGORA
+                              BAIXAR MEU E-BOOK AGORA
                             </a>
                           </td>
                         </tr>
@@ -129,7 +143,8 @@ export async function POST(request) {
 
                       <!-- Próximos passos -->
                       <p style="color:#a3a3a3; font-size:14px; line-height:1.6; margin:0 0 10px 0;">
-                        <strong style="color:#d89900;">⚡ Próximos passos:</strong> Nos próximos dias, vou te enviar um <strong style="color:#ffffff;">Capítulo Extra exclusivo</strong> direto no seu e-mail com informações que não estão no e-book. Fique de olho!
+                        <strong style="color:#d89900;">Próximos passos:</strong>
+                        nos próximos dias, você receberá uma breve reflexão sobre o conteúdo do e-book e, em seguida, um Capítulo Extra exclusivo com informações complementares. Fique de olho na sua caixa de entrada.
                       </p>
 
                       <p style="color:#d4d4d4; font-size:16px; line-height:1.6; margin:20px 0 0 0;">
