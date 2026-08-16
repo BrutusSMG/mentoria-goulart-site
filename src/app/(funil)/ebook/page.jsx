@@ -47,7 +47,14 @@ export default function EbookLandingPage() {
 
       if (response.ok && (data.sucesso || data.success)) {
         trackLead('Subdominio - Anuncio Ebook');
-        router.push('/obrigado');
+        const hostname = window.location.hostname;
+
+        const isEbookSubdomain =
+          hostname === 'ebook.mentoriagarimpourbano.com.br' ||
+          hostname.startsWith('ebook.localhost') ||
+          hostname.startsWith('ebook.127.0.0.1');
+
+        router.push(isEbookSubdomain ? '/obrigado' : '/ebook/obrigado');
       } else {
         setStatus('error');
       }
