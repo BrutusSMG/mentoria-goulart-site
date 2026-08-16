@@ -25,6 +25,13 @@ export async function POST(request) {
     const body = await request.json();
     const { nome, email, whatsapp, utms={}, telefone_secundario, origem } = body;
 
+    const origemParaPainel =
+      utms.utm_source || origem || 'Isca Digital - Ebook';
+
+    const campanhaParaPainel =
+      utms.utm_campaign || 'Acesso direto';
+
+
     // --- PROTEÇÃO CONTRA BOTS (HONEYPOT) ---
     // Mesmo padrão da /api/contato: se o campo invisível veio preenchido, é robô.
     // Respondemos sucesso para enganá-lo, mas não fazemos nada.
@@ -56,9 +63,9 @@ export async function POST(request) {
         ...(whatsapp ? { whatsapp } : {}),
         // Se ele se cadastrou de novo, resetamos o status para false
         baixouEbook: false,
-        utmSource: utms.utm_source || null,
+        utmSource: origemParaPainel,
         utmMedium: utms.utm_medium || null,
-        utmCampaign: utms.utm_campaign || null,
+        utmCampaign: campanhaParaPainel,
         utmTerm: utms.utm_term || null,
         utmContent: utms.utm_content || null
       },
@@ -67,9 +74,9 @@ export async function POST(request) {
         email, 
         whatsapp: whatsapp || '',   // campo é obrigatório no schema; vazio quando não informado
         baixouEbook: false,
-        utmSource: utms.utm_source || null,
+        utmSource: origemParaPainel,
         utmMedium: utms.utm_medium || null,
-        utmCampaign: utms.utm_campaign || null,
+        utmCampaign: campanhaParaPainel,
         utmTerm: utms.utm_term || null,
         utmContent: utms.utm_content || null
       }

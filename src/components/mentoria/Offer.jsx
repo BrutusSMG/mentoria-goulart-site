@@ -1,77 +1,86 @@
 // src/components/mentoria/Offer.jsx
 "use client";
 
+import { useEffect, useState } from 'react';
+import { Check, Package } from 'lucide-react';
 import { trackInitiateCheckout } from '@/utils/tracking';
-import Link from 'next/link';
-import { Check, Package, BookMarked, GraduationCap, Rocket } from 'lucide-react';
+import { captureUtms, getUtms } from '@/utils/utm';
 
-// Vamos reutilizar os dados dos bônus para calcular o valor total
-const bonusValue = 198 + 147 + 247; // R$592
-const courseValue = 4997;
-const totalValue = courseValue + bonusValue;
-const discountedValue = 2497;
+const HOTMART_CHECKOUT_URL = 'https://go.hotmart.com/J105438092D?dp=1&src=brevo-email-5';
+
+function montarCheckoutComUtms( ) {
+  const url = new URL(HOTMART_CHECKOUT_URL);
+  const utms = getUtms();
+
+  Object.entries(utms).forEach(([chave, valor]) => {
+    if (valor) url.searchParams.set(chave, valor);
+  });
+
+  return url.toString();
+}
 
 const Offer = () => {
+
+  function handleCheckout(event) {
+    event.preventDefault();
+
+    // Garante a captura da origem atual antes de sair do site.
+    captureUtms();
+
+    // Dispara o evento Meta antes da navegação para a Hotmart.
+    trackInitiateCheckout('Curso Garimpo Urbano com Mentoria', 2497);
+
+    // Leva para a Hotmart com UTM + src, sem expor o e-mail do Lead.
+    window.location.assign(montarCheckoutComUtms());
+  }
+
   return (
-    <section id="oferta" className="bg-[#171f35] py-16 md:py-24 px-4">
+    <section id="oferta" className="bg-[#171f35] px-4 py-16 md:py-24">
       <div className="container mx-auto max-w-4xl text-center">
-        
-        {/* Card de Oferta Principal */}
-        <div className="bg-gray-900 border-2 border-[#d89900] rounded-2xl shadow-2xl shadow-[#d89900]/20 p-6 md:p-10 mx-auto">
-
-          {/* Título da Oferta */}
-          <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-2">
-            Sua Vaga na Mentoria Garimpo Urbano
+        <div className="mx-auto rounded-2xl border-2 border-[#d89900] bg-gray-900 p-6 shadow-2xl shadow-[#d89900]/20 md:p-10">
+          <h2 className="mb-3 text-3xl font-extrabold text-white md:text-4xl">
+            Acesso à Mentoria Garimpo Urbano
           </h2>
-          <p className="text-yellow-400 font-semibold mb-8">OFERTA ESPECIAL DE LANÇAMENTO</p>
 
-          {/* Lista de Entregáveis (O que o aluno leva) */}
-          <div className="text-left max-w-md mx-auto space-y-4 mb-10">
+          <p className="mb-8 text-zinc-300">
+            Uma trilha de aprendizagem progressiva para quem quer estudar recuperação de metais preciosos com mais clareza, orientação e responsabilidade.
+          </p>
+
+          <div className="mx-auto mb-10 max-w-md space-y-4 text-left">
             <p className="flex items-start gap-3 text-lg">
-              <Check className="h-6 w-6 text-green-500 shrink-0 mt-1" />
-              <span>1 ano de acesso completo aos <strong className="text-white">Módulos do Curso</strong></span>
-            </p>            
-            <p className="flex items-start gap-3 text-lg">
-              <Check className="h-6 w-6 text-green-500 shrink-0 mt-1" />
-              <span>Acesso à <strong className="text-white">Comunidade VIP</strong> de alunos</span>
+              <Check className="mt-1 h-6 w-6 shrink-0 text-green-500" />
+              <span>1 ano de acesso aos <strong className="text-white">módulos do curso</strong></span>
             </p>
-            <p className="flex items-center gap-3 text-lg text-yellow-400">
-              <Package className="h-6 w-6 shrink-0 mt-1" /> 
-              <span><strong className="text-white">Pacote de Bônus Exclusivos</strong></span>
-            </p>           
+            <p className="flex items-start gap-3 text-lg">
+              <Check className="mt-1 h-6 w-6 shrink-0 text-green-500" />
+              <span>Acesso à <strong className="text-white">comunidade de alunos</strong></span>
+            </p>
+            <p className="flex items-start gap-3 text-lg">
+              <Package className="mt-1 h-6 w-6 shrink-0 text-[#d89900]" />
+              <span><strong className="text-white">Materiais complementares</strong> incluídos na proposta</span>
+            </p>
           </div>
 
-          {/* Bloco de Preço */}
           <div className="mb-8">
-            <div className="text-center mb-4">
-              <span className="text-gray-400">Valor total do pacote: </span>
-              <span className="text-red-500 line-through text-xl">R${totalValue.toFixed(2).replace('.', ',')}</span>
-            </div>
-            <p className="text-lg text-white mb-2">
-              Hoje, por apenas 12x de
+            <p className="mb-2 text-lg text-white">Investimento</p>
+            <p className="text-5xl font-extrabold text-green-500 sm:text-7xl md:text-8xl">
+              12x de R$258,25
             </p>
-            <p className="text-5xl sm:text-7xl md:text-8xl font-extrabold text-green-500 animate-pulse">
-              R$281,57
-            </p>
-            <p className="text-lg text-white mt-2">
-              ou {discountedValue.toFixed(2).replace('.', ',')} à vista
-            </p>
+            <p className="mt-2 text-lg text-white">ou R$2.497,00 à vista</p>
           </div>
 
-          {/* Botão de CTA */}
           <div className="mt-10">
-            <Link 
-              href="https://go.hotmart.com/J105438092D?dp=1"
-              onClick={() => trackInitiateCheckout('Curso + Mentoria', 2497)}
-              className="bg-[#d89900] text-white font-bold text-2xl md:text-3xl py-5 px-8 rounded-lg shadow-lg shadow-[#d89900]/50 hover:bg-[#c68a00] hover:scale-105 transition-all duration-300 ease-in-out inline-block"
+            <a
+              href={HOTMART_CHECKOUT_URL}
+              onClick={handleCheckout}
+              className="inline-block rounded-lg bg-[#d89900] px-8 py-5 text-2xl font-bold text-black shadow-lg shadow-[#d89900]/50 transition-all duration-300 ease-in-out hover:scale-105 hover:bg-[#F7FA83] md:text-3xl"
             >
-              SIM, QUERO GARANTIR MINHA VAGA AGORA!
-            </Link>
+              QUERO ENTRAR NA MENTORIA
+            </a>
           </div>
 
-          {/* Gatilho de Urgência */}
-          <p className="text-gray-500 text-sm mt-8">
-            ⚠️ Vagas limitadas. Esta oferta pode encerrar a qualquer momento.
+          <p className="mt-6 text-sm text-zinc-400">
+            Compra processada pela Hotmart. Você conta com garantia de 7 dias, conforme as condições apresentadas no checkout.
           </p>
         </div>
       </div>

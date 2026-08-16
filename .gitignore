@@ -45,3 +45,6 @@ next-env.d.ts
 
 scripts/create-admin.js
 scripts/check-admin.js
+
+# Scripts locais de validação
+teste-c-hotmart-brevo.ps1

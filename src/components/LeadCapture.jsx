@@ -27,7 +27,11 @@ const LeadCapture = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...formData, utms: getUtms() }),
+        body: JSON.stringify({
+          ...formData,
+          utms: getUtms(),
+          origem: 'Isca Digital - Ebook',
+        }),
       });
 
       if (!response.ok) {

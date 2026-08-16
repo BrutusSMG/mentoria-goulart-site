@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { timingSafeEqual } from "crypto";
+import { moverCompradorParaPosVenda } from '@/lib/brevo';
 
 export const runtime = "nodejs";
 
@@ -212,6 +213,31 @@ export async function POST(req) {
           aprovadoEm: dataHotmart(compra?.approved_date),
         },
       });
+
+      const compraConfirmada = [
+        "PURCHASE_APPROVED",
+        "PURCHASE_COMPLETE",
+      ].includes(evento);
+
+      if (lead && compraConfirmada) {
+        await tx.lead.update({
+          where: { id: lead.id },
+          data: {
+            comprouMentoria: true,
+            comprouMentoriaEm: dataHotmart(compra?.approved_date) || new Date(),
+          },
+        });
+      }
+
+      if (compraConfirmada && emailComprador) {
+        await moverCompradorParaPosVenda(emailComprador);
+
+        console.info('Comprador sincronizado no Brevo', {
+          evento,
+          transacaoCodigo,
+        });
+      }
+
     });
 
     return resposta({ received: true }, 200);

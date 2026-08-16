@@ -43,15 +43,8 @@ const Hero = () => {
             <div className="flex flex-col items-center md:items-start text-center md:text-left">
               
               {/* Vagas abertas para a mentoria */}
-              <div className="inline-flex items-center gap-4 bg-[#d89900]/10 border border-[#d89900]/40 text-[#d89900] font-bold uppercase tracking-widest px-5 py-1.5 rounded-full text-xs md:text-sm mb-6 backdrop-blur-sm shadow-[0_0_15px_rgba(216,153,0,0.15)]">
-    
-                {/* Efeito de Bolinha Pulsante (Live Status) */}
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d89900] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-[#d89900]"></span>
-                </span>
-                
-                Vagas Abertas Para a Mentoria
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#d89900]/40 bg-[#d89900]/10 px-5 py-1.5 text-xs font-bold uppercase tracking-widest text-[#d89900] backdrop-blur-sm shadow-[0_0_15px_rgba(216,153,0,0.15)] md:text-sm">
+                Mentoria Garimpo Urbano
               </div>
               
               {/* Imagem */}
@@ -120,7 +113,7 @@ const Hero = () => {
                 }}
                 className="bg-[#d89900] text-black font-bold text-lg py-4 px-8 rounded-lg hover:bg-[#F7FA83] transition-colors inline-block"
               >
-                QUERO GARANTIR MINHA VAGA AGORA!
+                CONHECER A MENTORIA
               </a>
 
               <a 
