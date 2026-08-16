@@ -277,7 +277,7 @@ export default function AdminDashboardPage() {
           ) : (
             <div className="divide-y divide-zinc-800">
               {hotmart.vendasPorProduto.slice(0, 6).map((produto) => (
-                <div key={`${produto.produtoId}-${produto.moeda}`} className="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div key={`${produto.produtoId}-${produto.moeda}-${produto.produtoNome || "produto-sem-nome"}`} className="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-medium text-white truncate">{produto.produtoNome || `Produto ${produto.produtoId}`}</p>
                     <p className="text-xs text-zinc-600 mt-1">{produto.vendas.toLocaleString("pt-BR")} venda{produto.vendas === 1 ? "" : "s"} aprovada{produto.vendas === 1 ? "" : "s"}</p>
