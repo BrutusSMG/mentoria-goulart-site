@@ -52,7 +52,7 @@ export default function AdminMobileNavigation({ items, usuario }) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-zinc-900 bg-black/95 px-4 backdrop-blur md:hidden">
+      <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-zinc-900 bg-black/95 px-4 backdrop-blur md:hidden">
         <button
           type="button"
           onClick={() => setAberto(true)}
@@ -63,18 +63,17 @@ export default function AdminMobileNavigation({ items, usuario }) {
           <Menu className="h-5 w-5" />
         </button>
 
-        <div className="flex min-w-0 flex-1 items-center justify-center gap-2 px-2 text-center">
+        <div className="flex min-w-0 flex-1 flex-col items-center justify-center px-2 text-center">
           <Image
             src="/logo_fundoTransparentered.png"
             alt="Garimpo Urbano"
-            width={32}
-            height={32}
-            className="h-8 w-8 shrink-0 object-contain"
+            width={56}
+            height={56}
+            className="h-12 w-12 shrink-0 object-contain"
           />
-          <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-white">Painel Administrativo</p>
-            <p className="truncate text-xs text-zinc-500">Garimpo Urbano</p>
-          </div>
+          <p className="-mt-1 truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+            Painel Administrativo
+          </p>
         </div>
 
         <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[#d89900]/30 bg-[#d89900]/10 text-sm font-bold text-[#d89900]">

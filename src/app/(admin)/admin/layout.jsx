@@ -1,12 +1,11 @@
 // src/app/(admin)/admin/layout.jsx
 import { getServerSession } from "next-auth/next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/admin-permissoes";
+import AdminDesktopNavigation from "@/components/admin/AdminDesktopNavigation";
 import AdminMobileNavigation from "@/components/admin/AdminMobileNavigation";
-import Image from "next/image";
-import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 
 const LINKS_DESKTOP = {
   dashboard: "Dashboard",
@@ -16,14 +15,6 @@ const LINKS_DESKTOP = {
   sucatas: "Valores de Sucata",
   depoimentos: "Depoimentos",
 };
-
-function classeDoLinkDesktop(ativo = false) {
-  return `block rounded-lg p-3 text-sm font-medium transition-colors ${
-    ativo
-      ? "bg-zinc-900 text-white"
-      : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
-  }`;
-}
 
 export default async function AdminLayout({ children }) {
   const session = await getServerSession(authOptions);
@@ -85,50 +76,24 @@ export default async function AdminLayout({ children }) {
 
   return (
     <div className="min-h-dvh bg-zinc-950 text-white md:flex">
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-zinc-900 bg-black md:flex">
-        <div className="border-b border-zinc-900 p-6">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/logo_fundoTransparentered.png"
-              alt="Garimpo Urbano"
-              width={40}
-              height={40}
-              className="h-10 w-10 shrink-0 object-contain"
-            />
-            <div className="min-w-0">
-              <h2 className="truncate text-xl font-bold text-[#d89900]">Garimpo Urbano</h2>
-              <p className="text-xs text-zinc-500">Painel Administrativo</p>
-            </div>
-          </div>
-        </div>
-
-        <nav className="flex-1 p-4" aria-label="Navegação administrativa">
-          <ul className="space-y-2">
-            {itensNavegacao.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={classeDoLinkDesktop(item.href === "/admin")}
-                >
-                  {item.rotulo}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <div className="border-t border-zinc-900 p-4">
-          <p className="truncate text-sm text-zinc-400">{contaAtual.nome}</p>
-          <p className="mt-1 text-xs text-zinc-600">{contaAtual.role}</p>
-          <AdminLogoutButton className="mt-4 w-full" />
-        </div>
-      </aside>
+      <AdminDesktopNavigation items={itensNavegacao} usuario={contaAtual} />
 
       <main className="min-w-0 flex-1">
         <AdminMobileNavigation items={itensNavegacao} usuario={contaAtual} />
 
-        <header className="hidden h-16 items-center border-b border-zinc-900 bg-black px-6 md:flex">
-          <h1 className="text-lg font-bold">Visão Geral</h1>
+        <header className="hidden h-40 items-center justify-center border-b border-zinc-900 bg-black md:flex">
+          <div className="flex flex-col items-center justify-center text-center">
+            <Image
+              src="/logo_fundoTransparentered.png"
+              alt="Garimpo Urbano"
+              width={128}
+              height={128}
+              className="h-32 w-32 object-contain"
+            />
+            <p className="-mt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+              Painel Administrativo
+            </p>
+          </div>
         </header>
 
         <div className="w-full p-4 sm:p-6 md:p-8">
