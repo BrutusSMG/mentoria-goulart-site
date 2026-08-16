@@ -23,18 +23,20 @@ model CotacaoHistorico {
 
 // Tabela para guardar os leads do site
 model Lead {
-  id          String   @id @default(cuid())
-  nome        String
-  email       String   @unique
-  whatsapp    String?
-  baixouEbook Boolean  @default(false)
-  utmSource   String?
-  utmMedium   String?
-  utmCampaign String?
-  utmContent  String?
-  utmTerm     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String   @id @default(cuid())
+  nome              String
+  email             String   @unique
+  whatsapp          String?
+  baixouEbook       Boolean  @default(false)
+  comprouMentoria   Boolean  @default(false)
+  comprouMentoriaEm DateTime?
+  utmSource         String?
+  utmMedium         String?
+  utmCampaign       String?
+  utmContent        String?
+  utmTerm           String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
   transacoesHotmart HotmartTransaction[]
 }
 

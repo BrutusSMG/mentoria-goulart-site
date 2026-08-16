@@ -37,6 +37,7 @@ export default function EbookLandingPage() {
         body: JSON.stringify({
           nome,
           email,
+          telefone_secundario: honeypot,
           origem: 'Subdominio - Anuncio Ebook', 
           utms: getUtms(),
         }),
@@ -45,7 +46,7 @@ export default function EbookLandingPage() {
       const data = await response.json();
 
       if (response.ok && (data.sucesso || data.success)) {
-        trackLead('Isca Digital - Ebook (Subdominio)');
+        trackLead('Subdominio - Anuncio Ebook');
         router.push('/obrigado');
       } else {
         setStatus('error');
