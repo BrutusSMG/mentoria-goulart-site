@@ -7,7 +7,7 @@ export default async function AlterarSenhaLayout({ children }) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    redirect("/admin-login");
+    redirect("/login");
   }
 
   if (!session.user?.mustChangePassword) {

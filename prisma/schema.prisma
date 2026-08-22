@@ -11,33 +11,80 @@ datasource db {
 
 // Tabela para guardar o histórico de cotações
 model CotacaoHistorico {
-  id           String   @id @default(cuid())
-  dolar        Float
-  ouro         Float
-  prata        Float
-  platina      Float
-  paladio      Float
-  rodio        Float?
-  criadoEm     DateTime @default(now())
+  id       String   @id @default(cuid())
+  dolar    Float
+  ouro     Float
+  prata    Float
+  platina  Float
+  paladio  Float
+  rodio    Float?
+  criadoEm DateTime @default(now())
 }
 
 // Tabela para guardar os leads do site
 model Lead {
-  id                String   @id @default(cuid())
-  nome              String
-  email             String   @unique
-  whatsapp          String?
-  baixouEbook       Boolean  @default(false)
-  comprouMentoria   Boolean  @default(false)
-  comprouMentoriaEm DateTime?
-  utmSource         String?
-  utmMedium         String?
-  utmCampaign       String?
-  utmContent        String?
-  utmTerm           String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  transacoesHotmart HotmartTransaction[]
+  id                   String                @id @default(cuid())
+  nome                 String
+  email                String                @unique
+  whatsapp             String?
+  baixouEbook          Boolean               @default(false)
+  comprouMentoria      Boolean               @default(false)
+  comprouMentoriaEm    DateTime?
+  jornadaContribuicoes JornadaContribuicao[]
+  utmSource            String?
+  utmMedium            String?
+  utmCampaign          String?
+  utmContent           String?
+  utmTerm              String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  transacoesHotmart    HotmartTransaction[]
+}
+
+model JornadaContribuicao {
+  id             String  @id @default(cuid())
+  leadId         String
+  idempotencyKey String? @unique
+
+  formVersion        String   @default("1.0")
+  caminho            String
+  respostas          Json
+  produtosDeclarados String[] @default([])
+
+  nomeInformado        String
+  emailInformado       String
+  whatsappInformado    String?
+  cidadeEstado         String?
+  tempoMentoria        String?
+  dataCompraAproximada String?
+
+  statusVinculo           String   @default("PENDENTE_VERIFICACAO")
+  statusOperacional       String   @default("NOVA_RESPOSTA")
+  tags                    String[] @default([])
+  interesseEntrevista     String?
+  consentimentoEntrevista Boolean  @default(false)
+  consentimentoConteudo   Boolean  @default(false)
+  melhorCanal             String?
+  contatoPreferencial     String?
+
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmContent  String?
+  utmTerm     String?
+
+  observacoesInternas String?   @db.Text
+  verificadoEm        DateTime?
+  verificadoPor       String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId, createdAt])
+  @@index([statusVinculo])
+  @@index([statusOperacional])
+  @@index([caminho])
 }
 
 // Enum para os perfis de acesso do painel admin
@@ -49,40 +96,41 @@ enum Role {
 
 // Tabela de usuários do painel admin
 model AdminUser {
-  id                 String   @id @default(cuid())
-  nome               String
-  email              String   @unique
-  senha              String
-  role               Role     @default(PARCEIRO)
-  ativo              Boolean  @default(true)
-  podeGerenciarSucatas     Boolean  @default(false)
-  podeGerenciarDepoimentos Boolean  @default(false)
-  mustChangePassword Boolean  @default(false)
-  passwordChangedAt  DateTime?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                       String    @id @default(cuid())
+  nome                     String
+  email                    String    @unique
+  senha                    String
+  role                     Role      @default(PARCEIRO)
+  ativo                    Boolean   @default(true)
+  podeGerenciarSucatas     Boolean   @default(false)
+  podeGerenciarDepoimentos Boolean   @default(false)
+  podeGerenciarJornada     Boolean   @default(false)
+  mustChangePassword       Boolean   @default(false)
+  passwordChangedAt        DateTime?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
 }
 
 // Tabela para gerenciar os valores das sucatas
 model SucataItem {
-  id            String   @id @default(cuid())
-  nome          String   // Ex: Placa de Celular
-  categoria     String   // Ex: Eletrônicos, Catalisadores
-  valorKg       Float    // Valor por KG em Reais
-  metais        String   // Metais presentes (ex: Ouro, Prata)
-  imagemUrl     String?  // Opcional: link para imagem
-  ativo         Boolean  @default(true)
+  id                String   @id @default(cuid())
+  nome              String // Ex: Placa de Celular
+  categoria         String // Ex: Eletrônicos, Catalisadores
+  valorKg           Float // Valor por KG em Reais
+  metais            String // Metais presentes (ex: Ouro, Prata)
+  imagemUrl         String? // Opcional: link para imagem
+  ativo             Boolean  @default(true)
   ultimaAtualizacao DateTime @default(now()) @updatedAt
-  atualizadoPor String?  // ID do AdminUser que atualizou
+  atualizadoPor     String? // ID do AdminUser que atualizou
 }
 
 // Tabela para gerenciar os depoimentos
 model Depoimento {
   id        String   @id @default(cuid())
-  nome      String   // Nome do aluno
+  nome      String // Nome do aluno
   texto     String   @db.Text
-  videoUrl  String?  // Opcional: link do YouTube/Vimeo
-  imagemUrl String?  // Opcional: foto do aluno
+  videoUrl  String? // Opcional: link do YouTube/Vimeo
+  imagemUrl String? // Opcional: foto do aluno
   aprovado  Boolean  @default(false) // Para moderação
   destaque  Boolean  @default(false) // Aparecer na home
   createdAt DateTime @default(now())
@@ -91,16 +139,16 @@ model Depoimento {
 // Auditoria e idempotência dos eventos recebidos da Hotmart.
 // Não armazena o payload completo para evitar guardar dados sensíveis desnecessários.
 model HotmartWebhookEvent {
-  id                 String   @id @default(cuid())
-  hotmartEventId     String   @unique
-  evento             String
-  versao             String?
-  transacaoCodigo    String?
-  produtoId          String?
-  criadoNaHotmartEm  DateTime?
-  recebidoEm         DateTime @default(now())
-  processadoEm       DateTime?
-  erroProcessamento  String?
+  id                String    @id @default(cuid())
+  hotmartEventId    String    @unique
+  evento            String
+  versao            String?
+  transacaoCodigo   String?
+  produtoId         String?
+  criadoNaHotmartEm DateTime?
+  recebidoEm        DateTime  @default(now())
+  processadoEm      DateTime?
+  erroProcessamento String?
 
   @@index([transacaoCodigo])
   @@index([produtoId])
@@ -110,24 +158,24 @@ model HotmartWebhookEvent {
 // Estado mais recente de cada transação Hotmart.
 // O código da transação impede que o mesmo pedido gere uma venda duplicada.
 model HotmartTransaction {
-  id                  String   @id @default(cuid())
-  transacaoCodigo     String   @unique
-  leadId              String?
-  emailComprador      String?
-  produtoId           String
-  produtoUcode        String?
-  produtoNome         String
-  status              String
-  valorBruto          Decimal  @db.Decimal(12, 2)
-  moeda               String   @default("BRL")
-  formaPagamento      String?
-  parcelas            Int?
-  origemSrc           String?
-  origemSck           String?
-  origemXcod          String?
-  aprovadoEm          DateTime?
-  criadoEm            DateTime @default(now())
-  atualizadoEm        DateTime @updatedAt
+  id              String    @id @default(cuid())
+  transacaoCodigo String    @unique
+  leadId          String?
+  emailComprador  String?
+  produtoId       String
+  produtoUcode    String?
+  produtoNome     String
+  status          String
+  valorBruto      Decimal   @db.Decimal(12, 2)
+  moeda           String    @default("BRL")
+  formaPagamento  String?
+  parcelas        Int?
+  origemSrc       String?
+  origemSck       String?
+  origemXcod      String?
+  aprovadoEm      DateTime?
+  criadoEm        DateTime  @default(now())
+  atualizadoEm    DateTime  @updatedAt
 
   lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
 

@@ -21,7 +21,7 @@ const productsList = [
     price: 'R$ 997,00',
     icon: <GraduationCap className="h-8 w-8 text-yellow-500" />,
     highlight: false,
-    link: '#',
+    link: 'https://go.hotmart.com/U107226996B?dp=1',
   },
   {
     id: 3,

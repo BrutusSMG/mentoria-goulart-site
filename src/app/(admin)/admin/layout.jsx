@@ -14,13 +14,14 @@ const LINKS_DESKTOP = {
   usuarios: "Usuários",
   sucatas: "Valores de Sucata",
   depoimentos: "Depoimentos",
+  jornada: 'Jornada do Aluno',
 };
 
 export default async function AdminLayout({ children }) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
-    redirect("/admin-login");
+    redirect("/login");
   }
 
   const contaAtual = await prisma.adminUser.findUnique({
@@ -32,11 +33,12 @@ export default async function AdminLayout({ children }) {
       mustChangePassword: true,
       podeGerenciarSucatas: true,
       podeGerenciarDepoimentos: true,
+      podeGerenciarJornada: true,
     },
   });
 
   if (!contaAtual?.ativo) {
-    redirect("/admin-login?erro=conta-inativa");
+    redirect("/login?erro=conta-inativa");
   }
 
   if (contaAtual.mustChangePassword) {
@@ -46,6 +48,7 @@ export default async function AdminLayout({ children }) {
   const ehAdmin = contaAtual.role === "ADMIN";
   const podeVerSucatas = ehAdmin || contaAtual.podeGerenciarSucatas;
   const podeVerDepoimentos = ehAdmin || contaAtual.podeGerenciarDepoimentos;
+  const podeVerJornada = ehAdmin || contaAtual.podeGerenciarJornada;
 
   const itensNavegacao = [];
 
@@ -67,12 +70,20 @@ export default async function AdminLayout({ children }) {
   }
 
   if (podeVerDepoimentos) {
-    itensNavegacao.push({
-      href: "/admin/depoimentos",
+  itensNavegacao.push(
+    {
+      href: '/admin/depoimentos',
       rotulo: LINKS_DESKTOP.depoimentos,
-      icone: "depoimentos",
-    });
-  }
+      icone: 'depoimentos',
+    },
+    {
+      href: '/admin/jornada',
+      rotulo: LINKS_DESKTOP.jornada,
+      icone: 'jornada',
+    },
+  );
+}
+
 
   return (
     <div className="min-h-dvh bg-zinc-950 text-white md:flex">

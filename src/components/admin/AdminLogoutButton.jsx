@@ -17,7 +17,7 @@ export default function AdminLogoutButton({
     setSaindo(true);
 
     await signOut({
-      callbackUrl: "/admin-login",
+      callbackUrl: "/login",
     });
   }
 
