@@ -3,6 +3,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { getSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { destinoInicialDoUsuario } from '@/lib/destino-pos-login';
 import {
   AlertCircle,
   BookOpenCheck,
@@ -76,19 +79,33 @@ function LinhaFunil({ titulo, valor, percentualLargura, cor = "bg-[#d89900]" }) 
 }
 
 export default function AdminDashboardPage() {
+  const router = useRouter();
+
   const [dashboard, setDashboard] = useState(null);
   const [integracoes, setIntegracoes] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
 
-  useEffect(() => {
+    useEffect(() => {
     let ativo = true;
 
     async function carregarDados() {
       try {
+        const sessao = await getSession();
+
+        if (!sessao?.user) {
+          router.replace('/login');
+          return;
+        }
+
+        if (sessao.user.role !== 'ADMIN') {
+          router.replace(destinoInicialDoUsuario(sessao.user));
+          return;
+        }
+
         const [dashboardResposta, integracoesResposta] = await Promise.all([
-          fetch("/api/admin/dashboard", { cache: "no-store" }),
-          fetch("/api/admin/integracoes/resumo", { cache: "no-store" }),
+          fetch('/api/admin/dashboard', { cache: 'no-store' }),
+          fetch('/api/admin/integracoes/resumo', { cache: 'no-store' }),
         ]);
 
         const [dashboardPayload, integracoesPayload] = await Promise.all([
@@ -97,11 +114,17 @@ export default function AdminDashboardPage() {
         ]);
 
         if (!dashboardResposta.ok) {
-          throw new Error(dashboardPayload.error || "Não foi possível carregar as métricas de leads.");
+          throw new Error(
+            dashboardPayload.error ||
+              'Não foi possível carregar as métricas de leads.',
+          );
         }
 
         if (!integracoesResposta.ok) {
-          throw new Error(integracoesPayload.error || "Não foi possível carregar as métricas das integrações.");
+          throw new Error(
+            integracoesPayload.error ||
+              'Não foi possível carregar as métricas das integrações.',
+          );
         }
 
         if (ativo) {
@@ -109,7 +132,9 @@ export default function AdminDashboardPage() {
           setIntegracoes(integracoesPayload);
         }
       } catch (error) {
-        if (ativo) setErro(error.message || "Não foi possível carregar o dashboard.");
+        if (ativo) {
+          setErro(error.message || 'Não foi possível carregar o dashboard.');
+        }
       } finally {
         if (ativo) setLoading(false);
       }
@@ -120,7 +145,7 @@ export default function AdminDashboardPage() {
     return () => {
       ativo = false;
     };
-  }, []);
+  }, [router]);
 
   const receitaPrincipal = useMemo(() => {
     const receitas = integracoes?.hotmart?.receitaPorMoeda || [];

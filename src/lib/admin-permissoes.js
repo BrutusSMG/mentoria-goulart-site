@@ -15,6 +15,7 @@ if (process.env.NODE_ENV !== "production") {
 const CAMPO_DO_MODULO = {
   SUCATAS: "podeGerenciarSucatas",
   DEPOIMENTOS: "podeGerenciarDepoimentos",
+  JORNADA: "podeGerenciarJornada",
 };
 
 export async function obterAcessoAtual() {
@@ -35,6 +36,7 @@ export async function obterAcessoAtual() {
       mustChangePassword: true,
       podeGerenciarSucatas: true,
       podeGerenciarDepoimentos: true,
+      podeGerenciarJornada: true,
     },
   });
 

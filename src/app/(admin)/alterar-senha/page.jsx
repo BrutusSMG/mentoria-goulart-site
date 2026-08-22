@@ -43,7 +43,7 @@ export default function AlterarSenhaPage() {
 
       setConcluido(true);
       setTimeout(() => {
-        void signOut({ callbackUrl: "/admin-login?senha=atualizada" });
+        void signOut({ callbackUrl: "/login?senha=atualizada" });
       }, 1600);
     } catch (error) {
       setErro(error.message || "Não foi possível atualizar a senha.");
