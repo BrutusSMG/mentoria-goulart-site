@@ -23,7 +23,7 @@ model CotacaoHistorico {
 
 // Tabela para guardar os leads do site
 model Lead {
- id                   String                @id @default(cuid())
+  id                   String                @id @default(cuid())
   nome                 String
   email                String                @unique
   whatsapp             String?
@@ -39,6 +39,7 @@ model Lead {
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   transacoesHotmart    HotmartTransaction[]
+  aluno                Aluno?
 }
 
 model JornadaContribuicao {
@@ -76,8 +77,8 @@ model JornadaContribuicao {
   observacoesInternas String?   @db.Text
   verificadoEm        DateTime?
   verificadoPor       String?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
@@ -85,6 +86,124 @@ model JornadaContribuicao {
   @@index([statusVinculo])
   @@index([statusOperacional])
   @@index([caminho])
+}
+
+enum StatusAluno {
+  PENDENTE_ACESSO
+  ATIVO
+  SUSPENSO
+  INATIVO
+}
+
+enum OrigemAluno {
+  HOTMART
+  LEGADO
+  MANUAL
+}
+
+enum OrigemMatricula {
+  HOTMART
+  LEGADO
+  MANUAL
+}
+
+enum StatusMatricula {
+  PENDENTE
+  ATIVA
+  SUSPENSA
+  CANCELADA
+  ENCERRADA
+}
+
+enum VisibilidadePerfil {
+  PRIVADO
+  ALUNOS
+}
+
+model Aluno {
+  id                String      @id @default(cuid())
+  leadId            String?     @unique
+  nome              String
+  email             String      @unique
+  whatsapp          String?
+  senhaHash         String?
+  status            StatusAluno @default(PENDENTE_ACESSO)
+  origem            OrigemAluno @default(HOTMART)
+  emailVerificadoEm DateTime?
+  ultimoLoginEm     DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  lead              Lead?                @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  matriculas        Matricula[]
+  transacoesHotmart HotmartTransaction[]
+  perfil            PerfilAluno?
+  tokensAcesso      AlunoAccessToken[]
+
+  @@index([status])
+  @@index([origem])
+  @@index([createdAt])
+}
+
+model Matricula {
+  id           String          @id @default(cuid())
+  alunoId      String
+  produtoId    String
+  produtoUcode String?
+  produtoNome  String
+  origem       OrigemMatricula @default(HOTMART)
+  status       StatusMatricula @default(PENDENTE)
+  concedidaEm  DateTime?
+  suspensaEm   DateTime?
+  encerradaEm  DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  aluno             Aluno                @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+  transacoesHotmart HotmartTransaction[]
+
+  @@unique([alunoId, produtoId])
+  @@index([alunoId])
+  @@index([produtoId])
+  @@index([status])
+}
+
+model AlunoAccessToken {
+  id        String    @id @default(cuid())
+  alunoId   String
+  tokenHash String    @unique
+  tipo      String
+  expiraEm  DateTime
+  usadoEm   DateTime?
+  createdAt DateTime  @default(now())
+
+  aluno Aluno @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+
+  @@index([alunoId])
+  @@index([expiraEm])
+}
+
+model PerfilAluno {
+  id                 String             @id @default(cuid())
+  alunoId            String             @unique
+  nomeExibicao       String?
+  fotoUrl            String?
+  cidade             String?
+  estado             String?
+  bio                String?            @db.Text
+  experiencia        String?            @db.Text
+  objetivos          String?            @db.Text
+  mostrarFoto        Boolean            @default(false)
+  mostrarLocalizacao Boolean            @default(false)
+  mostrarBio         Boolean            @default(false)
+  mostrarExperiencia Boolean            @default(false)
+  mostrarObjetivos   Boolean            @default(false)
+  mostrarWhatsapp    Boolean            @default(false)
+  visibilidade       VisibilidadePerfil @default(PRIVADO)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  aluno Aluno @relation(fields: [alunoId], references: [id], onDelete: Cascade)
 }
 
 // Enum para os perfis de acesso do painel admin
@@ -161,6 +280,8 @@ model HotmartTransaction {
   id              String    @id @default(cuid())
   transacaoCodigo String    @unique
   leadId          String?
+  alunoId         String?
+  matriculaId     String?
   emailComprador  String?
   produtoId       String
   produtoUcode    String?
@@ -177,9 +298,13 @@ model HotmartTransaction {
   criadoEm        DateTime  @default(now())
   atualizadoEm    DateTime  @updatedAt
 
-  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  lead      Lead?      @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  aluno     Aluno?     @relation(fields: [alunoId], references: [id], onDelete: SetNull)
+  matricula Matricula? @relation(fields: [matriculaId], references: [id], onDelete: SetNull)
 
   @@index([leadId])
+  @@index([alunoId])
+  @@index([matriculaId])
   @@index([emailComprador])
   @@index([produtoId])
   @@index([status])
