@@ -13,6 +13,9 @@ export function destinosDoUsuario(usuario) {
 }
 
 export function destinoInicialDoUsuario(usuario) {
+  
+  if (usuario?.tipoConta === 'ALUNO') return '/aluno';
+
   if (usuario?.role === 'ADMIN') return '/admin';
 
   const destinos = destinosDoUsuario(usuario);
