@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { timingSafeEqual } from "crypto";
 import { moverCompradorParaPosVenda } from '@/lib/brevo';
+import { Resend } from "resend";
+import { provisionarAlunoHotmart } from '@/lib/provisionar-aluno';
 
 export const runtime = "nodejs";
 
@@ -49,6 +51,71 @@ function produtoPermitido(produtoId) {
   if (configurados.length === 0) return true;
 
   return configurados.includes(String(produtoId));
+}
+
+function escaparHtml(valor = "") {
+  const caracteres = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  };
+
+  return String(valor).replace(/[&<>"']/g, (caractere) => caracteres[caractere]);
+}
+
+function nomeDoComprador(comprador) {
+  const nome = String(comprador?.name || '').trim();
+  if (nome) return nome;
+
+  return [comprador?.first_name, comprador?.last_name]
+    .filter((parte) => typeof parte === 'string' && parte.trim())
+    .join(' ')
+    .trim() || 'Aluno';
+}
+
+function whatsappDoComprador(comprador) {
+  const telefone = comprador?.phone || comprador?.phone_number || comprador?.checkout_phone;
+  return typeof telefone === 'string' && telefone.trim() ? telefone.trim() : null;
+}
+
+async function enviarConvitePrimeiroAcesso({ email, nome, token }) {
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    console.warn('[RESEND] RESEND_API_KEY ausente; convite não enviado.');
+    return;
+  }
+
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_ALUNO_URL
+    || process.env.NEXT_PUBLIC_BASE_URL
+    || 'http://localhost:3000'
+   ).replace(/\/$/, '');
+  const link = `${baseUrl}/aluno/primeiro-acesso?token=${encodeURIComponent(token)}`;
+  const nomeSeguro = escaparHtml(nome || 'Aluno');
+
+  try {
+    await new Resend(apiKey).emails.send({
+      from: 'Prof. Goulart <contato@mentoriagarimpourbano.com.br>',
+      to: email,
+      subject: 'Seu acesso à Área do Aluno — Garimpo Urbano',
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#fff;padding:32px;border-radius:16px">
+          <p style="color:#d89900;font-weight:bold;letter-spacing:2px">GARIMPO URBANO</p>
+          <h1>Olá, ${nomeSeguro}.</h1>
+          <p>Sua compra foi confirmada. Agora você pode criar a senha do seu acesso à Área do Aluno.</p>
+          <p><a href="${link}" style="display:inline-block;background:#d89900;color:#000;padding:14px 20px;border-radius:8px;text-decoration:none;font-weight:bold">CRIAR MEU ACESSO</a></p>
+          <p style="color:#a3a3a3;font-size:13px">Este link expira em 72 horas e pode ser usado uma única vez. As aulas continuam disponíveis no ambiente da Hotmart.</p>
+        </div>
+      `,
+    });
+
+    console.info('Convite de primeiro acesso enviado', { email });
+  } catch (error) {
+    console.error('Erro ao enviar convite de primeiro acesso:', error?.message);
+  }
 }
 
 export async function POST(req) {
@@ -151,6 +218,10 @@ export async function POST(req) {
   const emailComprador = emailNormalizado(comprador.email);
   const valorRecebido = compra?.full_price?.value ?? compra?.price?.value ?? 0;
   const valorBruto = new Prisma.Decimal(String(valorRecebido));
+  const nomeDoAluno = nomeDoComprador(comprador);
+  const whatsappDoAluno = whatsappDoComprador(comprador);
+  let conviteParaEnviar = null;
+
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -173,7 +244,7 @@ export async function POST(req) {
         },
       });
 
-      await tx.hotmartTransaction.upsert({
+      const transacao = await tx.hotmartTransaction.upsert({
         where: { transacaoCodigo },
         create: {
           transacaoCodigo,
@@ -230,6 +301,40 @@ export async function POST(req) {
       }
 
       if (compraConfirmada && emailComprador) {
+        const provisionamento = await provisionarAlunoHotmart(tx, {
+          leadId: lead?.id || null,
+          email: emailComprador,
+          nome: nomeDoAluno,
+          whatsapp: whatsappDoAluno,
+          produtoId,
+          produtoUcode: produto.ucode ? String(produto.ucode) : null,
+          produtoNome,
+        });
+
+        if (provisionamento) {
+          await tx.hotmartTransaction.update({
+            where: { id: transacao.id },
+            data: {
+              alunoId: provisionamento.alunoId,
+              matriculaId: provisionamento.matriculaId,
+            },
+          });
+
+          if (provisionamento.conviteNovo && provisionamento.conviteToken) {
+            conviteParaEnviar = {
+              email: emailComprador,
+              nome: nomeDoAluno,
+              token: provisionamento.conviteToken,
+            };
+          }
+        }
+      }
+
+      if (
+        compraConfirmada
+        && emailComprador
+        && process.env.HOTMART_SYNC_BREVO !== 'false'
+      ) {
         await moverCompradorParaPosVenda(emailComprador);
 
         console.info('Comprador sincronizado no Brevo', {
@@ -239,6 +344,10 @@ export async function POST(req) {
       }
 
     });
+
+    if (conviteParaEnviar) {
+      await enviarConvitePrimeiroAcesso(conviteParaEnviar);
+    }
 
     return resposta({ received: true }, 200);
   } catch (error) {
