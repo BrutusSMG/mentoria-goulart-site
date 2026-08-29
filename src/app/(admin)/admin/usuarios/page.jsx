@@ -73,6 +73,7 @@ const dadosIniciais = {
   ativo: true,
   podeGerenciarSucatas: false,
   podeGerenciarDepoimentos: false,
+  podeGerenciarJornada: false,
 };
 
 export default function UsuariosPage() {
@@ -147,6 +148,7 @@ export default function UsuariosPage() {
       ativo: usuario.ativo,
       podeGerenciarSucatas: Boolean(usuario.podeGerenciarSucatas),
       podeGerenciarDepoimentos: Boolean(usuario.podeGerenciarDepoimentos),
+      podeGerenciarJornada: Boolean(usuario.podeGerenciarJornada),
     });
     setModal("editar");
   }
@@ -187,7 +189,7 @@ export default function UsuariosPage() {
             senhaTemporaria: form.senhaTemporaria,
             podeGerenciarSucatas: form.podeGerenciarSucatas,
             podeGerenciarDepoimentos: form.podeGerenciarDepoimentos,
-
+            podeGerenciarJornada: form.podeGerenciarJornada,
           }
         : {
             nome: form.nome,
@@ -196,6 +198,7 @@ export default function UsuariosPage() {
             senhaTemporaria: form.senhaTemporaria || undefined,
             podeGerenciarSucatas: form.podeGerenciarSucatas,
             podeGerenciarDepoimentos: form.podeGerenciarDepoimentos,
+            podeGerenciarJornada: form.podeGerenciarJornada,
           };
 
       const resposta = await fetch(url, {
@@ -308,7 +311,8 @@ export default function UsuariosPage() {
                         <div className="flex flex-wrap gap-1">
                           {usuario.podeGerenciarSucatas ? <span className="rounded bg-zinc-800 px-2 py-1 text-xs text-zinc-300">Sucatas</span> : null}
                           {usuario.podeGerenciarDepoimentos ? <span className="rounded bg-zinc-800 px-2 py-1 text-xs text-zinc-300">Depoimentos</span> : null}
-                          {!usuario.podeGerenciarSucatas && !usuario.podeGerenciarDepoimentos ? <span className="text-sm text-zinc-600">Nenhum</span> : null}
+                          {usuario.podeGerenciarJornada ? <span className="rounded bg-zinc-800 px-2 py-1 text-xs text-zinc-300">Jornada</span> : null}
+                          {!usuario.podeGerenciarSucatas && !usuario.podeGerenciarDepoimentos && !usuario.podeGerenciarJornada ? <span className="text-sm text-zinc-600">Nenhum</span> : null}
                         </div>
                       ) : (
                         <span className="text-sm text-zinc-600">Nenhum</span>
@@ -423,6 +427,21 @@ function CamposFormulario({ form, alterarCampo, criando }) {
               type="checkbox"
               checked={form.podeGerenciarDepoimentos}
               onChange={(event) => alterarCampo("podeGerenciarDepoimentos", event.target.checked)}
+              className="h-5 w-5 accent-[#d89900]"
+            />
+          </label>
+
+          <label className="mt-3 flex cursor-pointer items-center justify-between gap-4 rounded-lg border border-zinc-800 p-3">
+            <span>
+              <span className="block text-sm font-medium text-zinc-200">Jornada do Aluno</span>
+              <span className="mt-1 block text-xs text-zinc-500">
+                Consultar histórico e fazer a triagem das contribuições.
+              </span>
+            </span>
+            <input
+              type="checkbox"
+              checked={form.podeGerenciarJornada}
+              onChange={(event) => alterarCampo('podeGerenciarJornada', event.target.checked)}
               className="h-5 w-5 accent-[#d89900]"
             />
           </label>

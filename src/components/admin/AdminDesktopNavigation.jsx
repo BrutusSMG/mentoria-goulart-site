@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  ClipboardList,
   Database,
   FileText,
   PanelLeftClose,
@@ -22,6 +23,7 @@ const ICONES = {
   usuarios: Users,
   sucatas: Database,
   depoimentos: FileText,
+  jornada: ClipboardList,
 };
 
 function linkAtivo(pathname, href) {

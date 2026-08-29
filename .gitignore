@@ -45,7 +45,10 @@ next-env.d.ts
 
 scripts/create-admin.js
 scripts/check-admin.js
+scripts/criar-aluno-teste.js
 
 # Scripts locais de validação
 teste-c-hotmart-brevo.ps1
 teste-c-hotmart-publicado.ps1
+mentoria-goulart-site/
+onda-3-1-revisao.txt

@@ -12,9 +12,9 @@ export default function QuaseLaPage() {
   return (
     <main className="min-h-screen bg-black py-20 px-4 flex flex-col items-center justify-center">
       <div className="max-w-2xl w-full bg-gray-900 p-8 md:p-12 rounded-2xl border border-yellow-500/30 text-center shadow-2xl shadow-yellow-500/10">
-        
+
         <Mail className="h-20 w-20 text-yellow-500 mx-auto mb-6 animate-bounce" />
-        
+
         <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
           Falta só um passo!
         </h1>
@@ -35,20 +35,6 @@ export default function QuaseLaPage() {
         </div>
 
         <hr className="border-gray-800 mb-8" />
-
-        {/* Upsell Estratégico */}
-        <h2 className="text-2xl font-bold text-white mb-4">
-          Enquanto o e-mail chega...
-        </h2>
-        <p className="text-gray-400 mb-6">
-          Que tal conhecer a Mentoria Completa onde eu te ensino na prática, em vídeo, tudo o que você vai ler no e-book?
-        </p>
-        <Link 
-          href="/mentoria"
-          className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-black font-bold text-lg py-4 px-8 rounded-lg transition-transform hover:scale-105"
-        >
-          Conhecer a Mentoria Garimpo Urbano <ArrowRight className="h-5 w-5" />
-        </Link>
 
       </div>
     </main>

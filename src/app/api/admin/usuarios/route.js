@@ -46,6 +46,7 @@ const camposSeguros = {
   ativo: true,
   podeGerenciarSucatas: true,
   podeGerenciarDepoimentos: true,
+  podeGerenciarJornada: true,
   mustChangePassword: true,
   passwordChangedAt: true,
   createdAt: true,
@@ -98,6 +99,9 @@ export async function POST(req) {
     const podeGerenciarDepoimentos =
       role === "PARCEIRO" && body?.podeGerenciarDepoimentos === true;
 
+    const podeGerenciarJornada =
+      role === "PARCEIRO" && body?.podeGerenciarJornada === true;
+
     if (!senhaValida(senhaTemporaria)) {
       return respostaPrivada({ error: "A senha temporária deve ter no mínimo 12 caracteres." }, 400);
     }
@@ -122,6 +126,7 @@ export async function POST(req) {
         ativo: true,
         podeGerenciarSucatas,
         podeGerenciarDepoimentos,
+        podeGerenciarJornada,
         mustChangePassword: true,
       },
       select: camposSeguros,

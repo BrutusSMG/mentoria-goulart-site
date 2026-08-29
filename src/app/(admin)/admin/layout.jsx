@@ -14,13 +14,14 @@ const LINKS_DESKTOP = {
   usuarios: "Usuários",
   sucatas: "Valores de Sucata",
   depoimentos: "Depoimentos",
+  jornada: "Jornada do Aluno",
 };
 
 export default async function AdminLayout({ children }) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
-    redirect("/admin-login");
+    redirect("/login");
   }
 
   const contaAtual = await prisma.adminUser.findUnique({
@@ -32,11 +33,12 @@ export default async function AdminLayout({ children }) {
       mustChangePassword: true,
       podeGerenciarSucatas: true,
       podeGerenciarDepoimentos: true,
+      podeGerenciarJornada: true,
     },
   });
 
   if (!contaAtual?.ativo) {
-    redirect("/admin-login?erro=conta-inativa");
+    redirect("/login?erro=conta-inativa");
   }
 
   if (contaAtual.mustChangePassword) {
@@ -45,7 +47,9 @@ export default async function AdminLayout({ children }) {
 
   const ehAdmin = contaAtual.role === "ADMIN";
   const podeVerSucatas = ehAdmin || contaAtual.podeGerenciarSucatas;
-  const podeVerDepoimentos = ehAdmin || contaAtual.podeGerenciarDepoimentos;
+  const podeVerDepoimentos =
+    ehAdmin || contaAtual.podeGerenciarDepoimentos;
+  const podeVerJornada = ehAdmin || contaAtual.podeGerenciarJornada;
 
   const itensNavegacao = [];
 
@@ -53,8 +57,16 @@ export default async function AdminLayout({ children }) {
     itensNavegacao.push(
       { href: "/admin", rotulo: LINKS_DESKTOP.dashboard, icone: "dashboard" },
       { href: "/admin/leads", rotulo: LINKS_DESKTOP.leads, icone: "leads" },
-      { href: "/admin/transacoes", rotulo: LINKS_DESKTOP.transacoes, icone: "transacoes" },
-      { href: "/admin/usuarios", rotulo: LINKS_DESKTOP.usuarios, icone: "usuarios" },
+      {
+        href: "/admin/transacoes",
+        rotulo: LINKS_DESKTOP.transacoes,
+        icone: "transacoes",
+      },
+      {
+        href: "/admin/usuarios",
+        rotulo: LINKS_DESKTOP.usuarios,
+        icone: "usuarios",
+      },
     );
   }
 
@@ -71,6 +83,14 @@ export default async function AdminLayout({ children }) {
       href: "/admin/depoimentos",
       rotulo: LINKS_DESKTOP.depoimentos,
       icone: "depoimentos",
+    });
+  }
+
+  if (podeVerJornada) {
+    itensNavegacao.push({
+      href: "/admin/jornada",
+      rotulo: LINKS_DESKTOP.jornada,
+      icone: "jornada",
     });
   }
 

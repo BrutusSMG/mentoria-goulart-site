@@ -10,5 +10,6 @@ export async function GET() {
     ehAdmin: acesso.conta.role === "ADMIN",
     podeGerenciarSucatas: acesso.conta.role === "ADMIN" || acesso.conta.podeGerenciarSucatas,
     podeGerenciarDepoimentos: acesso.conta.role === "ADMIN" || acesso.conta.podeGerenciarDepoimentos,
+    podeGerenciarJornada: acesso.conta.role === "ADMIN" || acesso.conta.podeGerenciarJornada,
   }, { headers: { "Cache-Control": "private, no-store" } });
 }
