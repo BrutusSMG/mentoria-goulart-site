@@ -82,7 +82,7 @@ const Navbar = () => {
               rel="noopener noreferrer"
               className="hidden md:block border border-[#d89900] text-[#d89900] hover:bg-[#d89900] hover:text-black font-bold py-2 px-5 rounded-lg transition-all duration-300 text-sm"
             >
-              Área do Aluno
+              Área do Aluno Hotmart
             </Link>
 
             {/* Botão Hambúrguer para Mobile */}
