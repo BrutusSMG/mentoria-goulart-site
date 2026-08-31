@@ -6,7 +6,9 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (session?.user?.tipoConta !== 'ALUNO' || !session.user.alunoId) {
+  const tipoConta = session?.user?.tipoConta;
+  
+  if (!['ALUNO', 'ADMIN'].includes(tipoConta)) {
     return NextResponse.json({ ok: false, erro: 'Acesso não autorizado.' }, { status: 401 });
   }
 

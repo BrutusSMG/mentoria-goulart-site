@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 const campos = [
@@ -13,6 +14,7 @@ const campos = [
 ];
 
 export default function PerfilAlunoPage() {
+  const router = useRouter();
   const [aluno, setAluno] = useState(null);
   const [perfil, setPerfil] = useState(null);
   const [status, setStatus] = useState('loading');
@@ -23,7 +25,16 @@ export default function PerfilAlunoPage() {
     fetch('/api/alunos/meu-perfil')
       .then(async (response) => {
         const resultado = await response.json();
-        if (!response.ok) throw new Error(resultado.erro || 'Não foi possível carregar o perfil.');
+
+        if (response.status === 401 || response.status === 403) {
+          router.replace('/aluno');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(resultado.erro || 'Não foi possível carregar o perfil.');
+        }
+
         setAluno(resultado.aluno);
         setPerfil(resultado.perfil);
         setStatus('ready');
@@ -32,7 +43,7 @@ export default function PerfilAlunoPage() {
         setErro(error.message);
         setStatus('error');
       });
-  }, []);
+  }, [router]);
 
   function alterar(campo, valor) {
     setPerfil((atual) => ({ ...atual, [campo]: valor }));

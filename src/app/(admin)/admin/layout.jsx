@@ -15,6 +15,7 @@ const LINKS_DESKTOP = {
   sucatas: "Valores de Sucata",
   depoimentos: "Depoimentos",
   jornada: "Jornada do Aluno",
+  aluno: "Área do Aluno",
 };
 
 export default async function AdminLayout({ children }) {
@@ -93,6 +94,15 @@ export default async function AdminLayout({ children }) {
       icone: "jornada",
     });
   }
+
+  if (ehAdmin) {
+    itensNavegacao.push({
+      href: "/aluno",
+      rotulo: LINKS_DESKTOP.aluno,
+      icone: "usuarios",
+    });
+  }
+  
 
   return (
     <div className="min-h-dvh bg-zinc-950 text-white md:flex">
