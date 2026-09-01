@@ -11,6 +11,7 @@ import {
   ClipboardList,
   Database,
   FileText,
+  GraduationCap,
   Menu,
   ReceiptText,
   Users,
@@ -25,6 +26,7 @@ const ICONES = {
   sucatas: Database,
   depoimentos: FileText,
   jornada: ClipboardList,
+  alunos: GraduationCap,
 };
 
 function linkAtivo(pathname, href) {

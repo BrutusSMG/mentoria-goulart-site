@@ -1,10 +1,9 @@
 // src/app/api/admin/integracoes/resumo/route.js
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-const prisma = new PrismaClient();
 const STATUS_VENDA_APROVADA = ["APPROVED", "COMPLETE"];
 const STATUS_REEMBOLSO = ["REFUNDED", "PARTIALLY_REFUNDED"];
 

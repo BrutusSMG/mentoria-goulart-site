@@ -1,16 +1,9 @@
 // src/lib/admin-permissoes.js
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-const globalForPrisma = global;
-
-export const prisma =
-  globalForPrisma.prismaAdminPermissoes || new PrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prismaAdminPermissoes = prisma;
-}
+export { prisma };
 
 const CAMPO_DO_MODULO = {
   SUCATAS: "podeGerenciarSucatas",

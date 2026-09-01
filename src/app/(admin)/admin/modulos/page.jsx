@@ -1,41 +1,38 @@
-// src/app/%28admin%29/admin/modulos/page.jsx
-'use client';
-
-import Link from 'next/link';
-import { useSession } from 'next-auth/react';
-import { ClipboardList, Database, FileText, Loader2 } from 'lucide-react';
-import { destinosDoUsuario } from '@/lib/destino-pos-login';
+// src/app/(admin)/admin/modulos/page.jsx
+import Link from "next/link";
+import { getServerSession } from "next-auth/next";
+import { ClipboardList, Database, FileText } from "lucide-react";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { destinosDoUsuario } from "@/lib/destino-pos-login";
 
 const MODULOS = {
-  '/admin/jornada': {
-    titulo: 'Jornada do Aluno',
-    descricao: 'Consulte históricos e faça a triagem das contribuições.',
+  "/admin/jornada": {
+    titulo: "Jornada do Aluno",
+    descricao: "Consulte históricos e faça a triagem das contribuições.",
     Icone: ClipboardList,
   },
-  '/admin/depoimentos': {
-    titulo: 'Depoimentos',
-    descricao: 'Gerencie o conteúdo de depoimentos autorizados.',
+  "/admin/depoimentos": {
+    titulo: "Depoimentos",
+    descricao: "Gerencie o conteúdo de depoimentos autorizados.",
     Icone: FileText,
   },
-  '/admin/sucatas': {
-    titulo: 'Valores de sucata',
-    descricao: 'Gerencie os itens e valores autorizados.',
+  "/admin/sucatas": {
+    titulo: "Valores de sucata",
+    descricao: "Gerencie os itens e valores autorizados.",
     Icone: Database,
   },
 };
 
-export default function ModulosPage() {
-  const { data: sessao, status } = useSession();
+export default async function ModulosPage() {
+  const sessao = await getServerSession(authOptions);
   const destinos = destinosDoUsuario(sessao?.user);
-
-  if (status === 'loading') {
-    return <Loader2 className="mx-auto mt-20 h-7 w-7 animate-spin text-[#d89900]" />;
-  }
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
       <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-[#d89900]">Área de trabalho</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-[#d89900]">
+          Área de trabalho
+        </p>
         <h1 className="mt-2 text-3xl font-black text-white">Escolha um módulo</h1>
         <p className="mt-2 text-sm text-zinc-500">
           Acesse somente os módulos autorizados para sua conta.
@@ -63,7 +60,9 @@ export default function ModulosPage() {
                 <h2 className="mt-5 text-xl font-bold text-white group-hover:text-[#d89900]">
                   {modulo.titulo}
                 </h2>
-                <p className="mt-2 text-sm leading-relaxed text-zinc-500">{modulo.descricao}</p>
+                <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+                  {modulo.descricao}
+                </p>
               </Link>
             );
           })}

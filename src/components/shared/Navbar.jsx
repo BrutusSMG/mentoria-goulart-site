@@ -73,17 +73,7 @@ const Navbar = () => {
           </div>
 
           {/* 2. LADO DIREITO: BOTÃO ÁREA DE MEMBROS + HAMBÚRGUER */}
-          <div className="flex items-center gap-4 ml-auto">
-            
-            {/* Botão Área de Membros (Aparece só no Desktop) */}
-            <Link 
-              href="https://hotmart.com/pt-br/club/curso-garimpo-urbano" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:block border border-[#d89900] text-[#d89900] hover:bg-[#d89900] hover:text-black font-bold py-2 px-5 rounded-lg transition-all duration-300 text-sm"
-            >
-              Área do Aluno
-            </Link>
+          <div className="flex items-center gap-4 ml-auto">      
 
             {/* Botão Hambúrguer para Mobile */}
             <div className="md:hidden flex items-center">
@@ -140,19 +130,7 @@ const Navbar = () => {
                   </div>
                 )}
               </div>
-            ))}
-
-            {/* Botão Área de Membros no Mobile (Fica no final da lista) */}
-            <div className="pt-4 pb-2 border-t border-gray-800 mt-2">
-              <Link 
-                href="https://hotmart.com/pt-br/club/curso-garimpo-urbano"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full text-center bg-[#d89900] text-black font-bold py-3 rounded-lg hover:bg-[#F7FA83] transition-colors"
-              >
-                Área de Membros
-              </Link>
-            </div>
+            ))}            
 
           </div>
         </div>

@@ -6,9 +6,12 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 export default async function AlunoProtegidoLayout({ children }) {
   const sessao = await getServerSession(authOptions);
 
-  if (sessao?.user?.tipoConta !== 'ALUNO') {
+  const tipoConta = sessao?.user?.tipoConta;
+
+  if (!['ALUNO', 'ADMIN'].includes(tipoConta)) {
     redirect('/aluno/login');
   }
+
 
   return children;
 }

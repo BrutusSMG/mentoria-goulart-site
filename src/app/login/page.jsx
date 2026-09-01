@@ -24,12 +24,23 @@ export default function LoginPage() {
     setErro('');
     setStatus('loading');
 
-    const resultado = await signIn('credentials', {
-      area: 'admin',
+    const dadosLogin = {
       email: email.trim().toLowerCase(),
       password: senha,
       redirect: false,
+    };
+
+    let resultado = await signIn('credentials', {
+      ...dadosLogin,
+      area: 'admin',
     });
+
+    if (!resultado?.ok) {
+      resultado = await signIn('credentials', {
+        ...dadosLogin,
+        area: 'aluno',
+      });
+    }
 
     if (!resultado?.ok) {
       setStatus('error');
@@ -121,7 +132,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#d89900] to-[#F7FA83] px-4 py-3 text-base font-black text-black transition-all hover:shadow-[0_0_30px_rgba(216,153,0,0.5)] disabled:cursor-not-allowed disabled:opacity-70"
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-linear-to-r from-[#d89900] to-[#F7FA83] px-4 py-3 text-base font-black text-black transition-all hover:shadow-[0_0_30px_rgba(216,153,0,0.5)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {status === 'loading' ? (
               <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
