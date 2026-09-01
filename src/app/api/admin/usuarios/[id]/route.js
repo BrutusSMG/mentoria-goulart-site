@@ -46,6 +46,7 @@ const camposSeguros = {
   ativo: true,
   podeGerenciarSucatas: true,
   podeGerenciarDepoimentos: true,
+  podeGerenciarJornada: true,
   mustChangePassword: true,
   passwordChangedAt: true,
   createdAt: true,
@@ -81,6 +82,8 @@ export async function PATCH(req, { params }) {
       role === "PARCEIRO" && body?.podeGerenciarSucatas === true;
     const podeGerenciarDepoimentos =
       role === "PARCEIRO" && body?.podeGerenciarDepoimentos === true;
+    const podeGerenciarJornada =
+      role === "PARCEIRO" && body?.podeGerenciarJornada === true;
 
     if (editandoPropriaConta && (role !== alvo.role || ativo !== alvo.ativo)) {
       return respostaPrivada(
@@ -110,6 +113,7 @@ export async function PATCH(req, { params }) {
       ativo,
       podeGerenciarSucatas,
       podeGerenciarDepoimentos,
+      podeGerenciarJornada,
     };
 
     if (senhaTemporaria !== undefined && senhaTemporaria !== "") {
