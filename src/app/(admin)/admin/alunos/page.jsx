@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   AlertCircle,
   ChevronLeft,
@@ -192,7 +193,7 @@ export default function AlunosPage() {
             </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-[900px] w-full text-left">
+            <table className="min-w-225 w-full text-left">
               <thead className="bg-zinc-800/70 text-xs uppercase tracking-wide text-zinc-400">
                 <tr>
                   <th className="p-4 font-semibold">Aluno</th>
@@ -214,7 +215,13 @@ export default function AlunosPage() {
                   dados.items.map((aluno) => (
                     <tr key={aluno.id} className="transition-colors hover:bg-zinc-800/40">
                       <td className="p-4">
-                        <p className="font-medium text-white">{aluno.nome || "Sem nome"}</p>
+                        <Link
+                          href={`/admin/alunos/${aluno.id}`}
+                          className="font-medium text-white hover:text-[#d89900]"
+                        >
+                          {aluno.nome || "Sem nome"}
+                        </Link>
+
                         <p className="mt-1 text-sm text-zinc-500">{aluno.email}</p>
                       </td>
                       <td className="p-4">
