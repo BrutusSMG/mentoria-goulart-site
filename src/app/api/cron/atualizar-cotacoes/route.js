@@ -31,7 +31,7 @@ export async function GET(request) {
     ]);
 
     // 2. Busca APENAS o Ródio na GoldAPI (Gasta 1 requisição das 100 mensais)
-    let rodioUsdOz = 4750.00; // Valor padrão caso a GoldAPI falhe
+    let rodioUsdOz = null;
     
     try {
       const resRodio = await fetch(`https://www.goldapi.io/api/XRH/USD`, {
@@ -43,10 +43,20 @@ export async function GET(request) {
       } );
       if (resRodio.ok) {
         const dataRodio = await resRodio.json();
-        if (dataRodio.price) rodioUsdOz = dataRodio.price;
+
+        if (dataRodio.price) {
+          rodioUsdOz = dataRodio.price;
+        }
+      } else {
+        console.error(
+          `Aviso: GoldAPI respondeu ${resRodio.status} ao buscar o ródio.`,
+        );
       }
-    } catch (e) {
-      console.error("Aviso: Falha ao buscar Ródio na GoldAPI.");
+    } catch (error) {
+      console.error(
+        "Aviso: Falha ao buscar ródio na GoldAPI:",
+        error?.message || error,
+      );
     }
 
     // 3. Salva os valores PUROS (Onça e Dólar) no Banco de Dados
