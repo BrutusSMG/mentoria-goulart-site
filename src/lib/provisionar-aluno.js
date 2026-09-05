@@ -30,8 +30,20 @@ export async function provisionarAlunoHotmart(tx, {
 
   const alunoExistente = await tx.aluno.findUnique({
     where: { email: emailNormalizado },
-    select: { id: true, nome: true, leadId: true, senhaHash: true },
+    select: {
+      id: true,
+      nome: true,
+      leadId: true,
+      senhaHash: true,
+      status: true,
+    },
   });
+
+  const statusAluno =
+    alunoExistente &&
+    ['SUSPENSO', 'INATIVO'].includes(alunoExistente.status)
+      ? alunoExistente.status
+      : 'ATIVO';
 
   const aluno = await tx.aluno.upsert({
     where: { email: emailNormalizado },
@@ -39,7 +51,7 @@ export async function provisionarAlunoHotmart(tx, {
       nome: nome || alunoExistente?.nome || 'Aluno',
       ...(whatsapp ? { whatsapp } : {}),
       ...(alunoExistente?.leadId || leadId ? { leadId: alunoExistente?.leadId || leadId } : {}),
-      status: alunoExistente?.senhaHash ? 'ATIVO' : 'PENDENTE_ACESSO',
+      status: statusAluno,
       origem: 'HOTMART',
     },
     create: {
@@ -47,7 +59,7 @@ export async function provisionarAlunoHotmart(tx, {
       nome: nome || 'Aluno',
       email: emailNormalizado,
       whatsapp: whatsapp || null,
-      status: 'PENDENTE_ACESSO',
+      status: 'ATIVO',
       origem: 'HOTMART',
     },
   });
@@ -86,7 +98,7 @@ export async function provisionarAlunoHotmart(tx, {
 
   let conviteToken = null;
 
-  if (!aluno.senhaHash) {
+  if (!aluno.senhaHash && aluno.status === 'ATIVO') {
     const conviteExistente = await tx.alunoAccessToken.findFirst({
       where: {
         alunoId: aluno.id,

@@ -45,7 +45,7 @@ export async function POST(request) {
       select: { id: true, nome: true, status: true },
     });
 
-    if (!aluno || aluno.status === 'INATIVO') {
+    if (!aluno || aluno.status !== 'ATIVO') {
       return respostaGenerica();
     }
 

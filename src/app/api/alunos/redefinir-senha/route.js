@@ -32,7 +32,7 @@ export async function POST(request) {
       || tokenAcesso.tipo !== 'RECUPERACAO_SENHA'
       || tokenAcesso.usadoEm
       || tokenAcesso.expiraEm <= new Date()
-      || tokenAcesso.aluno.status === 'INATIVO';
+      || tokenAcesso.aluno.status !== 'ATIVO';
 
     if (invalido) return respostaErro('Este link é inválido, expirou ou já foi utilizado.');
 
@@ -44,7 +44,6 @@ export async function POST(request) {
         where: { id: tokenAcesso.alunoId },
         data: {
           senhaHash,
-          status: 'ATIVO',
         },
       }),
       prisma.alunoAccessToken.update({

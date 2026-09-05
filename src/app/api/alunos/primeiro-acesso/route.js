@@ -40,7 +40,8 @@ export async function POST(request) {
       !tokenAcesso ||
       tokenAcesso.tipo !== 'PRIMEIRO_ACESSO' ||
       tokenAcesso.usadoEm ||
-      tokenAcesso.expiraEm <= new Date();
+      tokenAcesso.expiraEm <= new Date() ||
+      tokenAcesso.aluno.status !== 'ATIVO';
 
     if (tokenInvalido) {
       return respostaErro('Este convite é inválido, expirou ou já foi utilizado.');
@@ -54,7 +55,6 @@ export async function POST(request) {
         where: { id: tokenAcesso.alunoId },
         data: {
           senhaHash,
-          status: 'ATIVO',
           emailVerificadoEm: agora,
         },
       }),
