@@ -223,6 +223,10 @@ export async function POST(req) {
   const whatsappDoAluno = whatsappDoComprador(comprador);
   let conviteParaEnviar = null;
 
+  const compraConfirmada = [
+    "PURCHASE_APPROVED",
+    "PURCHASE_COMPLETE",
+  ].includes(evento);
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -286,11 +290,6 @@ export async function POST(req) {
         },
       });
 
-      const compraConfirmada = [
-        "PURCHASE_APPROVED",
-        "PURCHASE_COMPLETE",
-      ].includes(evento);
-
       if (lead && compraConfirmada) {
         await tx.lead.update({
           where: { id: lead.id },
@@ -331,20 +330,27 @@ export async function POST(req) {
         }
       }
 
-      if (
-        compraConfirmada
-        && emailComprador
-        && process.env.HOTMART_SYNC_BREVO !== 'false'
-      ) {
+    });
+
+    if (
+      compraConfirmada
+      && emailComprador
+      && process.env.HOTMART_SYNC_BREVO !== 'false'
+    ) {
+      try {
         await moverCompradorParaPosVenda(emailComprador);
 
         console.info('Comprador sincronizado no Brevo', {
           evento,
           transacaoCodigo,
         });
+      } catch (brevoError) {
+        console.error(
+          'Erro ao sincronizar comprador no Brevo (não bloqueante):',
+          brevoError?.message || brevoError,
+        );
       }
-
-    });
+    }
 
     if (conviteParaEnviar) {
       await enviarConvitePrimeiroAcesso(conviteParaEnviar);
