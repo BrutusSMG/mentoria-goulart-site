@@ -1,6 +1,7 @@
 // src/app/api/webhooks/hotmart/route.js
 import { NextResponse } from "next/server";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { timingSafeEqual } from "crypto";
 import { moverCompradorParaPosVenda } from '@/lib/brevo';
 import { Resend } from "resend";
@@ -8,7 +9,7 @@ import { provisionarAlunoHotmart } from '@/lib/provisionar-aluno';
 
 export const runtime = "nodejs";
 
-const prisma = new PrismaClient();
+
 
 function resposta(data, status = 200) {
   return NextResponse.json(data, {

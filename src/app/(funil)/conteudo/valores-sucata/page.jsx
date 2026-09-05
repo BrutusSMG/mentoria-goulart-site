@@ -1,9 +1,8 @@
 // src/app/(funil)/conteudo/valores-sucata/page.jsx
 import { redirect } from 'next/navigation';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/lib/prisma";
 import Link from 'next/link';
 
-const prisma = new PrismaClient();
 
 export const metadata = {
   title: 'Tabela de Valores | Garimpo Urbano',

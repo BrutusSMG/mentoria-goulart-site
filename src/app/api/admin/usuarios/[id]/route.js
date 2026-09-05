@@ -1,11 +1,10 @@
 // src/app/api/admin/usuarios/[id]/route.js
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import bcrypt from "bcryptjs";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-const prisma = new PrismaClient();
 const ROLES_VALIDOS = ["ADMIN", "PARCEIRO", "FORNECEDOR"];
 
 function respostaPrivada(data, status = 200) {

@@ -2,10 +2,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/lib/prisma";
 import { ArrowRight, CheckCircle2, Quote, ShieldCheck, Sparkles } from 'lucide-react';
 
-const prisma = new PrismaClient();
 
 export const metadata = {
   title: 'Depoimentos de Alunos | Garimpo Urbano',

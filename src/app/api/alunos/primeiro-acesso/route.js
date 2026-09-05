@@ -1,10 +1,9 @@
 // src/app/api/alunos/primeiro-acesso/route.js
 import crypto from 'node:crypto';
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from "@/lib/prisma";
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
 
 function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
