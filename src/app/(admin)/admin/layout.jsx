@@ -1,9 +1,7 @@
 // src/app/(admin)/admin/layout.jsx
-import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { prisma } from "@/lib/admin-permissoes";
+import { obterAcessoAtual } from "@/lib/admin-permissoes";
 import AdminDesktopNavigation from "@/components/admin/AdminDesktopNavigation";
 import AdminMobileNavigation from "@/components/admin/AdminMobileNavigation";
 
@@ -20,28 +18,17 @@ const LINKS_DESKTOP = {
 };
 
 export default async function AdminLayout({ children }) {
-  const session = await getServerSession(authOptions);
+  const acesso = await obterAcessoAtual();
 
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
+  if (!acesso.permitido) {
+    if (acesso.status === 401) {
+      redirect("/login");
+    }
 
-  const contaAtual = await prisma.adminUser.findUnique({
-    where: { id: session.user.id },
-    select: {
-      nome: true,
-      role: true,
-      ativo: true,
-      mustChangePassword: true,
-      podeGerenciarSucatas: true,
-      podeGerenciarDepoimentos: true,
-      podeGerenciarJornada: true,
-    },
-  });
-
-  if (!contaAtual?.ativo) {
     redirect("/login?erro=conta-inativa");
   }
+
+  const contaAtual = acesso.conta;
 
   if (contaAtual.mustChangePassword) {
     redirect("/alterar-senha");

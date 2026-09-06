@@ -1,9 +1,11 @@
 // src/app/api/admin/usuarios/route.js
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
 import bcrypt from "bcryptjs";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import {
+  obterAcessoAdmin,
+  prisma,
+  respostaAcessoNegado,
+} from "@/lib/admin-permissoes";
 
 const ROLES_VALIDOS = ["ADMIN", "PARCEIRO", "FORNECEDOR"];
 
@@ -16,25 +18,6 @@ function respostaPrivada(data, status = 200) {
 
 function senhaValida(senha) {
   return typeof senha === "string" && senha.length >= 12;
-}
-
-async function exigirAdmin() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.id) {
-    return { erro: respostaPrivada({ error: "Não autorizado" }, 401) };
-  }
-
-  const contaAtual = await prisma.adminUser.findUnique({
-    where: { id: session.user.id },
-    select: { ativo: true, role: true },
-  });
-
-  if (!contaAtual?.ativo || contaAtual.role !== "ADMIN") {
-    return { erro: respostaPrivada({ error: "Acesso restrito a administradores" }, 403) };
-  }
-
-  return { session, contaAtual };
 }
 
 const camposSeguros = {
@@ -53,8 +36,8 @@ const camposSeguros = {
 };
 
 export async function GET() {
-  const acesso = await exigirAdmin();
-  if (acesso.erro) return acesso.erro;
+  const acesso = await obterAcessoAdmin();
+  if (!acesso.permitido) return respostaAcessoNegado(acesso);
 
   try {
     const usuarios = await prisma.adminUser.findMany({
@@ -70,8 +53,8 @@ export async function GET() {
 }
 
 export async function POST(req) {
-  const acesso = await exigirAdmin();
-  if (acesso.erro) return acesso.erro;
+  const acesso = await obterAcessoAdmin();
+  if (!acesso.permitido) return respostaAcessoNegado(acesso);
 
   try {
     const body = await req.json();

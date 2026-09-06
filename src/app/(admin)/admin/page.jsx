@@ -3,7 +3,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { destinoInicialDoUsuario } from '@/lib/destino-pos-login';
 import {
@@ -91,15 +90,29 @@ export default function AdminDashboardPage() {
 
     async function carregarDados() {
       try {
-        const sessao = await getSession();
+        const permissoesResposta = await fetch('/api/admin/minhas-permissoes', {
+          cache: 'no-store',
+        });
+        const permissoesPayload = await permissoesResposta.json();
 
-        if (!sessao?.user) {
+        if (permissoesResposta.status === 401) {
           router.replace('/login');
           return;
         }
 
-        if (sessao.user.role !== 'ADMIN') {
-          router.replace(destinoInicialDoUsuario(sessao.user));
+        if (permissoesResposta.status === 403) {
+          router.replace('/login?erro=conta-inativa');
+          return;
+        }
+
+        if (!permissoesResposta.ok) {
+          throw new Error(
+            permissoesPayload.error || 'Não foi possível validar suas permissões.',
+          );
+        }
+
+        if (!permissoesPayload.ehAdmin) {
+          router.replace(destinoInicialDoUsuario(permissoesPayload));
           return;
         }
 

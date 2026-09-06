@@ -1,8 +1,7 @@
 // src/app/(admin)/admin/modulos/page.jsx
 import Link from "next/link";
-import { getServerSession } from "next-auth/next";
 import { ClipboardList, Database, FileText } from "lucide-react";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { obterAcessoAtual } from "@/lib/admin-permissoes";
 import { destinosDoUsuario } from "@/lib/destino-pos-login";
 
 const MODULOS = {
@@ -24,8 +23,8 @@ const MODULOS = {
 };
 
 export default async function ModulosPage() {
-  const sessao = await getServerSession(authOptions);
-  const destinos = destinosDoUsuario(sessao?.user);
+  const acesso = await obterAcessoAtual();
+  const destinos = destinosDoUsuario(acesso.conta);
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">

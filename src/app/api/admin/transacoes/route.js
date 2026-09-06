@@ -1,8 +1,10 @@
 // src/app/api/admin/transacoes/route.js
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import {
+  obterAcessoAdmin,
+  prisma,
+  respostaAcessoNegado,
+} from "@/lib/admin-permissoes";
 
 
 function respostaPrivada(data, status = 200) {
@@ -19,11 +21,10 @@ function inteiroLimitado(valor, padrao, minimo, maximo) {
 }
 
 export async function GET(req) {
-  const session = await getServerSession(authOptions);
+  const acesso = await obterAcessoAdmin();
 
-  if (!session) return respostaPrivada({ error: "Não autorizado" }, 401);
-  if (session.user?.role !== "ADMIN") {
-    return respostaPrivada({ error: "Acesso restrito a administradores" }, 403);
+  if (!acesso.permitido) {
+    return respostaAcessoNegado(acesso);
   }
 
   try {

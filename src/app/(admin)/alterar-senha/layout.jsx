@@ -1,16 +1,15 @@
 // src/app/(admin)/alterar-senha/layout.jsx
-import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { obterAcessoAtual } from "@/lib/admin-permissoes";
 
 export default async function AlterarSenhaLayout({ children }) {
-  const session = await getServerSession(authOptions);
+  const acesso = await obterAcessoAtual();
 
-  if (!session) {
+  if (!acesso.permitido) {
     redirect("/login");
   }
 
-  if (!session.user?.mustChangePassword) {
+  if (!acesso.conta.mustChangePassword) {
     redirect("/admin");
   }
 

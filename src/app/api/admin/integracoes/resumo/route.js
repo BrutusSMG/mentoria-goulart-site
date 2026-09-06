@@ -1,8 +1,10 @@
 // src/app/api/admin/integracoes/resumo/route.js
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import {
+  obterAcessoAdmin,
+  prisma,
+  respostaAcessoNegado,
+} from "@/lib/admin-permissoes";
 
 const STATUS_VENDA_APROVADA = ["APPROVED", "COMPLETE"];
 const STATUS_REEMBOLSO = ["REFUNDED", "PARTIALLY_REFUNDED"];
@@ -97,11 +99,10 @@ async function consultarBrevo() {
 }
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
+  const acesso = await obterAcessoAdmin();
 
-  if (!session) return respostaPrivada({ error: "Não autorizado" }, 401);
-  if (session.user?.role !== "ADMIN") {
-    return respostaPrivada({ error: "Acesso restrito a administradores" }, 403);
+  if (!acesso.permitido) {
+    return respostaAcessoNegado(acesso);
   }
 
   try {

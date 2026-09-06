@@ -1,9 +1,11 @@
 // src/app/api/admin/alterar-minha-senha/route.js
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
 import bcrypt from "bcryptjs";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import {
+  obterAcessoAtual,
+  prisma,
+  respostaAcessoNegado,
+} from "@/lib/admin-permissoes";
 
 
 function respostaPrivada(data, status = 200) {
@@ -14,10 +16,10 @@ function respostaPrivada(data, status = 200) {
 }
 
 export async function POST(req) {
-  const session = await getServerSession(authOptions);
+  const acesso = await obterAcessoAtual();
 
-  if (!session?.user?.id) {
-    return respostaPrivada({ error: "Não autorizado." }, 401);
+  if (!acesso.permitido) {
+    return respostaAcessoNegado(acesso);
   }
 
   try {
@@ -43,7 +45,7 @@ export async function POST(req) {
     }
 
     const usuario = await prisma.adminUser.findUnique({
-      where: { id: session.user.id },
+      where: { id: acesso.conta.id },
       select: {
         id: true,
         senha: true,
