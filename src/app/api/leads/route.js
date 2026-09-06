@@ -1,4 +1,5 @@
 // src/app/api/leads/route.js
+import { emailValido } from '@/lib/validacoes';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,8 +51,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email) || email.endsWith('.con') || email.endsWith('.com.brr')) {
+    if (!emailValido(email)) {
       return NextResponse.json({ error: 'E-mail inválido' }, { status: 400 });
     }
 

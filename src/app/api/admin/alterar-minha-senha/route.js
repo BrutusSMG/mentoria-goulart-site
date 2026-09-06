@@ -6,7 +6,10 @@ import {
   prisma,
   respostaAcessoNegado,
 } from "@/lib/admin-permissoes";
-
+import {
+  SENHA_ADMIN_MIN,
+  senhaAdminValida,
+} from "@/lib/validacoes";
 
 function respostaPrivada(data, status = 200) {
   return NextResponse.json(data, {
@@ -32,8 +35,11 @@ export async function POST(req) {
       return respostaPrivada({ error: "Preencha todos os campos." }, 400);
     }
 
-    if (novaSenha.length < 12) {
-      return respostaPrivada({ error: "A nova senha deve ter no mínimo 12 caracteres." }, 400);
+    if (!senhaAdminValida(novaSenha)) {
+      return respostaPrivada(
+        { error: `A nova senha deve ter no mínimo ${SENHA_ADMIN_MIN} caracteres.` },
+        400,
+      );
     }
 
     if (novaSenha !== confirmarSenha) {

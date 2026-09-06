@@ -1,5 +1,6 @@
 // src/app/api/admin/depoimentos/route.js
 import { prisma, obterAcessoModulo, respostaAcessoNegado } from "@/lib/admin-permissoes";
+import { imagemUrlValida } from "@/lib/validacoes";
 
 export async function GET() {
   const acesso = await obterAcessoModulo("DEPOIMENTOS");
@@ -17,6 +18,14 @@ export async function POST(req) {
   if (!acesso.permitido) return respostaAcessoNegado(acesso);
 
   const body = await req.json();
+
+  if (!imagemUrlValida(body.imagemUrl)) {
+    return Response.json(
+      { error: "Informe uma URL de imagem válida." },
+      { status: 400 },
+    );
+  }
+
   const dados = {
     nome: String(body.nome || "").trim(),
     texto: String(body.texto || "").trim(),

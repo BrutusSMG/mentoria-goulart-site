@@ -4,6 +4,7 @@ import { Resend } from 'resend';
 import { prisma } from '@/lib/prisma';
 import { PRODUTO_SLUGS, nomeProduto } from '@/lib/jornada-produtos';
 import { JORNADA_FLAGS } from '@/lib/jornada-config';
+import { emailFormatoValido } from '@/lib/validacoes';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -185,7 +186,7 @@ export async function POST(request) {
       }, 400);
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!emailFormatoValido(email)) {
       return resposta({ error: 'E-mail inválido.' }, 400);
     }
 

@@ -3,6 +3,11 @@ import crypto from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import {
+  SENHA_ALUNO_MIN,
+  SENHA_ALUNO_MAX,
+  senhaAlunoValida,
+} from "@/lib/validacoes";
 
 function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
@@ -19,8 +24,17 @@ export async function POST(request) {
     const senha = typeof body?.senha === 'string' ? body.senha : '';
 
     if (!token) return respostaErro('Link de recuperação inválido.');
-    if (senha.length < 8) return respostaErro('A senha precisa ter pelo menos 8 caracteres.');
-    if (senha.length > 128) return respostaErro('A senha não pode ter mais de 128 caracteres.');
+    if (!senhaAlunoValida(senha)) {
+      if (senha.length < SENHA_ALUNO_MIN) {
+        return respostaErro(
+          `A senha precisa ter pelo menos ${SENHA_ALUNO_MIN} caracteres.`,
+        );
+      }
+
+      return respostaErro(
+        `A senha não pode ter mais de ${SENHA_ALUNO_MAX} caracteres.`,
+      );
+    }
 
     const tokenAcesso = await prisma.alunoAccessToken.findUnique({
       where: { tokenHash: hashToken(token) },

@@ -1,5 +1,6 @@
 // src/app/api/admin/depoimentos/[id]/route.js
 import { prisma, obterAcessoAdmin, obterAcessoModulo, respostaAcessoNegado } from "@/lib/admin-permissoes";
+import { imagemUrlValida } from "@/lib/validacoes";
 
 export async function PUT(req, { params }) {
   const acesso = await obterAcessoModulo("DEPOIMENTOS");
@@ -7,9 +8,25 @@ export async function PUT(req, { params }) {
 
   const { id } = await params;
   const body = await req.json();
+
   const atual = await prisma.depoimento.findUnique({ where: { id } });
 
-  if (!atual) return Response.json({ error: "Depoimento não encontrado." }, { status: 404 });
+  if (!atual) {
+    return Response.json(
+      { error: "Depoimento não encontrado." },
+      { status: 404 },
+    );
+  }
+
+  if (
+    body.imagemUrl !== undefined &&
+    !imagemUrlValida(body.imagemUrl)
+  ) {
+    return Response.json(
+      { error: "Informe uma URL de imagem válida." },
+      { status: 400 },
+    );
+  }
 
   const dados = {
     nome: body.nome === undefined ? atual.nome : String(body.nome).trim(),

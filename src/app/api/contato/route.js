@@ -1,4 +1,5 @@
 // src/app/api/contato/route.js
+import { emailValido } from '@/lib/validacoes';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,11 +24,7 @@ export async function POST(request) {
       return NextResponse.json({ sucesso: false, erro: "E-mail é obrigatório." }, { status: 400 });
     }
 
-    // Regex para formato básico de e-mail (texto@texto.texto)
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-    // Verifica se o formato é inválido OU se termina com erros comuns de digitação brasileiros
-    if (!emailRegex.test(email) || email.endsWith('.con') || email.endsWith('.com.brr')) {
+    if (!emailValido(email)) {
       return NextResponse.json({ sucesso: false, erro: "Por favor, insira um e-mail válido." }, { status: 400 });
     }
 

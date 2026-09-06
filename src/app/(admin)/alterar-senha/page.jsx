@@ -4,6 +4,10 @@
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { CheckCircle2, KeyRound, Loader2, LockKeyhole, ShieldCheck } from "lucide-react";
+import {
+  SENHA_ADMIN_MIN,
+  senhaAdminValida,
+} from "@/lib/validacoes";
 
 export default function AlterarSenhaPage() {
   const [senhaTemporaria, setSenhaTemporaria] = useState("");
@@ -17,8 +21,10 @@ export default function AlterarSenhaPage() {
     event.preventDefault();
     setErro("");
 
-    if (novaSenha.length < 12) {
-      setErro("A nova senha deve ter no mínimo 12 caracteres.");
+    if (!senhaAdminValida(novaSenha)) {
+      setErro(
+        `A nova senha deve ter no mínimo ${SENHA_ADMIN_MIN} caracteres.`,
+      );
       return;
     }
 
@@ -79,7 +85,10 @@ export default function AlterarSenhaPage() {
 
             <div className="flex gap-2 rounded-lg border border-zinc-800 bg-black/40 p-3 text-xs leading-relaxed text-zinc-500">
               <ShieldCheck className="h-4 w-4 shrink-0 text-[#d89900]" />
-              <p>Use pelo menos 12 caracteres e não repita a senha temporária recebida.</p>
+              <p>
+                Use pelo menos {SENHA_ADMIN_MIN} caracteres e não repita a senha
+                temporária recebida.
+              </p>
             </div>
 
             {erro ? <p className="rounded-lg bg-red-500/10 p-3 text-sm text-red-200">{erro}</p> : null}

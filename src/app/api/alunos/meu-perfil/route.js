@@ -3,6 +3,11 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
+import {
+  normalizarUf,
+  ufValida,
+  urlHttpsValida,
+} from '@/lib/validacoes';
 
 const CAMPOS_TEXTO = ['nomeExibicao', 'fotoUrl', 'cidade', 'estado', 'bio', 'experiencia', 'objetivos'];
 const CAMPOS_BOOLEANOS = ['mostrarFoto', 'mostrarLocalizacao', 'mostrarBio', 'mostrarExperiencia', 'mostrarObjetivos', 'mostrarWhatsapp'];
@@ -50,11 +55,15 @@ function validarAtualizacao(body) {
     dados.visibilidade = body.visibilidade;
   }
 
-  if (dados.estado && dados.estado.length > 2) {
-    throw new Error('Estado deve ter até 2 caracteres.');
+  if (dados.estado) {
+    if (!ufValida(dados.estado)) {
+      throw new Error('Estado/UF inválido.');
+    }
+
+    dados.estado = normalizarUf(dados.estado);
   }
 
-  if (dados.fotoUrl && !/^https:\/\//i.test(dados.fotoUrl )) {
+  if (dados.fotoUrl && !urlHttpsValida(dados.fotoUrl)) {
     throw new Error('A foto precisa usar uma URL HTTPS.');
   }
 

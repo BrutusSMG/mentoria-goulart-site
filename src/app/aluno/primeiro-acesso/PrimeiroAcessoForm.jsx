@@ -3,6 +3,11 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  SENHA_ALUNO_MIN,
+  SENHA_ALUNO_MAX,
+  senhaAlunoValida,
+} from "@/lib/validacoes";
 
 export default function PrimeiroAcessoAlunoPage() {
   const router = useRouter();
@@ -22,8 +27,17 @@ export default function PrimeiroAcessoAlunoPage() {
       return;
     }
 
-    if (senha.length < 8) {
-      setErro('A senha precisa ter pelo menos 8 caracteres.');
+    if (!senhaAlunoValida(senha)) {
+      if (senha.length < SENHA_ALUNO_MIN) {
+        setErro(
+          `A senha precisa ter pelo menos ${SENHA_ALUNO_MIN} caracteres.`,
+        );
+      } else {
+        setErro(
+          `A senha não pode ter mais de ${SENHA_ALUNO_MAX} caracteres.`,
+        );
+      }
+
       return;
     }
 
@@ -73,13 +87,13 @@ export default function PrimeiroAcessoAlunoPage() {
               type="password"
               autoComplete="new-password"
               required
-              minLength={8}
-              maxLength={128}
+              minLength={SENHA_ALUNO_MIN}
+              maxLength={SENHA_ALUNO_MAX}
               value={senha}
               onChange={(event) => setSenha(event.target.value)}
               disabled={status === 'loading'}
               className="w-full rounded-lg border border-zinc-700 bg-black px-4 py-3 text-white outline-none transition-colors focus:border-[#d89900] focus:ring-1 focus:ring-[#d89900]"
-              placeholder="Mínimo de 8 caracteres"
+              placeholder={`Mínimo de ${SENHA_ALUNO_MIN} caracteres`}
             />
           </label>
 
@@ -91,8 +105,8 @@ export default function PrimeiroAcessoAlunoPage() {
               type="password"
               autoComplete="new-password"
               required
-              minLength={8}
-              maxLength={128}
+              minLength={SENHA_ALUNO_MIN}
+              maxLength={SENHA_ALUNO_MAX}
               value={confirmacao}
               onChange={(event) => setConfirmacao(event.target.value)}
               disabled={status === 'loading'}

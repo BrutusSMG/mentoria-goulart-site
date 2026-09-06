@@ -1,5 +1,9 @@
 // src/app/api/admin/sucatas/[id]/route.js
 import { prisma, obterAcessoAdmin, obterAcessoModulo, respostaAcessoNegado } from "@/lib/admin-permissoes";
+import {
+  imagemUrlValida,
+  valorMonetarioValido,
+} from "@/lib/validacoes";
 
 export async function PUT(req, { params }) {
   const acesso = await obterAcessoModulo("SUCATAS");
@@ -7,6 +11,20 @@ export async function PUT(req, { params }) {
 
   const { id } = await params;
   const body = await req.json();
+
+  if (!valorMonetarioValido(body.valorKg)) {
+    return Response.json(
+      { error: "Informe um valor por kg válido." },
+      { status: 400 },
+    );
+  }
+
+  if (!imagemUrlValida(body.imagemUrl)) {
+    return Response.json(
+      { error: "Informe uma URL de imagem válida." },
+      { status: 400 },
+    );
+  }
 
   const item = await prisma.sucataItem.update({
     where: { id },

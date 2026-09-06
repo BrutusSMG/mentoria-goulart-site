@@ -3,10 +3,10 @@ import crypto from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { prisma } from '@/lib/prisma';
-
-function normalizarEmail(email) {
-  return String(email || '').trim().toLowerCase();
-}
+import {
+  emailFormatoValido,
+  normalizarEmail,
+} from '@/lib/validacoes';
 
 function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
@@ -36,7 +36,7 @@ export async function POST(request) {
     const body = await request.json();
     const email = normalizarEmail(body?.email);
 
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!email || !emailFormatoValido(email)) {
       return respostaGenerica();
     }
 

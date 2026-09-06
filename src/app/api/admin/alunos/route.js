@@ -1,5 +1,6 @@
 // src/app/api/admin/alunos/route.js
 import { obterAcessoAdmin, prisma, respostaAcessoNegado } from "@/lib/admin-permissoes";
+import { inteiroLimitado } from "@/lib/validacoes";
 
 function respostaPrivada(data, status = 200) {
   return Response.json(data, {
@@ -8,12 +9,6 @@ function respostaPrivada(data, status = 200) {
       "Cache-Control": "private, no-store, max-age=0",
     },
   });
-}
-
-function inteiroLimitado(valor, padrao, minimo, maximo) {
-  const numero = Number.parseInt(valor, 10);
-  if (Number.isNaN(numero)) return padrao;
-  return Math.min(Math.max(numero, minimo), maximo);
 }
 
 const STATUS_VALIDOS = new Set([

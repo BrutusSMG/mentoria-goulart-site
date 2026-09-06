@@ -6,18 +6,18 @@ import {
   prisma,
   respostaAcessoNegado,
 } from "@/lib/admin-permissoes";
-
-const ROLES_VALIDOS = ["ADMIN", "PARCEIRO", "FORNECEDOR"];
+import {
+  emailFormatoAdminValido,
+  nomeAdminValido,
+  roleAdminValida,
+  senhaAdminValida,
+} from "@/lib/validacoes";
 
 function respostaPrivada(data, status = 200) {
   return NextResponse.json(data, {
     status,
     headers: { "Cache-Control": "private, no-store, max-age=0" },
   });
-}
-
-function senhaValida(senha) {
-  return typeof senha === "string" && senha.length >= 12;
 }
 
 const camposSeguros = {
@@ -63,15 +63,15 @@ export async function POST(req) {
     const role = String(body?.role || "").trim();
     const senhaTemporaria = body?.senhaTemporaria;
 
-    if (nome.length < 2 || nome.length > 120) {
+    if (!nomeAdminValido(nome)) {
       return respostaPrivada({ error: "Informe um nome entre 2 e 120 caracteres." }, 400);
     }
 
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
+    if (!emailFormatoAdminValido(email)) {
       return respostaPrivada({ error: "Informe um e-mail válido." }, 400);
     }
 
-    if (!ROLES_VALIDOS.includes(role)) {
+    if (!roleAdminValida(role)) {
       return respostaPrivada({ error: "Perfil de acesso inválido." }, 400);
     }
 
@@ -84,7 +84,7 @@ export async function POST(req) {
     const podeGerenciarJornada =
       role === "PARCEIRO" && body?.podeGerenciarJornada === true;
 
-    if (!senhaValida(senhaTemporaria)) {
+    if (!senhaAdminValida(senhaTemporaria)) {
       return respostaPrivada({ error: "A senha temporária deve ter no mínimo 12 caracteres." }, 400);
     }
 

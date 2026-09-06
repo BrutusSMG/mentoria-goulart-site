@@ -3,7 +3,11 @@ import crypto from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { prisma } from "@/lib/prisma";
 import bcrypt from 'bcryptjs';
-
+import {
+  SENHA_ALUNO_MIN,
+  SENHA_ALUNO_MAX,
+  senhaAlunoValida,
+} from "@/lib/validacoes";
 
 function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
@@ -23,12 +27,16 @@ export async function POST(request) {
       return respostaErro('Token de primeiro acesso não informado.');
     }
 
-    if (senha.length < 8) {
-      return respostaErro('A senha precisa ter pelo menos 8 caracteres.');
-    }
+    if (!senhaAlunoValida(senha)) {
+      if (senha.length < SENHA_ALUNO_MIN) {
+        return respostaErro(
+          `A senha precisa ter pelo menos ${SENHA_ALUNO_MIN} caracteres.`,
+        );
+      }
 
-    if (senha.length > 128) {
-      return respostaErro('A senha não pode ter mais de 128 caracteres.');
+      return respostaErro(
+        `A senha não pode ter mais de ${SENHA_ALUNO_MAX} caracteres.`,
+      );
     }
 
     const tokenAcesso = await prisma.alunoAccessToken.findUnique({
