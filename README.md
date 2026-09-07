@@ -1,36 +1,240 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+﻿# Mentoria Garimpo Urbano — MGU
 
-## Getting Started
+Plataforma web da Mentoria Garimpo Urbano.
 
-First, run the development server:
+O projeto reúne o site institucional, área administrativa, área do aluno, integrações, captação de leads e demais módulos do ecossistema MGU.
+
+## Domínios
+
+Domínios principais:
+
+- `mentoriagarimpourbano.com.br`
+- `cursogarimpourbano.com`
+- `cursogarimpourbano.com.br` — domínio antigo
+
+Subdomínios:
+
+- `alunos.mentoriagarimpourbano.com.br`
+- `admin.mentoriagarimpourbano.com.br`
+- `ebook.mentoriagarimpourbano.com.br`
+
+## Stack principal
+
+- Next.js
+- React
+- Prisma
+- PostgreSQL / Neon
+- NextAuth
+- Tailwind CSS
+- Resend
+- Brevo
+- Vercel
+- Vitest
+
+## Ambientes
+
+### Desenvolvimento local
+
+Branch:
+
+`homologacao`
+
+Banco:
+
+homologação
+
+O ambiente local nunca deve usar o banco de produção.
+
+### Preview / Homologação online
+
+Branch:
+
+`homologacao`
+
+Deploy:
+
+Vercel Preview
+
+Banco:
+
+homologação
+
+O ambiente local e a Preview compartilham deliberadamente o banco de homologação.
+
+### Produção
+
+Branch:
+
+`main`
+
+Deploy:
+
+Vercel Production
+
+Banco:
+
+produção
+
+Alterações devem ser validadas primeiro em `homologacao` antes da promoção para `main`.
+
+## Fluxo de desenvolvimento
+
+Fluxo padrão:
+
+```text
+desenvolvimento local
+        ↓
+homologacao
+        ↓
+Vercel Preview
+        ↓
+validação
+        ↓
+main
+        ↓
+produção
+```
+
+Nunca aplicar alterações no banco de produção durante o desenvolvimento local.
+
+## Instalação
+
+Instale as dependências:
+
+```bash
+npm install
+```
+
+As variáveis de ambiente devem ser configuradas localmente em arquivo não versionado.
+
+Credenciais reais, tokens, senhas e URLs privadas de banco não devem ser commitados.
+
+## Comandos
+
+Executar o ambiente de desenvolvimento:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Executar lint:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+npm run lint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Executar testes automatizados:
 
-## Learn More
+```bash
+npm test
+```
 
-To learn more about Next.js, take a look at the following resources:
+Executar build:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+O build executa:
 
-## Deploy on Vercel
+```text
+prisma generate && next build
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+O processo de build não deve aplicar migrações automaticamente ao banco de dados.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Testes
+
+O projeto utiliza Vitest para testes unitários.
+
+A baseline inicial está em:
+
+```text
+tests/validacoes.test.js
+```
+
+As validações compartilhadas estão centralizadas em:
+
+```text
+src/lib/validacoes.js
+```
+
+## Documentação
+
+A documentação técnica está em:
+
+```text
+docs/
+```
+
+Estrutura:
+
+```text
+docs/
+├── arquitetura/
+├── operacao/
+├── migracoes/
+└── historico/
+```
+
+### Arquitetura vigente
+
+A fonte de verdade arquitetural é:
+
+```text
+docs/arquitetura/Arquitetura-MGU-v3.0.txt
+```
+
+Sempre que uma alteração modificar decisões arquiteturais, regras estruturais ou o roadmap, esse documento deve ser atualizado no mesmo ciclo.
+
+### Histórico
+
+Documentos antigos permanecem em:
+
+```text
+docs/historico/
+```
+
+Eles servem como registro histórico e podem descrever estados que já não representam a aplicação atual.
+
+## Banco de dados
+
+O projeto utiliza Prisma com PostgreSQL.
+
+Alterações de schema devem ser:
+
+1. desenvolvidas e revisadas em `homologacao`;
+2. aplicadas primeiro no banco de homologação;
+3. validadas funcionalmente;
+4. promovidas para produção somente após aprovação.
+
+Migrações destrutivas exigem planejamento específico.
+
+## Segurança
+
+Não versionar:
+
+- arquivos `.env`;
+- credenciais;
+- tokens;
+- senhas;
+- chaves de API;
+- URLs privadas de banco.
+
+Alterações automáticas de dependências, como `npm audit fix`, não devem ser executadas sem revisão prévia do impacto.
+
+## Branches
+
+### `homologacao`
+
+Branch de desenvolvimento e validação.
+
+### `main`
+
+Branch de produção.
+
+Mudanças devem seguir o fluxo controlado entre os ambientes.
+
+## Projeto
+
+Mentoria Garimpo Urbano — MGU

@@ -1,0 +1,1322 @@
+Arquitetura MGU v3.0
+Plano de evolução técnica e Etapa Prévia — Saneamento da Base Atual
+Status: documento-base para implementação
+Objetivo: organizar a evolução do MGU antes da criação do módulo de Fornecedores, consolidando Área do Aluno, matrículas, identidade, permissões, produtos, integrações, cotações e arquitetura administrativa.
+Este documento passa a ser a referência para as próximas alterações. A proposta é executar uma etapa por vez, sempre concluindo implementação, validação em homologação e critérios de aceite antes de avançar.
+
+1. Fluxo oficial de desenvolvimento e implantação
+A estrutura que adotaremos é:
+Ambiente
+Execução
+Branch
+Banco
+Local
+VS Code / máquina local
+homologacao durante desenvolvimento
+homologacao
+Preview
+Vercel Preview
+homologacao
+homologacao
+Produção
+Vercel Production
+main
+producao
+
+Portanto:
+DESENVOLVIMENTO LOCAL
+branch homologacao
+        │
+        ▼
+BANCO HOMOLOGAÇÃO
+        │
+        ▼
+push
+        │
+        ▼
+VERCEL PREVIEW
+branch homologacao
+        │
+        ▼
+BANCO HOMOLOGAÇÃO
+        │
+        │ validação aprovada
+        ▼
+merge homologacao → main
+        │
+        ▼
+VERCEL PRODUÇÃO
+branch main
+        │
+        ▼
+BANCO PRODUÇÃO
+Como local e preview utilizam o mesmo banco de homologação, migrations deverão ser executadas deliberadamente. Uma migration aplicada durante desenvolvimento já modifica o banco utilizado pelo Preview.
+A regra será:
+Código pode ser desenvolvido localmente livremente. Alteração estrutural de banco só é aplicada quando a etapa estiver preparada para ser testada em homologação.
+E o banco de produção nunca deverá ser usado diretamente pelo ambiente local.
+No momento da auditoria, main e homologacao estavam divergentes, portanto a primeira atividade técnica será regularizar essa situação antes de iniciar novas alterações estruturais.
+
+2. Restrições de infraestrutura
+O projeto continuará sendo pensado inicialmente para os planos gratuitos utilizados atualmente:
+Vercel;
+Neon;
+Brevo;
+Resend.
+Isso influencia diretamente a arquitetura.
+Não construiremos, neste momento, uma infraestrutura que dependa de Redis pago, filas gerenciadas, workers permanentes ou serviços adicionais obrigatórios.
+Quando precisarmos de processamento assíncrono ou reprocessamento de integrações, priorizaremos soluções baseadas no próprio PostgreSQL/Neon, como uma tabela IntegrationJob.
+A arquitetura deverá continuar sendo simples o suficiente para operar dentro desses limites, mas sem criar dependências que impeçam evolução futura.
+
+3. Conteúdo digital mantido
+Manteremos apenas:
+como-transformar-lixo-eletronico-em-ouro.pdf
+Esse PDF será o e-book gratuito entregue ao lead após informar nome e e-mail.
+O fluxo continuará sendo conceitualmente:
+Visitante
+   ↓
+Nome + E-mail
+   ↓
+Pessoa / Lead
+   ↓
+Registro da conversão
+   ↓
+Entrega do e-book
+Hoje existe uma rota que verifica o leadId, marca baixouEbook e entrega o PDF.
+O outro PDF existente em /private poderá ser removido. O repositório atualmente é público, portanto é importante entender que uma pasta chamada private protege o arquivo da exposição direta pelo Next.js, mas não o torna secreto dentro de um GitHub público. O e-book gratuito pode continuar sendo tratado como conteúdo de aquisição com acesso controlado, e não como segredo comercial.
+
+4. Arquitetura conceitual de destino
+Ao final das etapas, queremos chegar aproximadamente a:
+                        PESSOA
+                           │
+          ┌─ ─────┼  ──────┐
+          │                │                 │
+          ▼               ▼                ▼
+        LEAD     USUARIO     ALUNO
+          │                │                 │
+          │                │                 ▼
+          │                │          MATRICULA
+          │                │                 │
+          │                │                 ▼
+          │                │           PRODUTO
+          │                │
+          │                └── ACESSOS / PERMISSÕES
+          │
+          ▼
+INTERACOES DE MARKETING
+
+PESSOA
+   │
+   ▼
+PESSOA_ORGANIZACAO
+   │
+   ▼
+ORGANIZACAO
+   │
+   ▼
+FORNECEDOR
+   │
+   ├── PRODUTOS / SERVIÇOS
+   ├── LEADS / OPORTUNIDADES
+   └── MÉTRICAS
+Além desses domínios de negócio, teremos dois domínios técnicos transversais:
+INTEGRAÇÕES
+├── Hotmart
+├── Brevo
+└── Resend
+GOVERNANÇA
+├── AuditLog
+└── IntegrationJob
+Hoje Lead, Aluno e AdminUser armazenam identidades de forma independente, inclusive nome e e-mail, o que é uma das principais razões para evoluirmos para Pessoa.
+
+5. Princípios que deverão orientar todas as etapas
+Algumas regras passam a ser estruturais.
+Identidade não é acesso
+Pessoa representa quem é.
+Usuario representa como essa pessoa acessa o sistema.
+Aluno, Parceiro, representante de Fornecedor etc. representam relacionamentos que essa pessoa possui com o MGU.
+
+Senha não controla relação comercial
+Trocar ou recuperar senha nunca poderá:
+ativar matrícula;
+cancelar matrícula;
+reativar aluno;
+renovar assinatura.
+Hoje a redefinição de senha altera o Aluno.status para ATIVO, ponto que será corrigido já no saneamento.
+
+Integração externa não deverá controlar commit do banco
+A falha do Brevo ou Resend não poderá fazer uma compra válida da Hotmart deixar de ser registrada.
+Primeiro:
+BANCO
+↓
+COMMIT
+Depois:
+BREVO / RESEND
+
+Não inventaremos informação
+A regra será aplicada também às cotações.
+Se o ródio não puder ser consultado:
+INDISPONÍVEL
+e não:
+US$ 4.750,00
+apenas porque esse valor estava codificado como fallback.
+Hoje esse fallback existe na rotina da cotação.
+
+Migrações serão evolutivas
+Nas grandes alterações de banco usaremos o princípio:
+Adicionar
+↓
+Migrar
+↓
+Validar
+↓
+Trocar código
+↓
+Remover legado
+Nunca:
+Apagar tudo
+↓
+Criar arquitetura nova
+↓
+Torcer para funcionar
+
+6. Roadmap geral
+Etapa
+Objetivo
+Etapa Prévia
+Saneamento da base atual
+Etapa 1
+Conclusão da Área do Aluno e vigência de 1 ano
+Etapa 2
+Ciclo Hotmart, matrículas e integrações
+Etapa 3
+Produtos, preços, cotações e fundação administrativa
+Etapa 4
+Introdução da entidade Pessoa
+Etapa 5
+Usuários, acessos e permissões
+Etapa 6
+Consolidação de Lead, Aluno, Produto e marketing
+Etapa 7
+Organizações e relacionamentos empresariais
+Etapa 8
+Ecossistema MGU / Fornecedores
+Etapa 9
+Remoção do legado, auditoria final e estabilização
+
+Agora detalhamos cada uma.
+
+ETAPA PRÉVIA — Saneamento da Base Atual
+Objetivo
+Corrigir problemas arquiteturais e operacionais que já existem antes de alterar profundamente o modelo de dados.
+Essa etapa não introduz ainda Pessoa.
+Ela prepara o terreno.
+
+P0.1 — Regularizar main e homologacao
+STATUS: CONCLUÍDO EM 05/09/2026
+
+Precisamos começar de uma árvore Git conhecida.
+O fluxo oficial será:
+main
+   ↓ sincronização
+homologacao
+   ↓
+novos desenvolvimentos
+Não iniciaremos a refatoração enquanto houver funcionalidade exclusiva em cada branch sem reconciliação.
+
+Execução realizada:
+- main foi incorporada à homologacao por merge, preservando o commit exclusivo da homologacao referente ao detalhe administrativo do aluno.
+- Commit de merge criado: 018ed54 — Merge remote-tracking branch 'origin/main' into homologacao.
+- Após o push, o GitHub confirmou homologacao 2 commits à frente e 0 atrás de main.
+- O Preview da Vercel para o commit 018ed54 foi gerado com status Ready.
+- npm run lint executado com 0 erros e 1 warning não bloqueante em src/app/aluno/(protegido)/comunidade/page.jsx pelo uso de <img>.
+- npm run build executado com sucesso, incluindo prisma generate e build de produção do Next.js.
+- Durante a validação foi identificado um repositório Git legado aninhado em mentoria-goulart-site/, que fazia o ESLint analisar arquivos .next gerados e produzir erros falsos.
+- O repositório legado foi preservado fora da árvore ativa em P:\garimpo-urbano\arquivo-legado\mentoria-goulart-site-20260817.
+- A cópia legada preserva o branch feat/jornada-do-aluno, arquivos modificados e arquivos não rastreados, para comparação futura antes de eventual descarte definitivo.
+- Nenhuma migration de banco foi executada nesta etapa.
+
+Critério de aceite
+homologacao deve conter tudo o que está válido em main e continuar sendo o branch de desenvolvimento.
+
+Critério atendido:
+- homologacao contém integralmente main;
+- homologacao não está atrás de main;
+- homologacao permanece como branch de desenvolvimento/Preview;
+- main permanece como branch de produção.
+
+P0.2 — Formalizar separação dos bancos
+STATUS: CONCLUÍDO EM 05/09/2026
+
+Configuração formal:
+LOCAL
+DATABASE_URL → homologacao
+
+VERCEL PREVIEW
+DATABASE_URL → branch homologacao no Neon
+
+VERCEL PRODUCTION
+DATABASE_URL → branch production no Neon
+
+Regras operacionais confirmadas:
+- desenvolvimento local utiliza somente a base de homologação;
+- Vercel Preview utiliza somente a branch de homologação;
+- Vercel Production utiliza somente a branch de produção;
+- migrations e alterações locais não devem apontar para produção;
+- arquivos .env permanecem fora do Git por meio do .gitignore;
+- credenciais reais de banco não devem ser versionadas.
+
+Critério de aceite
+Ambientes Local, Preview e Produção possuem destinos de banco explicitamente separados e documentados.
+
+Critério atendido:
+- Local → homologacao;
+- Preview → homologacao;
+- Produção → production;
+- regras operacionais confirmadas.
+
+P0.3 — Limpeza dos PDFs
+STATUS: CONCLUÍDO EM 05/09/2026
+
+Definição:
+- manter somente `private/como-transformar-lixo-eletronico-em-ouro.pdf` como e-book gratuito ativo;
+- remover o e-book descontinuado `Mapa do Tesouro`.
+
+Execução realizada:
+- `private/mapa-do-tesouro.pdf` foi removido;
+- foi identificado que o mesmo PDF também existia historicamente em `public/mapa-do-tesouro.pdf`;
+- foi criado e validado um bundle completo de segurança antes da reescrita;
+- o histórico Git foi reescrito com `git-filter-repo`, removendo os dois caminhos de todas as referências reescritas:
+  - `private/mapa-do-tesouro.pdf`
+  - `public/mapa-do-tesouro.pdf`
+- `main` e `homologacao` foram atualizadas por force push controlado com `--force-with-lease`;
+- os repositórios locais foram ressincronizados com o novo histórico;
+- o e-book gratuito ativo `private/como-transformar-lixo-eletronico-em-ouro.pdf` foi preservado;
+- foi criado `private/README.md` registrando textualmente a descontinuação do material;
+- o README foi corrigido e validado no commit `9d4581e`.
+
+Critério de aceite:
+- o e-book gratuito ativo permanece disponível;
+- o `Mapa do Tesouro` não permanece na árvore atual;
+- os caminhos históricos do PDF descontinuado foram expurgados das branches reescritas;
+- existe registro textual da descontinuação sem reintroduzir o binário.
+
+Critério atendido.
+
+P0.4 — Padronizar Prisma Client
+STATUS: CONCLUÍDO EM 05/09/2026
+
+Objetivo:
+- manter uma única instância central de Prisma Client em `src/lib/prisma.js`;
+- remover instanciações diretas de `new PrismaClient()` espalhadas pela aplicação;
+- fazer os demais arquivos importarem `prisma` a partir de `@/lib/prisma`.
+
+Execução realizada:
+- foram identificados 10 arquivos com `new PrismaClient()` fora do singleton;
+- todos foram migrados para `import { prisma } from "@/lib/prisma";`;
+- no webhook Hotmart, o import de `Prisma` foi preservado separadamente porque os tipos/helpers de `Prisma` continuam sendo utilizados;
+- após a alteração, a busca por `PrismaClient` passou a retornar somente `src/lib/prisma.js`;
+- `npm run lint` executado com 0 erros e apenas o warning já conhecido de `<img>` na comunidade;
+- `npm run build` executado com sucesso;
+- commit criado e publicado em homologação:
+  - `210bf31` — `refactor: padronizar uso do prisma client`;
+- Preview da Vercel validado com status Ready;
+- repositório local permaneceu limpo e sincronizado com `origin/homologacao`.
+
+Critério de aceite:
+- apenas `src/lib/prisma.js` instancia `PrismaClient`;
+- nenhum endpoint ou página cria uma instância própria;
+- lint e build passam;
+- Preview está saudável.
+
+Critério atendido.
+
+P0.5 — Separar autenticação de status do aluno
+STATUS: CONCLUÍDO EM 05/09/2026
+
+Objetivo:
+- separar o estado de credencial do estado de negócio do aluno;
+- impedir que criação ou redefinição de senha altere indevidamente `Aluno.status`;
+- preservar estados administrativos como `SUSPENSO` e `INATIVO`;
+- restringir primeiro acesso e recuperação de senha a alunos `ATIVO`.
+
+Regras consolidadas:
+- senha e `senhaHash` representam somente a credencial;
+- `Aluno.status` representa a situação do aluno;
+- `Matricula.status` continuará representando o direito de acesso ao produto, em etapa própria;
+- aluno novo provisionado por compra Hotmart confirmada é criado como `ATIVO`;
+- aluno existente `SUSPENSO` ou `INATIVO` mantém seu status durante novo provisionamento;
+- aluno existente em situação normal é mantido/ajustado para `ATIVO` quando há compra aprovada;
+- primeiro acesso só pode ser concluído por aluno `ATIVO`;
+- primeiro acesso grava `senhaHash` e `emailVerificadoEm`, mas não altera `Aluno.status`;
+- recuperação de senha só é oferecida a aluno `ATIVO`;
+- redefinição de senha só é aceita para aluno `ATIVO` e não altera `Aluno.status`;
+- convite de primeiro acesso só é criado para aluno `ATIVO` sem senha.
+
+Execução realizada:
+- `src/lib/provisionar-aluno.js`
+  - removida a dependência entre existência de `senhaHash` e `Aluno.status`;
+  - status de alunos `SUSPENSO` e `INATIVO` passou a ser preservado;
+  - aluno novo de compra confirmada passa a ser criado como `ATIVO`;
+  - convite de primeiro acesso passou a exigir `aluno.status === 'ATIVO'`;
+- `src/app/api/alunos/primeiro-acesso/route.js`
+  - removido `status: 'ATIVO'` da atualização de credencial;
+  - token de primeiro acesso passou a ser inválido quando o aluno não está `ATIVO`;
+- `src/app/api/alunos/esqueci-senha/route.js`
+  - recuperação passou a ser disponibilizada somente para aluno `ATIVO`;
+- `src/app/api/alunos/redefinir-senha/route.js`
+  - token passou a ser inválido quando o aluno não está `ATIVO`;
+  - removido `status: 'ATIVO'` da atualização de senha;
+- `git diff --check` sem erros;
+- `npm run lint` executado com 0 erros e apenas o warning já conhecido de `<img>`;
+- `npm run build` executado com sucesso;
+- commit publicado em homologação:
+  - `0077942` — `fix: separar credenciais do status do aluno`;
+- Vercel Preview do commit validado com status Ready;
+- repositório local confirmado limpo e sincronizado com `origin/homologacao`.
+
+Critério de aceite:
+- criação/redefinição de senha não muda status do aluno;
+- alunos `SUSPENSO` ou `INATIVO` não são reativados por fluxo de credencial;
+- primeiro acesso e recuperação só funcionam para aluno `ATIVO`;
+- provisionamento comercial preserva bloqueios administrativos;
+- lint e build passam;
+- Preview está saudável.
+
+Critério atendido.
+
+P0.6 — Tirar Brevo de dentro da transação Hotmart
+STATUS: CONCLUÍDO EM 05/09/2026
+
+Objetivo:
+- garantir que a transação Prisma do webhook Hotmart contenha somente operações de banco;
+- impedir que uma falha ou lentidão da Brevo mantenha a transação aberta ou invalide o processamento da compra;
+- manter integrações externas após o COMMIT;
+- tratar a sincronização Brevo como não bloqueante nesta fase.
+
+Fluxo consolidado:
+Receber Hotmart
+      ↓
+validar
+      ↓
+transação banco
+      ↓
+COMMIT
+      ↓
+Brevo (não bloqueante)
+      ↓
+Resend convite de primeiro acesso
+
+Execução realizada:
+- `src/app/api/webhooks/hotmart/route.js`
+  - `compraConfirmada` passou a ser calculado fora da callback da transação;
+  - `moverCompradorParaPosVenda(emailComprador)` foi removido de dentro de `prisma.$transaction(...)`;
+  - a sincronização Brevo passou a ocorrer somente após o fechamento da transação;
+  - falhas da Brevo passaram a ser capturadas em `try/catch` e registradas em log sem invalidar a compra já persistida;
+  - o convite de primeiro acesso via Resend permaneceu fora da transação e com tratamento interno de falha.
+- foi revisado o restante do projeto para localizar integrações externas relevantes:
+  - Jornada já salva os dados antes de executar Resend/Brevo e usa integrações não bloqueantes;
+  - `/api/leads` não executa integrações externas dentro de transação Prisma;
+  - o problema transacional identificado no escopo do P0.6 estava concentrado no webhook Hotmart.
+- `git diff --check` sem erros;
+- `npm run lint` executado com sucesso;
+- `npm run build` executado com sucesso;
+- commit publicado em homologação:
+  - `28180e6` — `fix: remover brevo da transacao hotmart`;
+- Vercel Preview do commit validado com status Ready;
+- repositório local confirmado limpo e sincronizado com `origin/homologacao`.
+
+Limitação conhecida desta fase:
+- Brevo e Resend ainda são aguardados pela requisição HTTP após o COMMIT;
+- ainda não existe fila persistente/reprocessamento automático para integrações externas;
+- esse mecanismo será tratado posteriormente na camada de integrações/Etapa 2.
+
+Critério de aceite:
+- nenhuma chamada Brevo ocorre dentro da transação Prisma do webhook Hotmart;
+- falha da Brevo não desfaz a compra, aluno ou matrícula já gravados;
+- integrações externas ficam após o COMMIT;
+- lint e build passam;
+- Preview está saudável.
+
+Critério atendido.
+
+P0.7 — Corrigir imediatamente o comportamento das cotações
+STATUS: CONCLUÍDO EM 05/09/2026
+
+Objetivo:
+- remover cotações fictícias/fallbacks numéricos;
+- deixar indisponibilidade explícita quando a fonte de dados falhar;
+- exibir metais em R$/g na Home;
+- alinhar a mensagem de frequência de atualização ao cron realmente disponível no plano gratuito.
+
+Execução realizada:
+- `src/app/api/cron/atualizar-cotacoes/route.js`
+  - removido fallback fixo de `4750.00` para o ródio;
+  - falha da GoldAPI passa a resultar em `rodio: null`;
+  - respostas HTTP de erro da GoldAPI passam a ser registradas em log;
+  - falhas de rede/exceções passam a ser registradas sem inventar valor.
+- `src/app/api/cotacoes/route.js`
+  - removido o objeto de fallback com valores fixos;
+  - banco vazio passa a retornar todos os campos de cotação como `null`;
+  - `rodio` nulo no histórico continua nulo na API;
+  - erro de leitura do banco passa a retornar dados nulos com HTTP 503;
+  - removido o conceito `isFallback`.
+- `src/components/HomepageHero.jsx`
+  - dólar continua exibido em reais;
+  - ouro, prata, platina, paládio e ródio passam a ser exibidos em R$/g;
+  - quando não há valor real, a interface exibe `Cotação indisponível`;
+  - tooltip continua apresentando equivalências em 1g, 10g, 100g e 1kg;
+  - removida a exibição principal em US$/oz;
+  - texto `Atualizado 3x ao dia` alterado para `Atualizado diariamente`.
+- `vercel.json`
+  - mantido o cron diário existente (`0 15 * * *`), compatível com o plano gratuito atual.
+- busca final confirmou ausência de:
+  - valores fixos antigos de fallback;
+  - `isFallback`;
+  - `Atualizado 3x ao dia`;
+  - exibição `US$` e `/oz` nos arquivos tratados.
+- `git diff --check` sem erros;
+- `npm run lint` executado com sucesso;
+- `npm run build` executado com sucesso;
+- commit publicado em homologação:
+  - `01c4785` — `fix: corrigir cotacoes e remover fallbacks`;
+- deploy/Preview validado como OK;
+- repositório local confirmado limpo e sincronizado com `origin/homologacao`.
+
+Critério de aceite:
+- nenhuma cotação fictícia é apresentada como atual;
+- ródio indisponível permanece nulo;
+- falha de banco ou ausência de dados não gera preço inventado;
+- metais são apresentados em R$/g;
+- frequência informada ao usuário corresponde ao cron diário;
+- lint e build passam;
+- Preview está saudável.
+
+Critério atendido.
+
+P0.8 — Centralizar autorização administrativa
+STATUS: CONCLUÍDO EM 06/09/2026
+
+Objetivo:
+- eliminar leituras diretas e dispersas de sessão/role nas áreas administrativas;
+- tornar `src/lib/admin-permissoes.js` a fonte central de autorização administrativa baseada no estado atual do banco;
+- manter a distinção entre autenticação, acesso de ADMIN e acesso de PARCEIRO por módulo;
+- impedir que páginas exclusivas sejam renderizadas para contas sem permissão, mesmo quando a API já bloqueia a operação.
+
+Execução realizada:
+- consolidada a autorização administrativa em `src/lib/admin-permissoes.js`, com uso padronizado de:
+  - `obterAcessoAtual()` para conta autenticada e ativa;
+  - `obterAcessoAdmin()` para áreas exclusivas de ADMIN;
+  - `obterAcessoModulo()` para módulos liberados a ADMIN ou PARCEIRO autorizado;
+  - `respostaAcessoNegado()` para respostas 401/403 consistentes nas APIs.
+- rotas administrativas centralizadas:
+  - dashboard;
+  - leads;
+  - transações;
+  - resumo de integrações;
+  - usuários;
+  - edição de usuário;
+  - alteração da própria senha.
+- removidos helpers locais duplicados de autorização e leituras diretas de `session.user.role` nas rotas tratadas.
+- layouts administrativos passaram a consultar o estado atual da conta no banco, preservando:
+  - conta ativa;
+  - `mustChangePassword`;
+  - role atual;
+  - permissões atuais por módulo.
+- `/admin` passou a decidir o destino no servidor antes de renderizar o dashboard:
+  - ADMIN permanece no dashboard;
+  - PARCEIRO é redirecionado diretamente para `/admin/modulos` ou para seu único módulo permitido;
+  - eliminado o flash visual do dashboard/erro antes do redirecionamento.
+- criados guards server-side exclusivos de ADMIN para:
+  - `/admin/usuarios`;
+  - `/admin/leads`;
+  - `/admin/transacoes`;
+  - `/admin/alunos` e suas rotas filhas.
+- quando um PARCEIRO tenta abrir uma dessas áreas, a página interna não é montada e a interface exibe apenas a mensagem de acesso restrito, sem tabelas, botões, formulários ou dados do módulo.
+- mantida a segurança das APIs como camada autoritativa; a proteção de página foi adicionada como defesa complementar e melhoria de UX.
+- `FORNECEDOR` não recebe acesso administrativo global por flags de módulo; o modelo definitivo de usuários/permissões continua reservado para a Etapa 5.
+- busca final por `getServerSession`, `getSession`, `session.user`, `sessao.user`, `authOptions` e helpers locais confirmou que, dentro das áreas administrativas tratadas, as leituras diretas ficaram centralizadas apenas em `src/lib/admin-permissoes.js`.
+- `git diff --check` sem erros;
+- `npm run lint` executado com 0 erros e apenas o warning pré-existente de `<img>` na página da comunidade do aluno;
+- `npm run build` executado com sucesso em todas as correções;
+- commits publicados em homologação:
+  - `306383b` — `refactor: centralizar autenticacao administrativa`;
+  - `9271308` — `fix: bloquear modulos exclusivos no servidor`;
+  - `84c618a` — `fix: evitar flash do dashboard para parceiro`;
+- deploys de Preview concluídos com sucesso;
+- validação funcional realizada no Preview com contas ADMIN e PARCEIRO:
+  - ADMIN acessa normalmente dashboard e módulos exclusivos;
+  - PARCEIRO acessa apenas módulos permitidos;
+  - módulos exclusivos exibem acesso restrito sem carregar seu conteúdo;
+  - `/admin` redireciona o PARCEIRO sem flash visual.
+
+Critério de aceite:
+- autorização administrativa passa por uma fonte central baseada no banco;
+- páginas e APIs exclusivas de ADMIN rejeitam PARCEIRO/FORNECEDOR;
+- módulos compartilháveis respeitam as flags de permissão do PARCEIRO;
+- mudanças de role, status e permissões no banco não dependem de dados antigos da sessão para autorizar acesso;
+- páginas restritas não renderizam conteúdo sensível antes da negação;
+- lint e build passam;
+- Preview está saudável e os fluxos ADMIN/PARCEIRO foram validados.
+
+Critério atendido.
+
+P0.9 — Criar validações mínimas compartilhadas
+STATUS: CONCLUÍDO EM 06/09/2026
+
+Objetivo:
+- reduzir validações duplicadas e conversões diretas de dados recebidos;
+- criar uma camada mínima reaproveitável sem introduzir dependência nova desnecessária;
+- preservar, sempre que possível, os contratos já aceitos por cada rota, evitando endurecimento silencioso de regras durante a centralização.
+
+Decisão de implementação:
+- adotadas funções internas compartilhadas em `src/lib/validacoes.js`;
+- Zod não foi introduzido nesta etapa;
+- regras só foram centralizadas quando havia semântica comprovadamente compartilhada;
+- validações específicas de domínio permaneceram nos seus próprios módulos quando uma abstração genérica não traria ganho real.
+
+Camada compartilhada criada:
+- e-mail:
+  - `normalizarEmail()`;
+  - `emailFormatoValido()` para o formato básico já utilizado em Jornada e recuperação de senha;
+  - `emailFormatoAdminValido()` para preservar exatamente o contrato histórico da criação de usuários administrativos;
+  - `emailValido()` para o formato básico mais bloqueio dos erros conhecidos `.con` e `.com.brr` utilizados em Leads/Contato;
+- nome administrativo:
+  - `nomeAdminValido()`;
+  - constantes de mínimo 2 e máximo 120 caracteres;
+- senha administrativa:
+  - `senhaAdminValida()`;
+  - mínimo centralizado em 12 caracteres;
+- senha de aluno:
+  - `senhaAlunoValida()`;
+  - mínimo 8 e máximo 128 caracteres centralizados, sem misturar a política de senha administrativa;
+- role administrativa:
+  - `ROLES_ADMIN` e `roleAdminValida()` para ADMIN, PARCEIRO e FORNECEDOR;
+- paginação:
+  - `inteiroLimitado()` substituiu três implementações idênticas em Alunos, Leads e Transações administrativas;
+  - os helpers de paginação da Jornada foram mantidos separados porque possuem semântica diferente;
+- valores monetários:
+  - `valorMonetarioValido()` exige número finito maior ou igual a zero;
+  - aplicado a `valorKg` de Sucatas antes da conversão/persistência;
+- imagens/URLs:
+  - `imagemUrlValida()` aceita ausência de imagem, caminhos relativos já suportados pelo projeto (`/...` e `public/...`) e URLs HTTP/HTTPS válidas;
+  - aplicado em Sucatas e Depoimentos;
+  - `urlHttpsValida()` preserva a regra histórica do campo `fotoUrl` do perfil do aluno, que exige prefixo HTTPS;
+  - `videoUrl` de Depoimentos não foi tratado como URL genérica porque atualmente representa o ID do vídeo do YouTube;
+- UF:
+  - `UFS_BRASIL`, `normalizarUf()` e `ufValida()`;
+  - perfil do aluno passa a aceitar UF em minúsculas/maiúsculas, normalizar para maiúsculas e rejeitar siglas inexistentes.
+
+Decisões explícitas de não generalização nesta fase:
+- telefone/WhatsApp continua específico por fluxo, pois Jornada, Leads e Hotmart possuem contratos diferentes e uma regra única alteraria comportamento existente;
+- status de Aluno, status/tags da Jornada, caminhos da Jornada, slugs de produto e visibilidade do perfil permanecem específicos de seus domínios;
+- não foi criada abstração genérica de enum apenas para substituir `includes()`/`Set.has()` sem benefício arquitetural;
+- não foi criada uma regra global de nome, porque os limites atuais variam por contexto; apenas o nome administrativo possuía regra realmente compartilhada.
+
+Rotas e interfaces atualizadas no escopo:
+- criação/edição de usuários administrativos;
+- alteração da própria senha administrativa;
+- formulários de alteração de senha administrativa;
+- primeiro acesso e redefinição de senha do aluno, frontend e backend;
+- recuperação de senha do aluno;
+- Leads e Contato;
+- contribuições da Jornada;
+- listagens administrativas de Alunos, Leads e Transações;
+- Sucatas, criação e edição;
+- Depoimentos, criação e edição;
+- perfil do aluno para UF e foto HTTPS.
+
+Cuidados de compatibilidade aplicados durante a revisão final:
+- a criação de usuário administrativo manteve a regex histórica de e-mail em helper próprio, evitando endurecimento silencioso do contrato;
+- no PUT de Depoimentos, a busca do registro permanece antes da validação de imagem para preservar a precedência histórica de `404 Depoimento não encontrado` sobre erros de payload;
+- `valorKg: Number(body.valorKg)` permanece apenas como conversão após validação explícita, não mais como validação implícita.
+
+Validação executada:
+- buscas de resíduos confirmaram remoção das duplicações tratadas;
+- `git diff --check` sem erros;
+- `npm run lint` executado com sucesso;
+- `npm run build` executado com sucesso após a revisão final;
+- commit publicado em homologação:
+  - `5d21876` — `refactor: centralizar validacoes compartilhadas`;
+- Vercel Preview do commit concluído com status Ready/success;
+- smoke test funcional no Preview:
+  - login ADMIN e `/admin` carregando normalmente;
+  - POST de Sucata com `valorKg: -1` retorna HTTP 400 com `Informe um valor por kg válido.` e não cria registro;
+  - POST de Sucata com URL de imagem inválida retorna HTTP 400 com `Informe uma URL de imagem válida.` e não cria registro;
+  - POST em `/api/leads` com e-mail terminado em `.con` retorna HTTP 400 com `E-mail inválido` e não executa o fluxo de gravação/integrações;
+- nenhuma migration de banco foi necessária nesta etapa.
+
+Critério de aceite:
+- validações compartilháveis possuem fonte central mínima e reaproveitável;
+- regras específicas de domínio não são artificialmente generalizadas;
+- contratos existentes relevantes foram preservados durante a centralização;
+- entradas inválidas de preço, imagem, e-mail, UF, senha, role e paginação são tratadas antes do uso correspondente;
+- lint e build passam;
+- Preview está saudável e os principais bloqueios de validação foram confirmados funcionalmente.
+
+Critério atendido.
+
+P0.10 — Criar baseline de testes
+STATUS: CONCLUÍDO EM 06/09/2026
+
+Objetivo:
+- introduzir uma infraestrutura mínima de testes automatizados sem ampliar desnecessariamente o escopo técnico;
+- começar por funções puras e determinísticas, sem banco de dados, rede, mocks complexos, jsdom ou testes de interface;
+- estabelecer um comando padrão de teste que possa crescer nas próximas etapas.
+
+Decisão de implementação:
+- adotado Vitest como framework de testes;
+- versão instalada: `vitest@5.0.0`;
+- nenhum `vitest.config.js` foi necessário nesta baseline;
+- nenhum jsdom, Testing Library, cobertura ou runner adicional foi introduzido;
+- `package.json` passa a expor `npm test` com `vitest run`;
+- os primeiros testes foram concentrados em `src/lib/validacoes.js`, criado no P0.9, por ser uma camada pura, compartilhada e sem dependências externas.
+
+Baseline criada:
+- novo arquivo `tests/validacoes.test.js`;
+- 1 arquivo de teste;
+- 16 testes unitários;
+- cobertura funcional da baseline:
+  - normalização e formatos de e-mail;
+  - preservação da regra histórica de e-mail administrativo;
+  - bloqueio de `.con` e `.com.brr`;
+  - nome administrativo;
+  - senha administrativa;
+  - roles administrativas;
+  - senha de aluno;
+  - paginação limitada;
+  - valor monetário não negativo e finito;
+  - formatos de imagem já suportados pelo sistema;
+  - normalização/validação de UF;
+  - preservação da regra histórica de `fotoUrl` com prefixo HTTPS.
+
+Compatibilidade registrada pelos testes:
+- `emailFormatoAdminValido()` continua aceitando o comportamento histórico da regex administrativa, inclusive casos mais permissivos do que o validador básico;
+- `urlHttpsValida()` continua preservando a regra histórica de prefixo, sem endurecer silenciosamente o contrato nesta etapa;
+- os testes funcionam também como documentação executável das decisões de compatibilidade do P0.9.
+
+Escopo explicitamente não incluído nesta baseline:
+- testes de Prisma ou banco Neon;
+- testes de API com banco real;
+- mocks de Hotmart, Brevo ou Resend;
+- testes de UI;
+- testes de autenticação end-to-end;
+- testes de webhook duplicado, compra aprovada, primeiro acesso, recuperação de senha, permissões administrativas e cotações.
+Esses fluxos continuam sendo candidatos prioritários para expansão futura da suíte, mas não foram necessários para estabelecer a baseline mínima do P0.10.
+
+Validação executada:
+- `npm test`: 1 arquivo aprovado, 16/16 testes aprovados;
+- `npm run lint`: concluído com sucesso, permanecendo apenas o warning já conhecido de `<img>` na comunidade do aluno;
+- `npm run build`: concluído com sucesso;
+- `git diff --cached --check`: sem erros;
+- commit publicado em homologação:
+  - `65ababe3e6238301970cc764568eaa45e45eb550` — `test: criar baseline de testes unitarios`;
+- Vercel Preview do commit concluído com status success;
+- nenhuma migration de banco foi necessária nesta etapa.
+
+Observação de segurança identificada durante o fechamento:
+- `npm audit --omit=dev` apontou 3 vulnerabilidades de severidade alta em dependências de produção trazidas pelo `next@16.2.12`:
+  - `next` utiliza `postcss@8.4.31`, dentro da faixa vulnerável reportada;
+  - `next` utiliza `sharp@0.34.5`, também dentro da faixa vulnerável reportada;
+- `postcss@8.5.28` utilizado por Tailwind/Vitest não é o item vulnerável reportado nesse diagnóstico;
+- não foi executado `npm audit fix` nesta etapa para evitar atualização automática de Next/dependências fora do escopo do P0.10;
+- essa dívida deverá ser tratada em manutenção de segurança separada, com validação de regressão antes de produção.
+
+Critério de aceite:
+- existe framework de testes instalado e versionado;
+- existe comando `npm test` padrão e reproduzível;
+- existe ao menos uma suíte unitária útil, cobrindo regras compartilhadas críticas e sem depender de infraestrutura externa;
+- testes, lint e build passam;
+- Preview está saudável;
+- o escopo da baseline permanece pequeno e expansível.
+
+Critério atendido.
+
+P0.11 — Reorganizar documentação
+STATUS: IMPLEMENTAÇÃO LOCAL CONCLUÍDA EM 06/09/2026 — AGUARDANDO COMMIT/PUSH E VALIDAÇÃO DA PREVIEW
+
+Objetivo:
+- substituir o README genérico do create-next-app por documentação real do MGU;
+- separar documentação vigente, operação, migrações e histórico;
+- preservar documentos antigos sem tratá-los como fonte de verdade atual;
+- incorporar a Arquitetura MGU v3.0 ao próprio repositório, de forma versionada;
+- documentar explicitamente o fluxo entre desenvolvimento local, homologação e produção.
+
+Estrutura documental criada:
+docs/
+├── README.md
+├── arquitetura/
+│   ├── README.md
+│   └── Arquitetura-MGU-v3.0.txt
+├── operacao/
+│   ├── README.md
+│   └── AMBIENTES-E-DEPLOY.md
+├── migracoes/
+│   ├── README.md
+│   └── PROCEDIMENTO-MIGRACOES.md
+└── historico/
+    ├── README.md
+    ├── ONDA0_DESCOBERTAS.md
+    ├── ONDA1_MODELO_DADOS.md
+    └── PLANO_IMPLEMENTACAO_ALUNOS.md
+
+Decisões adotadas:
+- `docs/arquitetura/Arquitetura-MGU-v3.0.txt` passa a ser a fonte de verdade arquitetural versionada no repositório;
+- alterações que modifiquem arquitetura, regras estruturais, ambientes ou roadmap devem atualizar esse documento no mesmo ciclo;
+- os documentos antigos baseados no modelo de “Ondas” foram preservados por `git mv` em `docs/historico/`, mantendo histórico Git e sem reescrever seu conteúdo;
+- documentos em `docs/historico/` podem descrever estados antigos, domínios/subdomínios antigos, branches, commits e regras já substituídas e não prevalecem sobre a arquitetura vigente;
+- `README.md` da raiz agora identifica o projeto MGU, domínios e subdomínios oficiais, stack, branches, bancos, comandos, testes, documentação e regras básicas de segurança;
+- o subdomínio vigente documentado é `alunos.mentoriagarimpourbano.com.br`; referências históricas a `aluno.mentoriagarimpourbano.com.br` permanecem somente nos documentos históricos;
+- `docs/operacao/AMBIENTES-E-DEPLOY.md` registra o fluxo local → homologacao → Vercel Preview → validação → main → Vercel Production e a separação dos bancos Neon;
+- `docs/migracoes/PROCEDIMENTO-MIGRACOES.md` registra o procedimento mínimo para schema, migrations, backfills, alterações destrutivas, revisão e promoção para produção;
+- nenhum documento histórico foi apagado;
+- nenhuma alteração funcional de aplicação, schema ou banco foi necessária nesta atividade.
+
+Validação local executada:
+- `git diff --cached --check`: sem erros após remoção de uma linha em branco excedente no fim do TXT de arquitetura;
+- `npm test`: 1 arquivo aprovado, 16/16 testes aprovados;
+- `npm run lint`: concluído com sucesso, permanecendo apenas o warning já conhecido de `<img>`;
+- `npm run build`: concluído com sucesso;
+- renames dos três documentos históricos reconhecidos pelo Git com 100% de similaridade;
+- os avisos locais de conversão LF → CRLF no Windows são apenas de final de linha e não constituem erro do P0.11.
+
+Critério de aceite local:
+- README raiz representa o projeto real;
+- documentação vigente possui localização explícita e fonte de verdade;
+- documentação histórica está claramente separada;
+- procedimentos de ambiente/deploy e migrações estão documentados;
+- testes, lint, build e diff check passam;
+- nenhuma migration é necessária.
+
+Critério local atendido. O fechamento definitivo do P0.11 ocorrerá após commit, push de `homologacao` e confirmação da Vercel Preview. Após essa aprovação, a próxima atividade será o P0.12 — Preparar `alunos.mentoriagarimpourbano.com.br`.
+
+P0.12 — Preparar alunos.mentoriagarimpourbano.com.br
+Hoje o proxy trata explicitamente:
+ebook.mentoriagarimpourbano.com.br
+admin.mentoriagarimpourbano.com.br
+Incluiremos futuramente:
+alunos.mentoriagarimpourbano.com.br
+com o comportamento esperado:
+alunos.mentoriagarimpourbano.com.br/
+                    ↓
+                 /aluno
+A configuração efetiva poderá ser executada quando concluirmos a Área do Aluno na Etapa 1.
+
+Saída esperada da Etapa Prévia
+A base deverá estar:
+Git sincronizado
+Banco homologação controlado
+Prisma padronizado
+Autenticação sem misturar status
+Integrações desacopladas
+Cotação confiável
+Validações básicas
+Documentação organizada
+Testes mínimos existentes
+Somente então entramos nas mudanças estruturais maiores.
+
+ETAPA 1 — Conclusão da Área do Aluno e vigência
+Objetivo
+Concluir o que já está em implantação hoje.
+A Área do Aluno já possui:
+login;
+primeiro acesso;
+recuperação de senha;
+perfil;
+comunidade.
+Agora precisamos fechar o conceito de matrícula.
+
+Assinatura de 1 ano
+Toda nova matrícula deverá possuir vigência explícita.
+Modelo conceitual:
+Matricula
+├── concedidaEm
+├── iniciaEm
+├── expiraEm
+├── status
+├── suspensaEm
+├── canceladaEm
+├── encerradaEm
+└── motivoEncerramento
+A regra principal será:
+Compra aprovada
+      ↓
+Matricula ATIVA
+      ↓
+vigência de 1 ano
+      ↓
+ENCERRADA / EXPIRADA
+Não precisamos depender exclusivamente de um cron para impedir acesso após um ano.
+A autorização deverá sempre avaliar:
+status === ATIVA
+E
+agora < expiraEm
+Assim, mesmo se uma rotina de manutenção atrasar, o acesso já estará corretamente bloqueado.
+
+Saída voluntária
+Também precisaremos prever casos como:
+Aluno solicita saída
+Administrador suspende
+Cancelamento comercial
+Reembolso
+Chargeback
+Expiração
+Cada motivo deverá ser identificável.
+
+Critério de aceite
+Um aluno deve possuir acesso quando:
+conta válida
++
+matrícula válida
++
+vigência válida
+Esses três conceitos não podem ser confundidos.
+
+ETAPA 2 — Hotmart, matrículas e integrações
+Objetivo
+Transformar Hotmart → Aluno → Matrícula em um fluxo de domínio completo.
+O webhook já possui auditoria de evento e idempotência por hotmartEventId e transacaoCodigo, o que será preservado.
+
+Máquina de estados
+Definiremos uma tabela oficial entre evento Hotmart e efeito na matrícula.
+Exemplo conceitual:
+PURCHASE_APPROVED
+        ↓
+Matricula ATIVA
+
+PURCHASE_COMPLETE
+        ↓
+mantém ATIVA
+
+REFUND
+        ↓
+CANCELADA
+
+CHARGEBACK
+        ↓
+SUSPENSA ou CANCELADA
+
+nova compra válida
+        ↓
+nova vigência / matrícula válida
+Os nomes exatos dos eventos serão confirmados durante a implementação.
+
+IntegrationJob
+Criamos algo como:
+IntegrationJob
+├── id
+├── tipo
+├── referencia
+├── payloadMinimo
+├── status
+├── tentativas
+├── proximaTentativaEm
+├── ultimoErro
+├── createdAt
+└── processedAt
+Exemplos:
+BREVO_MOVER_CLIENTE
+RESEND_CONVITE_ALUNO
+RESEND_RECUPERACAO
+Isso poderá funcionar usando o PostgreSQL do Neon, sem exigir uma infraestrutura de filas paga.
+
+ETAPA 3 — Produtos, preços, cotações e administração
+Objetivo
+Criar um catálogo interno de produtos e melhorar o dashboard administrativo.
+Hoje as informações de produto ficam repetidas em matrículas e transações por produtoId, produtoUcode e produtoNome.
+Criaremos:
+Produto
+├── id
+├── nome
+├── slug
+├── descricao
+├── tipo
+├── ativo
+├── preco
+├── precoPromocional
+├── moeda
+└── createdAt
+E:
+ProdutoIntegracao
+├── produtoId
+├── provedor
+├── externalId
+└── externalUcode
+
+Administração de preços
+O dashboard ADMIN deverá permitir atualizar preços utilizados pelo próprio MGU.
+Por exemplo:
+Produtos
+--------------------------------
+Mentoria Garimpo Urbano
+Preço normal       R$ XXXX
+Preço promocional  R$ XXXX
+[ Salvar ]
+Essa configuração deverá ser a fonte para preços exibidos em páginas e componentes do MGU.
+Importante: alterar preço no MGU não significa automaticamente alterar o checkout da Hotmart.
+Inicialmente trataremos:
+Preço MGU = preço exibido pelo nosso sistema
+Uma eventual sincronização automática com o preço efetivamente cadastrado na Hotmart será outra integração, caso futuramente seja necessária.
+
+Cotações
+Nesta etapa, além da correção emergencial da Etapa Prévia, consolidaremos o modelo.
+Algo como:
+CotacaoMetal
+├── metal
+├── valorOriginal
+├── unidadeOriginal
+├── moedaOriginal
+├── dolarBrl
+├── valorBrlGrama
+├── fonte
+├── coletadoEm
+├── status
+└── erro
+O dashboard poderá exibir:
+OURO
+R$ XXX,XX/g
+Yahoo
+Atualizado 14:58
+
+RÓDIO
+Indisponível
+Última tentativa 14:58
+
+ETAPA 4 — Introdução de Pessoa
+Objetivo
+Criar identidade única.
+Modelo inicial:
+Pessoa
+├── id
+├── nome
+├── emailPrincipal
+├── telefonePrincipal
+├── ativo
+├── createdAt
+└── updatedAt
+Posteriormente podemos evoluir para:
+PessoaEmail
+PessoaTelefone
+permitindo:
+e-mail principal
+e-mail Hotmart
+e-mail antigo
+WhatsApp
+telefone comercial
+
+Normalização de e-mail
+A partir desta etapa haverá uma única regra.
+Exemplo:
+emailOriginal:
+Fabio@Dominio.com
+
+emailNormalizado:
+fabio@dominio.com
+A identidade será baseada no normalizado.
+Hoje há partes do projeto que normalizam o e-mail e outras que não aplicam exatamente a mesma regra. Essa inconsistência será eliminada.
+
+Migração
+A criação de Pessoa será não destrutiva.
+Primeiro:
+CREATE Pessoa
+Depois:
+Lead → Pessoa
+Aluno → Pessoa
+AdminUser → Pessoa
+Depois validamos.
+Só muito mais tarde removemos os campos duplicados.
+
+ETAPA 5 — Usuários, acessos e permissões
+Objetivo
+Separar definitivamente identidade, login e autorização.
+Modelo:
+Pessoa
+   ↓
+Usuario
+   ↓
+Permissões
+
+ADMIN
+O ADMIN:
+acessa o dashboard completo;
+vê todos os módulos;
+vê informações gerenciais;
+gerencia usuários;
+concede permissões a Parceiros;
+gerencia alunos;
+gerencia produtos;
+gerencia fornecedores;
+gerencia integrações.
+
+PARCEIRO
+O Parceiro não recebe automaticamente acesso administrativo total.
+O ADMIN seleciona módulos.
+Exemplo:
+Parceiro: João
+
+[x] Valores de Sucata
+[ ] Leads
+[x] Depoimentos
+[x] Jornada do Aluno
+[ ] Produtos
+O modelo atual já caminha nessa direção com flags como podeGerenciarSucatas, podeGerenciarDepoimentos e podeGerenciarJornada.
+Na nova arquitetura isso será generalizado.
+
+ALUNO
+ALUNO não precisa ser uma role administrativa.
+O acesso à Área do Aluno decorre de:
+Pessoa
+↓
+Aluno
+↓
+Matricula
+
+FORNECEDOR
+Da mesma forma, fornecedor não será apenas:
+role = FORNECEDOR
+Seu acesso decorrerá do relacionamento:
+Pessoa
+↓
+PessoaOrganizacao
+↓
+Fornecedor
+Ele terá um portal próprio.
+Isso permitirá que uma mesma pessoa seja, por exemplo:
+Aluno
++
+Representante de fornecedor
++
+Parceiro administrativo
+sem duplicar a pessoa.
+
+ETAPA 6 — Lead, Aluno, Produto e histórico de marketing
+Objetivo
+Refatorar os domínios existentes para utilizar Pessoa e Produto.
+
+Lead
+Passará a ser:
+Pessoa
+   ↓
+Lead
+Lead deixa de representar a própria pessoa e passa a representar o relacionamento comercial/marketing dela com o MGU.
+
+Interações de marketing
+Hoje um novo cadastro de mesmo e-mail pode atualizar UTMs armazenadas no Lead.
+Criaremos histórico.
+InteracaoMarketing
+├── pessoaId
+├── tipo
+├── origem
+├── utmSource
+├── utmMedium
+├── utmCampaign
+├── utmTerm
+├── utmContent
+├── pagina
+└── createdAt
+Assim poderemos saber:
+primeira origem
+última origem
+campanha da conversão
+trajetória
+
+Aluno
+Passará a conter apenas informações do relacionamento educacional.
+Não repetirá desnecessariamente identidade já disponível em Pessoa.
+
+PerfilAluno
+nomeExibicao continuará sendo diferente de Pessoa.nome.
+Hoje alterar nomeExibicao também pode atualizar o nome do aluno.
+Na arquitetura final:
+Pessoa.nome = nome oficial/interno
+PerfilAluno.nomeExibicao = nome escolhido para comunidade
+Um não altera o outro automaticamente.
+
+ETAPA 7 — Organizações
+Objetivo
+Introduzir entidades empresariais antes de implementar Fornecedores.
+Modelo:
+Organizacao
+├── id
+├── nomeFantasia
+├── razaoSocial
+├── documento
+├── email
+├── telefone
+├── site
+├── status
+└── createdAt
+Relacionamento:
+PessoaOrganizacao
+├── pessoaId
+├── organizacaoId
+├── funcao
+├── principal
+└── status
+Isso permitirá que várias pessoas representem a mesma empresa.
+
+ETAPA 8 — Ecossistema MGU / Fornecedores
+Objetivo
+Implementar o domínio que estamos planejando para aproximar alunos de produtos e serviços.
+O fornecedor passa a ter:
+Fornecedor
+   ↓
+Organizacao
+   ↓
+Representantes
+
+Produtos e serviços de fornecedor
+Não deverão ser confundidos com os produtos vendidos pelo próprio MGU.
+Teremos algo equivalente a:
+OfertaFornecedor
+├── fornecedorId
+├── categoria
+├── tipo
+├── titulo
+├── descricao
+├── imagem
+├── precoIndicativo
+├── contato
+├── status
+└── destaque
+Assim:
+Produto MGU ≠ Produto/Serviço do Fornecedor
+
+Portal do fornecedor
+O fornecedor terá área separada do painel administrativo.
+Exemplo:
+Fornecedor
+├── Dashboard
+├── Perfil da empresa
+├── Produtos e serviços
+├── Leads / oportunidades
+├── Métricas
+└── Configurações
+O ADMIN continuará tendo visão e moderação central.
+
+Área do aluno
+O aluno terá acesso ao Ecossistema MGU dentro de seu portal.
+Exemplo:
+Área do Aluno
+├── Início
+├── Perfil
+├── Comunidade
+├── Ecossistema MGU
+│   ├── Produtos
+│   ├── Serviços
+│   ├── Fornecedores
+│   └── Busca
+└── ...
+
+ETAPA 9 — Auditoria, remoção do legado e estabilização
+Objetivo
+Depois que a arquitetura nova estiver comprovadamente funcionando, remover estruturas antigas.
+
+AuditLog
+Criamos registros administrativos para operações relevantes:
+AuditLog
+├── usuarioId
+├── acao
+├── entidade
+├── entidadeId
+├── dados
+└── createdAt
+Exemplos:
+Fornecedor aprovado
+Preço alterado
+Aluno suspenso
+Matrícula cancelada
+Permissão concedida
+Produto desativado
+
+Remoção de duplicações
+Somente nessa etapa poderemos retirar definitivamente campos antigos de:
+Lead
+Aluno
+AdminUser
+que já tenham sido migrados para Pessoa, Usuario, etc.
+
+Segurança final
+Revisaremos:
+autenticação
+autorização
+headers
+webhooks
+tokens
+logs
+dados pessoais
+uploads
+permissões
+subdomínios
+Os cabeçalhos de segurança já existentes no next.config.mjs serão preservados e ampliados se necessário.
+
+7. Dashboard administrativo de destino
+Ao final do processo, imagino o painel ADMIN aproximadamente assim:
+DASHBOARD
+│
+├── Visão Geral
+│
+├── Comercial
+│   ├── Leads
+│   ├── Transações
+│   └── Produtos MGU
+│
+├── Alunos
+│   ├── Alunos
+│   ├── Matrículas
+│   └── Comunidade
+│
+├── Ecossistema MGU
+│   ├── Fornecedores
+│   ├── Produtos e Serviços
+│   ├── Leads / Oportunidades
+│   └── Aprovações
+│
+├── Conteúdo
+│   ├── Jornada do Aluno
+│   ├── Depoimentos
+│   └── Valores de Sucata
+│
+├── Mercado
+│   └── Cotações
+│
+├── Sistema
+│   ├── Usuários
+│   ├── Permissões
+│   ├── Integrações
+│   ├── Auditoria
+│   └── Jobs
+│
+└── Configurações
+O ADMIN vê tudo.
+O PARCEIRO vê apenas aquilo para o qual recebeu permissão.
+O FORNECEDOR nem sequer utiliza esse menu administrativo completo; entra em sua área específica.
+
+8. Critério de progressão entre etapas
+Nenhuma etapa será considerada terminada apenas porque “o código compilou”.
+Para avançarmos, cada etapa deverá passar por:
+1. Alteração local na homologacao
+           ↓
+2. lint / testes / build
+           ↓
+3. migration controlada no BD homologacao, se necessária
+           ↓
+4. push da homologacao
+           ↓
+5. teste no Preview
+           ↓
+6. validação funcional
+           ↓
+7. merge para main
+           ↓
+8. migration em produção, se necessária
+           ↓
+9. deploy de produção
+           ↓
+10. smoke test
+Se algo falhar, não avançamos para a etapa seguinte.
+
+9. Ordem que adotaremos a partir de agora
+A sequência operacional fica definida como:
+Etapa Prévia — Saneamento da Base Atual → Área do Aluno e vigência → Hotmart e integrações → Produtos/preços/cotações → Pessoa → Usuários e permissões → Lead/Aluno/Marketing → Organizações → Fornecedores → Auditoria e remoção do legado.
+Esse encadeamento evita que criemos Pessoa, Fornecedor ou um novo sistema de permissões sobre problemas que já conseguimos identificar e resolver na base existente.
+As atividades P0.1, P0.2, P0.3, P0.4, P0.5, P0.6 e P0.7 da Etapa Prévia foram concluídas em 05/09/2026. O P0.8 — Centralizar a autorização administrativa —, o P0.9 — Criar validações mínimas compartilhadas — e o P0.10 — Criar baseline de testes — foram concluídos em 06/09/2026. O P0.11 — Reorganizar documentação — teve implementação e validação local concluídas em 06/09/2026 e aguarda commit/push e validação da Vercel Preview para fechamento definitivo. Após essa aprovação, a próxima atividade será o P0.12 — Preparar alunos.mentoriagarimpourbano.com.br.
