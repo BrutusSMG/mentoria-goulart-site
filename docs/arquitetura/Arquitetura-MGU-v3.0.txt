@@ -983,6 +983,40 @@ VigenciaMatricula
 
 Os nomes e campos definitivos serão confirmados antes da migration, mas essa separação conceitual passa a ser a referência.
 
+Compatibilidade com alunos legados e provisionamento manual
+Nem todo aluno existente terá origem em um novo webhook da Hotmart.
+
+O sistema deverá comportar, no mínimo:
+
+aluno HOTMART
+= aluno provisionado a partir de compra/evento válido da Hotmart;
+
+aluno LEGADO
+= aluno anterior à implantação da nova regra de vigência, incluído por migração ou importação;
+
+aluno MANUAL
+= aluno criado administrativamente por necessidade operacional.
+
+Alunos legados não deverão receber retroativamente, apenas por causa da migration, uma expiração de 1 ano que não fazia parte da regra aplicável a eles.
+
+Para esses casos, uma VigenciaMatricula poderá possuir:
+
+transacaoOrigemId
+= vazio quando não houver transação externa correspondente;
+
+garantiaAte
+= vazio quando não houver regra de garantia aplicável;
+
+expiraEm
+= vazio quando o acesso não possuir vencimento definido naquele momento.
+
+expiraEm vazio não significa necessariamente acesso vitalício.
+Significa apenas que aquela vigência não possui data final definida no modelo atual.
+
+O histórico deverá permitir que futuramente uma decisão comercial ou administrativa substitua esse direito por outra vigência, sem apagar a origem LEGADO ou MANUAL.
+
+A regra de vigência de 1 ano + 7 dias será aplicada às novas aquisições elegíveis do produto MGU conforme sua regra comercial, e não indiscriminadamente aos alunos importados.
+
 Regra comercial do produto MGU atual
 Para a primeira aquisição válida do produto atual:
 
@@ -1041,12 +1075,21 @@ vigência não cancelada
 +
 iniciaEm <= agora
 +
+(
+expiraEm vazio
+OU
 agora < expiraEm
+)
 
 ADMIN poderá continuar possuindo exceção administrativa para suporte e gerenciamento.
 
 A autorização não deverá depender exclusivamente de rotina agendada.
-Mesmo que um cron de manutenção atrase, uma vigência cujo expiraEm já passou não poderá conceder acesso.
+
+Quando expiraEm possuir valor, uma vigência cuja data final já passou não poderá conceder acesso, mesmo que um cron de manutenção ainda não tenha atualizado seu status.
+
+Quando expiraEm estiver vazio, a vigência poderá continuar concedendo acesso enquanto seus demais critérios permanecerem válidos.
+
+A ausência de expiraEm será uma característica explícita da vigência e não uma exceção baseada diretamente em Aluno.origem.
 
 Estados de vigência
 O modelo deverá comportar conceitualmente estados equivalentes a:
@@ -1079,9 +1122,12 @@ O sistema deverá avisar o titular aproximadamente 30 dias antes do fim da vigê
 A rotina deverá considerar, no mínimo:
 
 vigência elegível;
+expiraEm preenchido;
 expiraEm ainda no futuro;
 expiraEm dentro da janela de aproximadamente 30 dias;
 avisoExpiracaoEnviadoEm ainda vazio.
+
+Vigências sem expiraEm não participarão da rotina de aviso de vencimento enquanto permanecerem sem data final definida.
 
 Após envio bem-sucedido:
 
@@ -1115,15 +1161,57 @@ Cada produto ou plano poderá possuir preço, duração, regra de renovação e 
 Subetapas da Etapa 1
 
 E1.1 — Auditar e fechar convite e primeiro acesso
-Validar o ciclo:
+Validar os diferentes caminhos de ingresso na Área do Aluno.
+
+Novo aluno via Hotmart:
 compra aprovada
-→ provisionamento
+→ provisionamento do aluno
 → matrícula
 → primeira vigência
-→ token
+→ geração do convite
 → e-mail
 → criação de senha
 → login.
+
+Aluno LEGADO ou MANUAL:
+importação ou criação administrativa
+→ aluno
+→ matrícula
+→ vigência compatível com sua regra de origem
+→ geração administrativa ou automatizada do convite
+→ e-mail
+→ criação de senha
+→ login.
+
+A ausência de webhook Hotmart não poderá impedir o primeiro acesso de alunos LEGADO ou MANUAL.
+
+Regra de credencial:
+aluno sem senha
+→ fluxo de primeiro acesso;
+
+aluno com senha
+→ fluxo de recuperação de senha.
+
+O primeiro acesso deverá possuir mecanismo seguro de reemissão do convite.
+
+O reenvio deverá:
+receber o e-mail sem revelar indevidamente se a conta existe;
+ser permitido somente para aluno elegível que ainda não possua senha;
+invalidar convites PRIMEIRO_ACESSO anteriores ainda não utilizados;
+gerar novo token criptograficamente seguro;
+armazenar somente o hash do token;
+possuir validade limitada;
+enviar novo e-mail de primeiro acesso.
+
+Para o fluxo atual, a validade prevista do convite permanece em 72 horas.
+
+Convite expirado, não recebido ou cuja tentativa de envio tenha falhado não deverá obrigar o aluno a utilizar a recuperação de senha como substituto do primeiro acesso.
+
+Falha no envio de um convite não poderá tornar o aluno permanentemente incapaz de obter outro.
+
+A recuperação de senha será conceitualmente destinada a contas que já concluíram o primeiro acesso e possuem credencial.
+
+Qualquer restrição técnica da recuperação de senha a contas que já possuam senha somente deverá ser aplicada depois que o fluxo de convite e reenvio estiver funcional também para alunos LEGADO e MANUAL, evitando bloqueio de usuários durante a transição.
 
 E1.2 — Formalizar Matricula ≠ VigenciaMatricula
 Confirmar modelo, campos, estados, relacionamentos, regras de histórico e compatibilidade com os dados existentes.
@@ -1166,7 +1254,17 @@ vigência cancelada;
 vigência expirada;
 renovação antecipada;
 aviso de expiração;
-aviso já enviado.
+aviso já enviado;
+aluno legado sem vencimento definido;
+aluno manual sem webhook Hotmart;
+convite de aluno legado;
+convite de aluno manual;
+convite expirado;
+reenvio de convite;
+falha no envio do convite;
+recuperação de senha antes do primeiro acesso;
+vigência com expiraEm vazio;
+vigência com expiraEm preenchido;
 
 Critério de aceite da Etapa 1
 A Área do Aluno deverá distinguir corretamente:
