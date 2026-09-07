@@ -185,9 +185,9 @@ Objetivo
 Etapa Prévia
 Saneamento da base atual
 Etapa 1
-Conclusão da Área do Aluno e vigência de 1 ano
+Conclusão da Área do Aluno e fundação de vigências
 Etapa 2
-Ciclo Hotmart, matrículas e integrações
+Ciclo Hotmart, vigências e integrações
 Etapa 3
 Produtos, preços, cotações e fundação administrativa
 Etapa 4
@@ -901,94 +901,394 @@ Documentação organizada
 Testes mínimos existentes
 Somente então entramos nas mudanças estruturais maiores.
 
-ETAPA 1 — Conclusão da Área do Aluno e vigência
+ETAPA 1 — Conclusão da Área do Aluno e fundação de vigências
 Objetivo
-Concluir o que já está em implantação hoje.
+Concluir a Área do Aluno e estabelecer o modelo temporal de direito de acesso que sustentará o produto atual sem impedir a evolução futura para outros produtos, planos e serviços do MGU.
+
 A Área do Aluno já possui:
 login;
 primeiro acesso;
 recuperação de senha;
 perfil;
 comunidade.
-Agora precisamos fechar o conceito de matrícula.
 
-Assinatura de 1 ano
-Toda nova matrícula deverá possuir vigência explícita.
-Modelo conceitual:
+Agora precisamos separar definitivamente quatro conceitos:
+
+Aluno
+= relacionamento educacional e situação do aluno.
+
 Matricula
+= vínculo do aluno com determinado produto.
+
+VigenciaMatricula
+= período temporal durante o qual aquela matrícula concede direito de acesso.
+
+HotmartTransaction
+= registro financeiro e de integração que pode originar, renovar, cancelar ou afetar uma vigência.
+
+Regra estrutural:
+identidade ≠ credencial ≠ matrícula ≠ vigência ≠ transação financeira.
+
+Criar senha, trocar senha, recuperar senha ou realizar login nunca poderá iniciar, renovar, cancelar ou ampliar uma vigência.
+
+Matrícula por produto
+Cada aluno poderá possuir uma matrícula independente para cada produto.
+
+Modelo conceitual:
+
+Aluno
+│
+├── Matricula: Produto A
+│     ├── Vigencia 1
+│     ├── Vigencia 2
+│     └── Vigencia 3
+│
+└── Matricula: Produto B
+      ├── Vigencia 1
+      └── Vigencia 2
+
+Uma renovação não deverá sobrescrever a vigência anterior.
+O histórico das vigências deverá ser preservado.
+
+Modelo conceitual de destino desta etapa:
+
+Matricula
+├── id
+├── alunoId
+├── produtoId
+├── produtoUcode
+├── produtoNome
+├── origem
+├── status
+├── createdAt
+├── updatedAt
+└── vigencias[]
+
+VigenciaMatricula
+├── id
+├── matriculaId
+├── transacaoOrigemId
 ├── concedidaEm
 ├── iniciaEm
+├── garantiaAte
 ├── expiraEm
 ├── status
 ├── suspensaEm
 ├── canceladaEm
 ├── encerradaEm
-└── motivoEncerramento
-A regra principal será:
-Compra aprovada
-      ↓
-Matricula ATIVA
-      ↓
-vigência de 1 ano
-      ↓
-ENCERRADA / EXPIRADA
-Não precisamos depender exclusivamente de um cron para impedir acesso após um ano.
-A autorização deverá sempre avaliar:
-status === ATIVA
-E
-agora < expiraEm
-Assim, mesmo se uma rotina de manutenção atrasar, o acesso já estará corretamente bloqueado.
+├── motivoEncerramento
+├── avisoExpiracaoEnviadoEm
+├── createdAt
+└── updatedAt
 
-Saída voluntária
-Também precisaremos prever casos como:
-Aluno solicita saída
-Administrador suspende
-Cancelamento comercial
-Reembolso
-Chargeback
-Expiração
-Cada motivo deverá ser identificável.
+Os nomes e campos definitivos serão confirmados antes da migration, mas essa separação conceitual passa a ser a referência.
 
-Critério de aceite
-Um aluno deve possuir acesso quando:
+Regra comercial do produto MGU atual
+Para a primeira aquisição válida do produto atual:
+
+concedidaEm
+= data de aprovação da compra.
+
+iniciaEm
+= data de aprovação da compra.
+
+garantiaAte
+= concedidaEm + 7 dias.
+
+expiraEm
+= iniciaEm + 1 ano + 7 dias.
+
+Os 7 dias adicionais fazem parte da regra comercial atual do produto MGU.
+Essa duração não será codificada como regra universal do sistema.
+
+Produtos e planos futuros poderão possuir durações diferentes.
+
+Renovação
+Uma renovação válida deverá criar nova vigência, preservando o histórico anterior.
+
+Se a renovação ocorrer antes do encerramento da vigência atual:
+
+concedidaEm
+= data de aprovação da nova compra.
+
+garantiaAte
+= concedidaEm + prazo de garantia aplicável à nova compra.
+
+iniciaEm
+= término da vigência atual.
+
+expiraEm
+= iniciaEm + duração comercial do produto/plano adquirido.
+
+Assim, o aluno não perde dias restantes por renovar antecipadamente.
+
+Se não existir vigência válida anterior, a nova vigência poderá iniciar na própria data de concessão, conforme a regra comercial do produto.
+
+Acesso à Área do Aluno
+Um aluno somente deverá acessar conteúdo protegido quando houver cumulativamente:
+
 conta válida
 +
-matrícula válida
+Aluno em situação permitida
++
+matrícula correspondente
 +
 vigência válida
-Esses três conceitos não podem ser confundidos.
++
+vigência não suspensa
++
+vigência não cancelada
++
+iniciaEm <= agora
++
+agora < expiraEm
 
-ETAPA 2 — Hotmart, matrículas e integrações
+ADMIN poderá continuar possuindo exceção administrativa para suporte e gerenciamento.
+
+A autorização não deverá depender exclusivamente de rotina agendada.
+Mesmo que um cron de manutenção atrase, uma vigência cujo expiraEm já passou não poderá conceder acesso.
+
+Estados de vigência
+O modelo deverá comportar conceitualmente estados equivalentes a:
+
+AGENDADA
+ATIVA
+SUSPENSA
+CANCELADA
+ENCERRADA
+
+Os nomes definitivos serão decididos na implementação.
+
+AGENDADA representa, por exemplo, uma renovação já comprada cuja vigência começará somente após o término da vigência atual.
+
+Cancelamento, suspensão e encerramento
+Deveremos distinguir:
+
+suspensão administrativa;
+cancelamento comercial;
+reembolso;
+chargeback;
+expiração natural;
+saída voluntária quando aplicável.
+
+Cada alteração deverá preservar histórico e possuir motivo identificável quando necessário.
+
+Aviso de expiração
+O sistema deverá avisar o titular aproximadamente 30 dias antes do fim da vigência.
+
+A rotina deverá considerar, no mínimo:
+
+vigência elegível;
+expiraEm ainda no futuro;
+expiraEm dentro da janela de aproximadamente 30 dias;
+avisoExpiracaoEnviadoEm ainda vazio.
+
+Após envio bem-sucedido:
+
+avisoExpiracaoEnviadoEm
+= data do envio.
+
+Isso evita o envio repetido do mesmo aviso em execuções diárias.
+
+O aviso deverá informar a data de encerramento do acesso e poderá futuramente oferecer opções de renovação.
+
+Preparação para produtos futuros
+A implementação desta etapa será específica para Aluno + Matricula + VigenciaMatricula porque Pessoa, Produto consolidado, Organizacao e Fornecedor pertencem a etapas posteriores.
+
+Entretanto, VigenciaMatricula não deverá ser tratada como solução universal definitiva.
+
+A arquitetura deverá permitir evolução futura para um conceito mais geral equivalente a:
+
+DireitoAcesso
+└── Vigencias
+
+Esse conceito poderá futuramente controlar acessos diferentes, por exemplo:
+
+Curso MGU;
+Ecossistema Garimpo Urbano;
+planos ou serviços adicionais;
+planos de fornecedores;
+outros produtos recorrentes ou anuidades.
+
+Cada produto ou plano poderá possuir preço, duração, regra de renovação e direito concedido diferentes.
+
+Subetapas da Etapa 1
+
+E1.1 — Auditar e fechar convite e primeiro acesso
+Validar o ciclo:
+compra aprovada
+→ provisionamento
+→ matrícula
+→ primeira vigência
+→ token
+→ e-mail
+→ criação de senha
+→ login.
+
+E1.2 — Formalizar Matricula ≠ VigenciaMatricula
+Confirmar modelo, campos, estados, relacionamentos, regras de histórico e compatibilidade com os dados existentes.
+
+E1.3 — Criar VigenciaMatricula de forma evolutiva
+Adicionar estrutura e migration sem apagar ou reinterpretar dados existentes de forma destrutiva.
+
+E1.4 — Provisionar primeira vigência
+Compra válida deverá criar ou localizar a matrícula correspondente e criar a vigência adequada de forma idempotente.
+
+E1.5 — Fazer a vigência controlar o acesso
+Centralizar a regra de autorização temporal e utilizá-la na Área do Aluno.
+
+E1.6 — Tratar expiração natural
+Vigência expirada deve deixar de conceder acesso mesmo antes de eventual atualização de status por rotina de manutenção.
+
+E1.7 — Implementar aviso de expiração
+Enviar aviso único aproximadamente 30 dias antes do término e registrar o envio.
+
+E1.8 — Exibir vigências
+Aluno deverá visualizar ao menos produto, situação e data final de acesso.
+ADMIN deverá visualizar histórico e informações necessárias para suporte.
+
+E1.9 — Preparar renovação
+Nova compra do mesmo produto deverá poder gerar nova vigência sem sobrescrever ou perder o período vigente.
+
+E1.10 — Testar o domínio de acesso
+Cobrir, no mínimo:
+primeira compra;
+compra duplicada;
+convite;
+primeiro acesso;
+login;
+aluno sem matrícula;
+matrícula sem vigência;
+vigência futura;
+vigência ativa;
+vigência suspensa;
+vigência cancelada;
+vigência expirada;
+renovação antecipada;
+aviso de expiração;
+aviso já enviado.
+
+Critério de aceite da Etapa 1
+A Área do Aluno deverá distinguir corretamente:
+
+quem é o aluno;
+como ele autentica;
+qual produto possui;
+qual matrícula representa esse vínculo;
+qual vigência concede acesso naquele momento.
+
+Nenhum desses conceitos poderá substituir indevidamente o outro.
+
+
+ETAPA 2 — Hotmart, vigências e integrações
 Objetivo
-Transformar Hotmart → Aluno → Matrícula em um fluxo de domínio completo.
-O webhook já possui auditoria de evento e idempotência por hotmartEventId e transacaoCodigo, o que será preservado.
+Transformar o ciclo externo Hotmart em efeitos de domínio explícitos sobre aluno, matrícula, vigência e transações, preservando auditoria, idempotência e histórico.
 
-Máquina de estados
-Definiremos uma tabela oficial entre evento Hotmart e efeito na matrícula.
+Hotmart será uma origem de eventos e pagamentos.
+Hotmart não será o modelo de domínio do MGU.
+
+Fluxo conceitual:
+
+EVENTO EXTERNO
+      ↓
+HotmartWebhookEvent / HotmartTransaction
+      ↓
+regra de tradução MGU
+      ↓
+Matricula / VigenciaMatricula
+      ↓
+direito de acesso
+
+Auditoria e idempotência
+O webhook já possui auditoria por hotmartEventId e transacaoCodigo.
+Essa base será preservada e ampliada quando necessário.
+
+O mesmo evento não poderá criar vigências duplicadas.
+Uma mesma transação não poderá conceder repetidamente o mesmo direito por causa de retentativas do webhook.
+
+Ciclo comercial completo
+Antes da implementação definitiva será feito inventário dos eventos realmente utilizados e disponibilizados pela Hotmart para o produto atual.
+
+Precisaremos mapear, quando aplicáveis:
+
+compra aprovada;
+compra concluída;
+renovação;
+reembolso;
+chargeback;
+cancelamento;
+cancelamento de renovação;
+inadimplência ou atraso;
+expiração;
+eventos duplicados;
+eventos recebidos fora de ordem.
+
+Os nomes oficiais e a semântica dos eventos serão confirmados durante a implementação.
+Não assumiremos que todo evento contendo a palavra “cancelamento” possui o mesmo efeito comercial.
+
+Máquina de tradução
+Teremos uma regra central de tradução entre evento externo e efeito interno.
+
 Exemplo conceitual:
+
 PURCHASE_APPROVED
         ↓
-Matricula ATIVA
+cria ou localiza Aluno
+        ↓
+cria ou localiza Matricula
+        ↓
+cria VigenciaMatricula
+        ↓
+gera convite apenas se ainda não existir credencial válida
 
 PURCHASE_COMPLETE
         ↓
-mantém ATIVA
+mantém estado válido sem duplicar vigência
 
 REFUND
         ↓
-CANCELADA
+cancela a vigência relacionada à compra reembolsada
 
 CHARGEBACK
         ↓
-SUSPENSA ou CANCELADA
+suspende ou cancela a vigência relacionada conforme regra comercial definida
 
-nova compra válida
+CANCELAMENTO DE RENOVAÇÃO
         ↓
-nova vigência / matrícula válida
-Os nomes exatos dos eventos serão confirmados durante a implementação.
+não deve necessariamente encerrar o período já pago
+        ↓
+impede apenas nova concessão quando essa for a semântica real do evento
+
+NOVA COMPRA / RENOVAÇÃO
+        ↓
+cria nova vigência
+        ↓
+preserva vigências anteriores
+
+Eventos fora de ordem
+O sistema deverá evitar que um evento antigo recebido tardiamente reverta indevidamente um estado mais recente.
+
+Quando necessário, a decisão deverá considerar:
+identificador do evento;
+data do evento na origem;
+transação relacionada;
+estado atual;
+histórico já processado.
+
+Integrações externas
+Falhas de Brevo, Resend ou futuras integrações não deverão desfazer uma alteração de banco já validamente confirmada.
+
+Primeiro:
+BANCO
+↓
+COMMIT
+
+Depois:
+BREVO / RESEND / OUTRAS INTEGRAÇÕES
 
 IntegrationJob
-Criamos algo como:
+Quando necessário, criaremos algo equivalente a:
+
 IntegrationJob
 ├── id
 ├── tipo
@@ -1000,11 +1300,17 @@ IntegrationJob
 ├── ultimoErro
 ├── createdAt
 └── processedAt
+
 Exemplos:
 BREVO_MOVER_CLIENTE
 RESEND_CONVITE_ALUNO
 RESEND_RECUPERACAO
-Isso poderá funcionar usando o PostgreSQL do Neon, sem exigir uma infraestrutura de filas paga.
+RESEND_AVISO_EXPIRACAO
+
+Isso poderá funcionar usando o PostgreSQL do Neon, sem exigir Redis pago, workers permanentes ou infraestrutura adicional obrigatória.
+
+Critério de aceite da Etapa 2
+O ciclo Hotmart deverá conseguir refletir corretamente no domínio do MGU os eventos que concedem, mantêm, renovam, suspendem, cancelam ou encerram direitos, sem duplicação e sem tornar Hotmart o centro da arquitetura.
 
 ETAPA 3 — Produtos, preços, cotações e administração
 Objetivo
@@ -1278,7 +1584,34 @@ Fornecedor
 ├── Leads / oportunidades
 ├── Métricas
 └── Configurações
+
 O ADMIN continuará tendo visão e moderação central.
+
+Situação cadastral e direito de acesso
+A situação do Fornecedor não deverá ser confundida com eventual pagamento, plano ou vigência de acesso.
+
+Conceitualmente teremos:
+
+Fornecedor.status
+= situação cadastral/comercial do fornecedor.
+
+Direito/plano de acesso
+= quais funcionalidades, serviços ou presença no Ecossistema foram contratados.
+
+Vigência
+= por quanto tempo aquele direito permanece válido.
+
+Um fornecedor poderá possuir estados equivalentes a:
+ATIVO;
+SUSPENSO;
+CANCELADO.
+
+O cancelamento cadastral deverá poder impedir uso do portal, publicação de ofertas ou participação ativa no Ecossistema sem apagar seu histórico de pagamentos, vigências, ofertas, leads ou relacionamentos.
+
+Se futuramente houver anuidade ou plano pago para fornecedores, esse direito não será modelado como Matricula de aluno.
+Ele deverá utilizar a evolução do conceito genérico de DireitoAcesso e Vigencias.
+
+Da mesma forma, o acesso de alunos ao Ecossistema poderá futuramente ser vendido ou renovado de forma independente do Curso MGU, inclusive com preço e duração próprios.
 
 Área do aluno
 O aluno terá acesso ao Ecossistema MGU dentro de seu portal.
@@ -1404,6 +1737,6 @@ Se algo falhar, não avançamos para a etapa seguinte.
 
 9. Ordem que adotaremos a partir de agora
 A sequência operacional fica definida como:
-Etapa Prévia — Saneamento da Base Atual → Área do Aluno e vigência → Hotmart e integrações → Produtos/preços/cotações → Pessoa → Usuários e permissões → Lead/Aluno/Marketing → Organizações → Fornecedores → Auditoria e remoção do legado.
+Etapa Prévia — Saneamento da Base Atual → Área do Aluno e fundação de vigências → Hotmart, vigências e integrações → Produtos/preços/cotações → Pessoa → Usuários e permissões → Lead/Aluno/Marketing → Organizações → Fornecedores → Auditoria e remoção do legado.
 Esse encadeamento evita que criemos Pessoa, Fornecedor ou um novo sistema de permissões sobre problemas que já conseguimos identificar e resolver na base existente.
 As atividades P0.1, P0.2, P0.3, P0.4, P0.5, P0.6 e P0.7 da Etapa Prévia foram concluídas em 05/09/2026. O P0.8 — Centralizar a autorização administrativa —, o P0.9 — Criar validações mínimas compartilhadas —, o P0.10 — Criar baseline de testes — e o P0.11 — Reorganizar documentação — foram concluídos em 06/09/2026. O P0.12 — Preparar alunos.mentoriagarimpourbano.com.br — foi concluído em 07/09/2026, com implementação local, commit/push em `homologacao` e Vercel Preview aprovados.
