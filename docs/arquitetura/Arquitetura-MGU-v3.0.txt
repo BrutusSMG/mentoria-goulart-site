@@ -732,7 +732,7 @@ Critério de aceite:
 Critério atendido.
 
 P0.11 — Reorganizar documentação
-STATUS: IMPLEMENTAÇÃO LOCAL CONCLUÍDA EM 06/09/2026 — AGUARDANDO COMMIT/PUSH E VALIDAÇÃO DA PREVIEW
+STATUS: CONCLUÍDO EM 06/09/2026
 
 Objetivo:
 - substituir o README genérico do create-next-app por documentação real do MGU;
@@ -787,19 +787,97 @@ Critério de aceite local:
 - testes, lint, build e diff check passam;
 - nenhuma migration é necessária.
 
-Critério local atendido. O fechamento definitivo do P0.11 ocorrerá após commit, push de `homologacao` e confirmação da Vercel Preview. Após essa aprovação, a próxima atividade será o P0.12 — Preparar `alunos.mentoriagarimpourbano.com.br`.
+Critério atendido.
+
+Fechamento remoto:
+- commit publicado em `homologacao`: `1f0f7fe` — `docs: reorganizar documentacao do projeto`;
+- push de `homologacao` concluído;
+- Vercel Preview concluída com sucesso;
+- documentação reorganizada passou a integrar oficialmente a base versionada do projeto.
+
+Após essa aprovação, a atividade seguinte passou a ser o P0.12 — Preparar `alunos.mentoriagarimpourbano.com.br`.
 
 P0.12 — Preparar alunos.mentoriagarimpourbano.com.br
-Hoje o proxy trata explicitamente:
-ebook.mentoriagarimpourbano.com.br
-admin.mentoriagarimpourbano.com.br
-Incluiremos futuramente:
-alunos.mentoriagarimpourbano.com.br
-com o comportamento esperado:
+STATUS: IMPLEMENTAÇÃO E VALIDAÇÃO LOCAL CONCLUÍDAS EM 07/09/2026 — AGUARDANDO COMMIT/PUSH E VALIDAÇÃO DA PREVIEW
+
+Objetivo:
+- preparar o subdomínio oficial `alunos.mentoriagarimpourbano.com.br`;
+- permitir que a Área do Aluno utilize URLs públicas sem o prefixo `/aluno`;
+- preservar compatibilidade temporária com os caminhos antigos `/aluno/...`;
+- manter as APIs existentes em `/api/...` sem prefixo adicional;
+- preparar os links de primeiro acesso e recuperação de senha para o domínio específico dos alunos.
+
+Comportamento público definido:
+
 alunos.mentoriagarimpourbano.com.br/
                     ↓
-                 /aluno
-A configuração efetiva poderá ser executada quando concluirmos a Área do Aluno na Etapa 1.
+                  /aluno
+
+alunos.mentoriagarimpourbano.com.br/login
+                    ↓
+              /aluno/login
+
+alunos.mentoriagarimpourbano.com.br/perfil
+                    ↓
+              /aluno/perfil
+
+alunos.mentoriagarimpourbano.com.br/comunidade
+                    ↓
+          /aluno/comunidade
+
+O caminho exibido ao aluno permanece limpo. O prefixo `/aluno` é utilizado internamente pela estrutura atual do App Router.
+
+Compatibilidade:
+- requisições ao subdomínio utilizando `/aluno` ou `/aluno/...` são redirecionadas para a URL pública equivalente sem o prefixo;
+- exemplo: `/aluno/login` → `/login`;
+- isso preserva os links e redirects internos existentes enquanto a Área do Aluno evolui;
+- nenhuma rota do domínio principal foi removida nesta atividade.
+
+Execução realizada:
+- `src/proxy.js` passou a reconhecer explicitamente:
+  - `alunos.mentoriagarimpourbano.com.br`;
+  - `alunos.localhost`;
+  - `alunos.127.0.0.1`;
+- URLs públicas limpas são reescritas internamente para `/aluno/...`;
+- foi adicionada proteção contra duplicação de prefixo, evitando caminhos como `/aluno/aluno/...`;
+- caminhos antigos `/aluno/...` no subdomínio são redirecionados para sua forma pública limpa;
+- o cookie `x-bare-page` continua sendo aplicado no subdomínio para manter o layout próprio da Área do Aluno;
+- o matcher do proxy continua excluindo `/api`, preservando as APIs de alunos e NextAuth em seus caminhos atuais;
+- `src/app/api/alunos/esqueci-senha/route.js` passou a gerar URL limpa de redefinição de senha quando `NEXT_PUBLIC_ALUNO_URL` estiver configurada;
+- `src/app/api/webhooks/hotmart/route.js` passou a gerar URL limpa de primeiro acesso quando `NEXT_PUBLIC_ALUNO_URL` estiver configurada;
+- quando `NEXT_PUBLIC_ALUNO_URL` não estiver definida, os dois fluxos preservam o fallback histórico pelo domínio base com `/aluno/...`;
+- no ambiente local, `NEXT_PUBLIC_ALUNO_URL` foi ajustada para `http://alunos.localhost:3000`;
+- o arquivo `.env` permanece fora do Git e nenhuma credencial ou configuração local foi versionada;
+- nenhuma alteração de schema Prisma ou migration foi necessária.
+
+Validação funcional local:
+- `http://alunos.localhost:3000/login` → 200 OK, rewrite interno para `/aluno/login`;
+- `http://alunos.localhost:3000/primeiro-acesso` → 200 OK, rewrite interno para `/aluno/primeiro-acesso`;
+- `http://alunos.localhost:3000/redefinir-senha` → 200 OK, rewrite interno para `/aluno/redefinir-senha`;
+- acesso a `/aluno/login` pelo subdomínio → redirect para `/login`;
+- acesso à raiz por usuário não autenticado:
+  - `/` → rewrite `/aluno`;
+  - proteção da Área do Aluno → `/aluno/login`;
+  - compatibilidade do proxy → `/login`;
+  - resposta final 200 OK;
+- não foi identificado loop de redirect.
+
+Validação técnica local:
+- `npm test`: 1 arquivo aprovado, 16/16 testes aprovados;
+- `npm run lint`: concluído com sucesso, permanecendo somente o warning já conhecido de `<img>`;
+- `npm run build`: concluído com sucesso;
+- `git diff --check`: sem erros.
+
+Critério de aceite local:
+- subdomínio de alunos reconhecido pelo proxy;
+- URLs públicas limpas disponíveis;
+- rotas antigas compatíveis;
+- APIs não afetadas;
+- links de primeiro acesso e recuperação preparados para `NEXT_PUBLIC_ALUNO_URL`;
+- testes, lint, build e validações funcionais locais aprovados;
+- nenhuma migration necessária.
+
+Critério local atendido. O fechamento definitivo do P0.12 ocorrerá após commit, push de `homologacao` e confirmação da Vercel Preview. A configuração efetiva do domínio customizado e DNS poderá ser realizada separadamente conforme a disponibilização do subdomínio nos ambientes da Vercel.
 
 Saída esperada da Etapa Prévia
 A base deverá estar:
@@ -1319,4 +1397,4 @@ Se algo falhar, não avançamos para a etapa seguinte.
 A sequência operacional fica definida como:
 Etapa Prévia — Saneamento da Base Atual → Área do Aluno e vigência → Hotmart e integrações → Produtos/preços/cotações → Pessoa → Usuários e permissões → Lead/Aluno/Marketing → Organizações → Fornecedores → Auditoria e remoção do legado.
 Esse encadeamento evita que criemos Pessoa, Fornecedor ou um novo sistema de permissões sobre problemas que já conseguimos identificar e resolver na base existente.
-As atividades P0.1, P0.2, P0.3, P0.4, P0.5, P0.6 e P0.7 da Etapa Prévia foram concluídas em 05/09/2026. O P0.8 — Centralizar a autorização administrativa —, o P0.9 — Criar validações mínimas compartilhadas — e o P0.10 — Criar baseline de testes — foram concluídos em 06/09/2026. O P0.11 — Reorganizar documentação — teve implementação e validação local concluídas em 06/09/2026 e aguarda commit/push e validação da Vercel Preview para fechamento definitivo. Após essa aprovação, a próxima atividade será o P0.12 — Preparar alunos.mentoriagarimpourbano.com.br.
+As atividades P0.1, P0.2, P0.3, P0.4, P0.5, P0.6 e P0.7 da Etapa Prévia foram concluídas em 05/09/2026. O P0.8 — Centralizar a autorização administrativa —, o P0.9 — Criar validações mínimas compartilhadas —, o P0.10 — Criar baseline de testes — e o P0.11 — Reorganizar documentação — foram concluídos em 06/09/2026. O P0.12 — Preparar alunos.mentoriagarimpourbano.com.br — teve implementação e validação local concluídas em 07/09/2026 e aguarda commit/push de `homologacao` e validação da Vercel Preview para fechamento definitivo.

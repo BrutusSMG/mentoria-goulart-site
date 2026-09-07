@@ -89,12 +89,16 @@ async function enviarConvitePrimeiroAcesso({ email, nome, token }) {
     return;
   }
 
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_ALUNO_URL
-    || process.env.NEXT_PUBLIC_BASE_URL
-    || 'http://localhost:3000'
-   ).replace(/\/$/, '');
-  const link = `${baseUrl}/aluno/primeiro-acesso?token=${encodeURIComponent(token)}`;
+  const baseAlunoConfigurado =
+    process.env.NEXT_PUBLIC_ALUNO_URL?.replace(/\/$/, '');
+
+  const baseFallback = (
+    process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  ).replace(/\/$/, '');
+
+  const link = baseAlunoConfigurado
+    ? `${baseAlunoConfigurado}/primeiro-acesso?token=${encodeURIComponent(token)}`
+    : `${baseFallback}/aluno/primeiro-acesso?token=${encodeURIComponent(token)}`;
   const nomeSeguro = escaparHtml(nome || 'Aluno');
 
   try {

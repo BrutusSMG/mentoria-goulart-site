@@ -21,6 +21,11 @@ export default function proxy(req) {
     hostname.startsWith('admin.localhost') ||
     hostname.startsWith('admin.127.0.0.1');
 
+  const isAlunosSubdomain =
+    hostname === 'alunos.mentoriagarimpourbano.com.br' ||
+    hostname.startsWith('alunos.localhost') ||
+    hostname.startsWith('alunos.127.0.0.1');
+
   // ebook.dominio.com.br/          → /ebook
   // ebook.dominio.com.br/obrigado  → /ebook/obrigado
   if (isEbookSubdomain) {
@@ -42,6 +47,29 @@ export default function proxy(req) {
     if (url.pathname === '/') {
       url.pathname = '/admin';
     }
+
+    const response = NextResponse.rewrite(url);
+    response.cookies.set('x-bare-page', '1', {
+      path: '/',
+      sameSite: 'lax',
+    });
+    return response;
+  }
+
+  if (isAlunosSubdomain) {
+    // Compatibilidade com links internos existentes em /aluno/...
+    // No subdomínio, o prefixo /aluno não deve aparecer na URL pública.
+    if (
+      url.pathname === '/aluno' ||
+      url.pathname.startsWith('/aluno/')
+    ) {
+      url.pathname = url.pathname.slice('/aluno'.length) || '/';
+      return NextResponse.redirect(url);
+    }
+
+    url.pathname = url.pathname === '/'
+      ? '/aluno'
+      : `/aluno${url.pathname}`;
 
     const response = NextResponse.rewrite(url);
     response.cookies.set('x-bare-page', '1', {

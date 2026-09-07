@@ -74,10 +74,16 @@ export async function POST(request) {
 
     const apiKey = process.env.RESEND_API_KEY;
     if (apiKey) {
-      const baseAluno = process.env.NEXT_PUBLIC_ALUNO_URL
-        || process.env.NEXT_PUBLIC_BASE_URL
-        || 'http://localhost:3000';
-      const link = `${baseAluno}/aluno/redefinir-senha?token=${encodeURIComponent(token )}`;
+      const baseAlunoConfigurado =
+        process.env.NEXT_PUBLIC_ALUNO_URL?.replace(/\/$/, '');
+
+      const baseFallback = (
+        process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+      ).replace(/\/$/, '');
+
+      const link = baseAlunoConfigurado
+        ? `${baseAlunoConfigurado}/redefinir-senha?token=${encodeURIComponent(token )}`
+        : `${baseFallback}/aluno/redefinir-senha?token=${encodeURIComponent(token )}`;
       const resend = new Resend(apiKey);
       const nomeSeguro = escaparHtml(aluno.nome || 'Aluno');
 
