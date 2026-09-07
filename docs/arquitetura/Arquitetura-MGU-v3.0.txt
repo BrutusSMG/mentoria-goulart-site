@@ -798,7 +798,7 @@ Fechamento remoto:
 Após essa aprovação, a atividade seguinte passou a ser o P0.12 — Preparar `alunos.mentoriagarimpourbano.com.br`.
 
 P0.12 — Preparar alunos.mentoriagarimpourbano.com.br
-STATUS: IMPLEMENTAÇÃO E VALIDAÇÃO LOCAL CONCLUÍDAS EM 07/09/2026 — AGUARDANDO COMMIT/PUSH E VALIDAÇÃO DA PREVIEW
+STATUS: CONCLUÍDO EM 07/09/2026
 
 Objetivo:
 - preparar o subdomínio oficial `alunos.mentoriagarimpourbano.com.br`;
@@ -877,7 +877,16 @@ Critério de aceite local:
 - testes, lint, build e validações funcionais locais aprovados;
 - nenhuma migration necessária.
 
-Critério local atendido. O fechamento definitivo do P0.12 ocorrerá após commit, push de `homologacao` e confirmação da Vercel Preview. A configuração efetiva do domínio customizado e DNS poderá ser realizada separadamente conforme a disponibilização do subdomínio nos ambientes da Vercel.
+Critério atendido.
+
+Fechamento remoto:
+- commit publicado em `homologacao`: `470397f` — `feat: preparar subdominio da area do aluno`;
+- push de `homologacao` concluído;
+- GitHub confirmou `homologacao` apontando para `470397fff19df493e7d476dbc1678546f015a373`;
+- Vercel Preview concluída com sucesso;
+- nenhuma migration foi necessária.
+
+A configuração efetiva do domínio customizado e DNS permanece uma atividade operacional separada, a ser realizada conforme a disponibilização do subdomínio nos ambientes da Vercel.
 
 Saída esperada da Etapa Prévia
 A base deverá estar:
@@ -1397,4 +1406,4 @@ Se algo falhar, não avançamos para a etapa seguinte.
 A sequência operacional fica definida como:
 Etapa Prévia — Saneamento da Base Atual → Área do Aluno e vigência → Hotmart e integrações → Produtos/preços/cotações → Pessoa → Usuários e permissões → Lead/Aluno/Marketing → Organizações → Fornecedores → Auditoria e remoção do legado.
 Esse encadeamento evita que criemos Pessoa, Fornecedor ou um novo sistema de permissões sobre problemas que já conseguimos identificar e resolver na base existente.
-As atividades P0.1, P0.2, P0.3, P0.4, P0.5, P0.6 e P0.7 da Etapa Prévia foram concluídas em 05/09/2026. O P0.8 — Centralizar a autorização administrativa —, o P0.9 — Criar validações mínimas compartilhadas —, o P0.10 — Criar baseline de testes — e o P0.11 — Reorganizar documentação — foram concluídos em 06/09/2026. O P0.12 — Preparar alunos.mentoriagarimpourbano.com.br — teve implementação e validação local concluídas em 07/09/2026 e aguarda commit/push de `homologacao` e validação da Vercel Preview para fechamento definitivo.
+As atividades P0.1, P0.2, P0.3, P0.4, P0.5, P0.6 e P0.7 da Etapa Prévia foram concluídas em 05/09/2026. O P0.8 — Centralizar a autorização administrativa —, o P0.9 — Criar validações mínimas compartilhadas —, o P0.10 — Criar baseline de testes — e o P0.11 — Reorganizar documentação — foram concluídos em 06/09/2026. O P0.12 — Preparar alunos.mentoriagarimpourbano.com.br — foi concluído em 07/09/2026, com implementação local, commit/push em `homologacao` e Vercel Preview aprovados.
