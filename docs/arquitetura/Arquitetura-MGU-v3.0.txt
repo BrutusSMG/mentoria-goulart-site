@@ -1222,7 +1222,267 @@ A recuperação de senha será conceitualmente destinada a contas que já conclu
 Qualquer restrição técnica da recuperação de senha a contas que já possuam senha somente deverá ser aplicada depois que o fluxo de convite e reenvio estiver funcional também para alunos LEGADO e MANUAL, evitando bloqueio de usuários durante a transição.
 
 E1.2 — Formalizar Matricula ≠ VigenciaMatricula
-Confirmar modelo, campos, estados, relacionamentos, regras de histórico e compatibilidade com os dados existentes.
+
+Matricula e VigenciaMatricula representam conceitos diferentes e não poderão substituir uma à outra.
+
+Matricula representa o vínculo administrativo e contratual do aluno com um produto dentro da plataforma.
+
+Uma combinação aluno + produto deverá possuir uma matrícula histórica, podendo essa matrícula possuir múltiplas vigências ao longo do tempo.
+
+O status da Matricula representa a situação administrativa/contratual desse vínculo:
+
+PENDENTE
+vínculo criado, porém ainda não plenamente regularizado ou liberado;
+
+ATIVA
+vínculo administrativo/contratual regular;
+
+SUSPENSA
+vínculo temporariamente bloqueado;
+
+CANCELADA
+vínculo cancelado de forma definitiva por uma ocorrência administrativa ou comercial;
+
+ENCERRADA
+vínculo finalizado normalmente.
+
+Matricula.status não representa, sozinho, o direito temporal de acesso.
+
+Uma Matricula ATIVA sem uma VigenciaMatricula válida no instante atual não deverá conceder acesso.
+
+Uma Matricula SUSPENSA, CANCELADA ou ENCERRADA deverá impedir acesso mesmo que exista uma vigência temporalmente válida.
+
+A suspensão da Matricula não deverá alterar automaticamente iniciaEm ou expiraEm das vigências associadas.
+
+Suspensão não interrompe, congela nem prolonga automaticamente o prazo contratado.
+
+Eventual compensação de tempo deverá ser tratada como prorrogação administrativa explícita e auditável.
+
+VigenciaMatricula representa uma concessão específica de direito de acesso vinculada a uma Matricula.
+
+Uma Matricula poderá possuir múltiplas VigenciaMatricula para preservar compras, renovações, concessões manuais e histórico.
+
+A VigenciaMatricula deverá possuir conceitualmente os seguintes campos:
+
+id
+identificador da vigência;
+
+matriculaId
+matrícula à qual a vigência pertence;
+
+transacaoOrigemId
+transação externa que originou a vigência, quando existir;
+
+origem
+origem daquela concessão específica;
+
+tipoDuracao
+natureza da duração concedida;
+
+status
+estado operacional daquela vigência;
+
+concedidaEm
+momento em que o direito foi concedido, quando conhecido;
+
+iniciaEm
+momento a partir do qual a vigência pode conceder acesso;
+
+garantiaAte
+fim do período de garantia comercial, quando aplicável;
+
+expiraEm
+fim temporal da vigência, quando definido;
+
+statusAlteradoEm
+momento em que o status atual passou a valer;
+
+canceladaEm
+momento efetivo do cancelamento, quando aplicável;
+
+encerradaEm
+momento efetivo do encerramento normal, quando aplicável;
+
+avisoExpiracaoEnviadoEm
+controle do aviso único de proximidade da expiração;
+
+createdAt
+data técnica de criação;
+
+updatedAt
+data técnica da última alteração.
+
+Origem da vigência
+
+A origem da vigência deverá ser independente da origem da Matricula.
+
+Valores conceituais:
+
+HOTMART
+LEGADO
+MANUAL
+
+Essa separação permitirá, por exemplo, uma Matricula originalmente LEGADO receber posteriormente uma nova VigenciaMatricula originada por uma renovação HOTMART.
+
+Datas da vigência
+
+concedidaEm representa quando o direito foi concedido ou adquirido.
+
+iniciaEm representa quando aquele período efetivamente começa a poder conceder acesso.
+
+expiraEm representa quando aquele período deixa de conceder acesso por tempo.
+
+concedidaEm poderá ser nulo para dados LEGADO quando a data histórica real não for conhecida.
+
+Nenhuma data histórica deverá ser inventada apenas para preencher concedidaEm.
+
+iniciaEm deverá existir para toda vigência.
+
+Quando uma vigência LEGADO não possuir data histórica de início conhecida, a migração poderá utilizar uma data técnica de início claramente tratada como marco da migração, sem representá-la falsamente como data da compra original.
+
+Duração da vigência
+
+TipoDuracaoVigencia deverá possuir conceitualmente:
+
+DEFINIDA
+INDEFINIDA
+VITALICIA
+
+DEFINIDA
+possui término previamente conhecido e exige expiraEm preenchido.
+
+INDEFINIDA
+não possui término definido no momento e exige expiraEm nulo.
+Poderá futuramente ser convertida para DEFINIDA quando a regra comercial estabelecer um prazo ou data final.
+
+VITALICIA
+representa concessão comercial efetivamente vitalícia e exige expiraEm nulo.
+Não deverá ser convertida para DEFINIDA por uma alteração comercial normal.
+
+expiraEm nulo, isoladamente, não significa acesso vitalício.
+
+A combinação tipoDuracao + expiraEm deverá determinar o significado comercial correto.
+
+Status da vigência
+
+StatusVigenciaMatricula deverá possuir conceitualmente:
+
+AGENDADA
+ATIVA
+SUSPENSA
+CANCELADA
+ENCERRADA
+
+AGENDADA
+direito já concedido cuja iniciaEm ainda está no futuro;
+
+ATIVA
+vigência operacionalmente apta a conceder acesso, desde que as demais regras de autorização sejam satisfeitas;
+
+SUSPENSA
+vigência temporariamente bloqueada sem alteração automática de seu prazo;
+
+CANCELADA
+direito daquela vigência revogado definitivamente;
+
+ENCERRADA
+vigência finalizada normalmente.
+
+O status deverá ser persistido no banco para operação, auditoria, suporte e integrações.
+
+O status persistido não substituirá a validação temporal.
+
+Para fins de autorização, o status persistido deverá ser combinado com as datas da vigência.
+
+SUSPENSA, CANCELADA e ENCERRADA são estados bloqueantes e não poderão conceder acesso.
+
+AGENDADA e ATIVA são estados potencialmente aptos a conceder acesso, dependendo da validade temporal.
+
+Uma vigência potencialmente apta somente poderá conceder acesso quando:
+
+iniciaEm <= agora;
+e
+expiraEm seja nulo ou agora < expiraEm.
+
+A chegada de iniciaEm deverá tornar a vigência temporalmente utilizável mesmo que uma rotina de manutenção ainda não tenha atualizado o status persistido de AGENDADA para ATIVA.
+
+Da mesma forma, a chegada de expiraEm deverá impedir acesso imediatamente mesmo que uma rotina de manutenção ainda não tenha atualizado o status persistido de ATIVA para ENCERRADA.
+
+As transições AGENDADA → ATIVA e ATIVA → ENCERRADA deverão continuar sendo persistidas para manter operação, suporte, relatórios e auditoria coerentes, mas a autorização não poderá depender exclusivamente da execução dessas rotinas.
+
+Suspensão
+
+A suspensão de Matricula ou VigenciaMatricula não deverá interromper nem prolongar automaticamente o prazo.
+
+iniciaEm e expiraEm deverão permanecer inalterados durante uma suspensão.
+
+A restituição eventual de dias deverá ser uma prorrogação explícita, separada da suspensão e futuramente auditável.
+
+VigenciaMatricula não deverá possuir suspensaEm apenas para tentar representar histórico de suspensões.
+
+Enquanto a vigência estiver SUSPENSA, statusAlteradoEm poderá indicar desde quando o status atual está vigente.
+
+Caso seja necessário histórico completo de múltiplas suspensões e reativações, deverá ser utilizada estrutura própria de auditoria/histórico, em vez de adicionar sucessivos campos de data à vigência.
+
+Relação com HotmartTransaction
+
+HotmartTransaction continuará representando o fato financeiro/comercial externo.
+
+VigenciaMatricula representará o direito de acesso resultante.
+
+Para vigências HOTMART, transacaoOrigemId deverá identificar a transação que originou aquela vigência.
+
+transacaoOrigemId poderá ser nulo para LEGADO e MANUAL.
+
+No modelo atual, uma mesma HotmartTransaction poderá originar no máximo uma VigenciaMatricula.
+
+transacaoOrigemId deverá portanto ser único quando preenchido.
+
+Retentativas ou eventos duplicados da mesma transação não poderão gerar vigências adicionais.
+
+Uma renovação deverá criar nova HotmartTransaction e nova VigenciaMatricula, preservando a vigência anterior.
+
+Reembolso ou chargeback não deverão criar nova vigência apenas para representar o cancelamento.
+
+Esses eventos deverão afetar a vigência originada pela respectiva transação.
+
+Um reembolso ou chargeback de uma renovação futura não deverá cancelar uma vigência anterior legitimamente adquirida.
+
+Cancelamento de renovação automática não significa cancelamento do direito já pago e não deverá, por si só, cancelar a vigência corrente.
+
+Histórico e fonte de verdade
+
+Matricula deverá permanecer como fonte do estado administrativo/contratual do vínculo aluno-produto.
+
+VigenciaMatricula deverá permanecer como fonte do direito temporal concedido.
+
+HotmartTransaction deverá permanecer como fonte interna do fato financeiro recebido da integração.
+
+HotmartWebhookEvent deverá permanecer como auditoria dos eventos externos recebidos.
+
+Nenhum desses conceitos deverá substituir indevidamente os demais.
+
+A autorização da Área do Aluno deverá futuramente combinar:
+
+Aluno elegível
++
+Matricula administrativamente apta
++
+VigenciaMatricula válida no instante atual
+=
+acesso permitido
+
+A Hotmart não deverá ser consultada diretamente para decidir autorização em tempo real.
+
+Compatibilidade com o modelo existente
+
+O campo concedidaEm atualmente existente em Matricula pertence ao modelo anterior à introdução de VigenciaMatricula.
+
+Sua migração, preservação ou posterior remoção deverá ser tratada de forma evolutiva na E1.3, sem perda de dados.
+
+Os campos administrativos existentes em Matricula não deverão ser reinterpretados automaticamente como datas de vigência.
+
+Nenhum dado existente deverá receber retroativamente uma regra temporal inventada apenas para satisfazer o novo modelo.
 
 E1.3 — Criar VigenciaMatricula de forma evolutiva
 Adicionar estrutura e migration sem apagar ou reinterpretar dados existentes de forma destrutiva.
