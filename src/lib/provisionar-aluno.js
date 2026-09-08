@@ -1,11 +1,10 @@
 // src/lib/provisionar-aluno.js
-import crypto from 'node:crypto';
-
-const TIPO_PRIMEIRO_ACESSO = 'PRIMEIRO_ACESSO';
-
-function hashToken(token ) {
-  return crypto.createHash('sha256').update(token).digest('hex');
-}
+import {
+  TIPO_PRIMEIRO_ACESSO,
+  calcularExpiracaoConvitePrimeiroAcesso,
+  gerarTokenPrimeiroAcesso,
+  hashTokenAcesso,
+} from '@/lib/convite-primeiro-acesso';
 
 function normalizarEmail(email) {
   const valor = String(email || '').trim().toLowerCase();
@@ -110,13 +109,13 @@ export async function provisionarAlunoHotmart(tx, {
     });
 
     if (!conviteExistente) {
-      conviteToken = crypto.randomBytes(32).toString('hex');
+      conviteToken = gerarTokenPrimeiroAcesso();
       await tx.alunoAccessToken.create({
         data: {
           alunoId: aluno.id,
-          tokenHash: hashToken(conviteToken),
+          tokenHash: hashTokenAcesso(conviteToken),
           tipo: TIPO_PRIMEIRO_ACESSO,
-          expiraEm: new Date(Date.now() + 72 * 60 * 60 * 1000),
+          expiraEm: calcularExpiracaoConvitePrimeiroAcesso(),
         },
       });
     }

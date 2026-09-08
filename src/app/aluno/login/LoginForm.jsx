@@ -124,9 +124,19 @@ export default function LoginAlunoPage() {
             {status === 'loading' ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : null}
             {status === 'loading' ? 'ENTRANDO...' : 'ENTRAR NA ÁREA DO ALUNO'}
           </button>
-          <div className="mt-4 text-center">
-            <a href="/aluno/esqueci-senha" className="text-sm text-[#F7FA83] underline-offset-4 hover:underline">
+          <div className="mt-4 space-y-2 text-center">
+            <a
+              href="/aluno/esqueci-senha"
+              className="block text-sm text-[#F7FA83] underline-offset-4 hover:underline"
+            >
               Esqueci minha senha
+            </a>
+
+            <a
+              href="/aluno/reenviar-convite"
+              className="block text-sm text-zinc-400 underline-offset-4 hover:text-[#F7FA83] hover:underline"
+            >
+              Não recebeu ou seu convite expirou?
             </a>
           </div>
 
@@ -142,9 +152,6 @@ export default function LoginAlunoPage() {
           >
             Acessar aulas na Hotmart
           </a>
-          <p className="pt-2 text-xs text-zinc-600">
-            Ainda não recebeu o convite de acesso? Entre em contato com o suporte.
-          </p>
         </div>
 
         <Link

@@ -42,10 +42,19 @@ export async function POST(request) {
 
     const aluno = await prisma.aluno.findUnique({
       where: { email },
-      select: { id: true, nome: true, status: true },
+      select: {
+        id: true,
+        nome: true,
+        status: true,
+        senhaHash: true,
+      },
     });
 
-    if (!aluno || aluno.status !== 'ATIVO') {
+    if (
+      !aluno ||
+      aluno.status !== 'ATIVO' ||
+      !aluno.senhaHash
+    ) {
       return respostaGenerica();
     }
 

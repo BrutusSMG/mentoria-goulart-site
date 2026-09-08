@@ -1209,6 +1209,14 @@ Convite expirado, não recebido ou cuja tentativa de envio tenha falhado não de
 
 Falha no envio de um convite não poderá tornar o aluno permanentemente incapaz de obter outro.
 
+O reenvio deverá possuir proteção contra solicitações repetidas em intervalo curto, evitando spam e evitando que um novo pedido invalide continuamente um convite recém-gerado ainda utilizável.
+
+Na implementação atual, pedidos de reenvio feitos dentro de uma janela de 5 minutos após a geração de um convite válido não deverão gerar nem invalidar outro convite.
+
+O resultado do envio deverá futuramente poder ser persistido de forma auditável para consulta administrativa, permitindo ao ADMIN identificar, quando aplicável, última tentativa, sucesso, falha e informação resumida do erro.
+
+A ausência dessa persistência nesta etapa não deverá impedir o funcionamento do reenvio; ela poderá ser incorporada posteriormente à infraestrutura de integrações e jobs.
+
 A recuperação de senha será conceitualmente destinada a contas que já concluíram o primeiro acesso e possuem credencial.
 
 Qualquer restrição técnica da recuperação de senha a contas que já possuam senha somente deverá ser aplicada depois que o fluxo de convite e reenvio estiver funcional também para alunos LEGADO e MANUAL, evitando bloqueio de usuários durante a transição.

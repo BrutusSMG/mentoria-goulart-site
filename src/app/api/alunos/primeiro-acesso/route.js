@@ -1,5 +1,4 @@
 // src/app/api/alunos/primeiro-acesso/route.js
-import crypto from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { prisma } from "@/lib/prisma";
 import bcrypt from 'bcryptjs';
@@ -8,10 +7,10 @@ import {
   SENHA_ALUNO_MAX,
   senhaAlunoValida,
 } from "@/lib/validacoes";
-
-function hashToken(token) {
-  return crypto.createHash('sha256').update(token).digest('hex');
-}
+import {
+  TIPO_PRIMEIRO_ACESSO,
+  hashTokenAcesso,
+} from '@/lib/convite-primeiro-acesso';
 
 function respostaErro(mensagem, status = 400) {
   return NextResponse.json({ ok: false, erro: mensagem }, { status });
@@ -40,16 +39,17 @@ export async function POST(request) {
     }
 
     const tokenAcesso = await prisma.alunoAccessToken.findUnique({
-      where: { tokenHash: hashToken(token) },
+      where: { tokenHash: hashTokenAcesso(token) },
       include: { aluno: true },
     });
 
     const tokenInvalido =
       !tokenAcesso ||
-      tokenAcesso.tipo !== 'PRIMEIRO_ACESSO' ||
+      tokenAcesso.tipo !== TIPO_PRIMEIRO_ACESSO ||
       tokenAcesso.usadoEm ||
       tokenAcesso.expiraEm <= new Date() ||
-      tokenAcesso.aluno.status !== 'ATIVO';
+      tokenAcesso.aluno.status !== 'ATIVO' ||
+      tokenAcesso.aluno.senhaHash;
 
     if (tokenInvalido) {
       return respostaErro('Este convite é inválido, expirou ou já foi utilizado.');
@@ -66,9 +66,15 @@ export async function POST(request) {
           emailVerificadoEm: agora,
         },
       }),
-      prisma.alunoAccessToken.update({
-        where: { id: tokenAcesso.id },
-        data: { usadoEm: agora },
+      prisma.alunoAccessToken.updateMany({
+        where: {
+          alunoId: tokenAcesso.alunoId,
+          tipo: TIPO_PRIMEIRO_ACESSO,
+          usadoEm: null,
+        },
+        data: {
+          usadoEm: agora,
+        },
       }),
     ]);
 
