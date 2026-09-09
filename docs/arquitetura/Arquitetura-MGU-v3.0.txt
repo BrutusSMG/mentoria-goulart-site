@@ -1674,7 +1674,52 @@ Critério de aceite:
 Critério atendido.
 
 E1.6 — Tratar expiração natural
-Vigência expirada deve deixar de conceder acesso mesmo antes de eventual atualização de status por rotina de manutenção.
+STATUS: CONCLUÍDO EM 09/09/2026
+
+Objetivo:
+Garantir que uma vigência deixe de conceder acesso assim que sua data de expiração for atingida, independentemente de eventual atualização posterior do status persistido por rotina de manutenção.
+
+Regra:
+- o status persistido da vigência não é suficiente para conceder acesso;
+- uma VigenciaMatricula com status ATIVA deixa de conceder acesso quando agora >= expiraEm;
+- o bloqueio ocorre mesmo que o status ainda permaneça ATIVA no banco;
+- expiraEm nulo continua representando ausência de término definido;
+- nenhuma rotina de manutenção, cron ou job é requisito para cortar o acesso no instante correto.
+
+Implementação:
+- a regra já havia sido incorporada à autorização central criada na E1.5;
+- alunoTemAcessoAtivo exige expiraEm nulo ou expiraEm maior que o momento atual;
+- vigenciaPermiteAcesso também bloqueia quando agora >= expiraEm;
+- não foi necessária alteração adicional no código de produção nesta etapa;
+- nenhuma alteração de schema ou migration foi necessária;
+- nenhuma rotina automática de alteração de status para ENCERRADA foi criada nesta etapa.
+
+Validação automatizada:
+- acrescentado teste específico para vigência com status ATIVA e expiraEm já no passado;
+- mantido teste de bloqueio exatamente no instante de expiraEm;
+- suíte completa: 44 testes aprovados em 4 arquivos;
+- lint com 0 erros e somente o warning já conhecido de <img>.
+
+Validação funcional em homologação:
+- criada vigência de teste DEFINIDA com status persistido ATIVA;
+- iniciaEm configurado no passado;
+- expiraEm configurado no passado;
+- o status permaneceu ATIVA durante toda a validação;
+- aluno autenticado foi bloqueado e direcionado para /acesso-indisponivel;
+- /api/alunos/comunidade retornou HTTP 403;
+- /api/alunos/meu-perfil retornou HTTP 403;
+- o bloqueio ocorreu sem alterar a vigência para ENCERRADA.
+
+Conclusão:
+A expiração temporal possui efeito imediato na autorização. A manutenção futura do status persistido poderá refletir administrativamente que a vigência foi encerrada, mas não participa da decisão crítica de permitir ou negar acesso.
+
+Critério de aceite:
+- vigência ATIVA com expiraEm no futuro pode conceder acesso;
+- vigência ATIVA com expiraEm igual ao momento atual não concede acesso;
+- vigência ATIVA com expiraEm no passado não concede acesso;
+- nenhuma atualização de status é necessária para que o acesso expire.
+
+Critério atendido.
 
 E1.7 — Implementar aviso de expiração
 Enviar aviso único aproximadamente 30 dias antes do término e registrar o envio.

@@ -90,6 +90,19 @@ describe('vigenciaPermiteAcesso', () => {
     ).toBe(true);
   });
 
+  it('nega acesso para vigência ATIVA já expirada', () => {
+    expect(
+      vigenciaPermiteAcesso(
+        {
+          status: 'ATIVA',
+          iniciaEm: new Date('2026-09-01T12:00:00.000Z'),
+          expiraEm: new Date('2026-09-08T12:00:00.000Z'),
+        },
+        agora,
+      ),
+    ).toBe(false);
+  });
+
   it('nega acesso exatamente no instante da expiração', () => {
     expect(
       vigenciaPermiteAcesso(
