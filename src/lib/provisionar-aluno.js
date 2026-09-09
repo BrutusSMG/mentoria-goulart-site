@@ -5,6 +5,7 @@ import {
   gerarTokenPrimeiroAcesso,
   hashTokenAcesso,
 } from '@/lib/convite-primeiro-acesso';
+import { provisionarPrimeiraVigenciaHotmart } from '@/lib/vigencia-matricula';
 
 function normalizarEmail(email) {
   const valor = String(email || '').trim().toLowerCase();
@@ -19,12 +20,28 @@ export async function provisionarAlunoHotmart(tx, {
   produtoId,
   produtoUcode = null,
   produtoNome,
+  transacaoOrigemId,
+  aprovadoEm,
 }) {
   const emailNormalizado = normalizarEmail(email);
   const produtoIdNormalizado = String(produtoId || '').trim();
 
   if (!emailNormalizado || !produtoIdNormalizado) {
     return null;
+  }
+
+  const transacaoOrigemIdNormalizado = String(
+    transacaoOrigemId || '',
+  ).trim();
+
+  if (
+    !transacaoOrigemIdNormalizado ||
+    !(aprovadoEm instanceof Date) ||
+    Number.isNaN(aprovadoEm.getTime())
+  ) {
+    throw new TypeError(
+      'Transação de origem e data de aprovação são obrigatórias para vigência Hotmart.',
+    );
   }
 
   const alunoExistente = await tx.aluno.findUnique({
@@ -74,7 +91,6 @@ export async function provisionarAlunoHotmart(tx, {
       produtoUcode: produtoUcode || null,
       produtoNome: produtoNome || 'Produto Hotmart',
       status: 'ATIVA',
-      concedidaEm: new Date(),
       suspensaEm: null,
       encerradaEm: null,
     },
@@ -85,8 +101,14 @@ export async function provisionarAlunoHotmart(tx, {
       produtoNome: produtoNome || 'Produto Hotmart',
       origem: 'HOTMART',
       status: 'ATIVA',
-      concedidaEm: new Date(),
+      concedidaEm: aprovadoEm,
     },
+  });
+
+  const vigencia = await provisionarPrimeiraVigenciaHotmart(tx, {
+    matriculaId: matricula.id,
+    transacaoOrigemId: transacaoOrigemIdNormalizado,
+    aprovadoEm,
   });
 
   await tx.perfilAluno.upsert({
@@ -124,6 +146,7 @@ export async function provisionarAlunoHotmart(tx, {
   return {
     alunoId: aluno.id,
     matriculaId: matricula.id,
+    vigenciaId: vigencia?.id || null,
     conviteToken,
     conviteNovo: Boolean(conviteToken),
   };

@@ -169,6 +169,7 @@ export async function POST(req) {
   const valorBruto = new Prisma.Decimal(String(valorRecebido));
   const nomeDoAluno = nomeDoComprador(comprador);
   const whatsappDoAluno = whatsappDoComprador(comprador);
+  const aprovadoEmRecebido = dataHotmart(compra?.approved_date);
   let conviteParaEnviar = null;
 
   const compraConfirmada = [
@@ -216,7 +217,7 @@ export async function POST(req) {
           origemSrc: compra?.origin?.src ? String(compra.origin.src) : null,
           origemSck: compra?.origin?.sck ? String(compra.origin.sck) : null,
           origemXcod: compra?.origin?.xcod ? String(compra.origin.xcod) : null,
-          aprovadoEm: dataHotmart(compra?.approved_date),
+          aprovadoEm: aprovadoEmRecebido,
         },
         update: {
           leadId: lead?.id || null,
@@ -234,7 +235,9 @@ export async function POST(req) {
           origemSrc: compra?.origin?.src ? String(compra.origin.src) : null,
           origemSck: compra?.origin?.sck ? String(compra.origin.sck) : null,
           origemXcod: compra?.origin?.xcod ? String(compra.origin.xcod) : null,
-          aprovadoEm: dataHotmart(compra?.approved_date),
+          ...(aprovadoEmRecebido
+            ? { aprovadoEm: aprovadoEmRecebido }
+            : {}),
         },
       });
 
@@ -243,12 +246,18 @@ export async function POST(req) {
           where: { id: lead.id },
           data: {
             comprouMentoria: true,
-            comprouMentoriaEm: dataHotmart(compra?.approved_date) || new Date(),
+            comprouMentoriaEm: transacao.aprovadoEm,
           },
         });
       }
 
       if (compraConfirmada && emailComprador) {
+        if (!transacao.aprovadoEm) {
+          throw new Error(
+            'Compra confirmada sem data de aprovação da Hotmart.',
+          );
+        }
+
         const provisionamento = await provisionarAlunoHotmart(tx, {
           leadId: lead?.id || null,
           email: emailComprador,
@@ -257,6 +266,8 @@ export async function POST(req) {
           produtoId,
           produtoUcode: produto.ucode ? String(produto.ucode) : null,
           produtoNome,
+          transacaoOrigemId: transacao.id,
+          aprovadoEm: transacao.aprovadoEm,
         });
 
         if (provisionamento) {

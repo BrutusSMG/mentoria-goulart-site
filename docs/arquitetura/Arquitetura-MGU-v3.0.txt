@@ -1524,7 +1524,66 @@ Critério de aceite:
 Critério atendido.
 
 E1.4 — Provisionar primeira vigência
-Compra válida deverá criar ou localizar a matrícula correspondente e criar a vigência adequada de forma idempotente.
+STATUS: CONCLUÍDO EM 08/09/2026
+
+Objetivo:
+Fazer uma compra Hotmart válida criar a primeira VigenciaMatricula da matrícula correspondente de forma idempotente, utilizando a data real de aprovação da compra e sem antecipar regras de renovação.
+
+Regras implementadas:
+- concedidaEm = data real de aprovação da compra;
+- iniciaEm = data real de aprovação da compra;
+- garantiaAte = aprovação + 7 dias;
+- expiraEm = aprovação + 1 ano-calendário + 7 dias;
+- o cálculo utiliza ano-calendário, e não quantidade fixa de 365 dias;
+- datas como 29/02 são tratadas corretamente;
+- vigência criada por compra Hotmart possui:
+  - origem = HOTMART;
+  - tipoDuracao = DEFINIDA;
+  - status = ATIVA;
+  - transacaoOrigemId correspondente à HotmartTransaction;
+- a mesma transação não cria uma segunda vigência;
+- se a matrícula já possui alguma vigência e chega uma nova transação, a E1.4 não cria uma segunda vigência;
+- renovação, recompra e encadeamento de novas vigências permanecem responsabilidade da E1.9;
+- nenhuma data de aprovação é inventada quando a Hotmart não fornece esse dado.
+
+Execução realizada:
+- criado src/lib/vigencia-matricula.js para centralizar regras temporais de vigência;
+- adicionadas funções de cálculo de dias e anos-calendário em UTC;
+- criada calcularVigenciaInicialMgu para aplicar a regra comercial atual de 1 ano-calendário + 7 dias;
+- criada provisionarPrimeiraVigenciaHotmart para centralizar idempotência e criação da primeira vigência;
+- provisionarAlunoHotmart passou a exigir transacaoOrigemId e aprovadoEm para provisionamento Hotmart válido;
+- Matricula.concedidaEm passa a receber aprovadoEm somente na criação da matrícula;
+- recompras não sobrescrevem mais Matricula.concedidaEm;
+- o webhook Hotmart passa transacao.id e transacao.aprovadoEm ao provisionamento;
+- HotmartTransaction.aprovadoEm deixa de ser apagado quando evento posterior da mesma transação não contém approved_date;
+- Lead.comprouMentoriaEm passa a usar a mesma data efetiva de aprovação da transação;
+- compra confirmada sem data de aprovação válida interrompe o provisionamento em vez de utilizar new Date() como fallback;
+- a criação da vigência ocorre dentro da mesma transação de banco do processamento da compra;
+- nenhuma regra de autorização de acesso foi alterada nesta etapa; isso permanece para a E1.5.
+
+Validação realizada:
+- testes de cálculo de dias;
+- teste de ano-calendário;
+- teste específico para 29/02;
+- teste da regra de 1 ano-calendário + 7 dias;
+- teste de rejeição de data inválida;
+- teste de idempotência para a mesma transação;
+- teste de criação da primeira vigência;
+- teste impedindo criação antecipada de segunda vigência na E1.4;
+- suíte completa: 31 testes aprovados em 3 arquivos;
+- lint com 0 erros e somente o warning já conhecido de <img>;
+- build de produção executado com sucesso.
+
+Critério de aceite:
+- primeira compra Hotmart válida cria VigenciaMatricula associada à matrícula e à transação;
+- a vigência utiliza a data real de aprovação da compra;
+- a regra temporal atual do MGU é aplicada como 1 ano-calendário + 7 dias;
+- processamento repetido da mesma transação não duplica vigência;
+- E1.4 não cria renovação antecipada;
+- ausência de approved_date não resulta em data fictícia;
+- testes, lint e build permanecem saudáveis.
+
+Critério atendido.
 
 E1.5 — Fazer a vigência controlar o acesso
 Centralizar a regra de autorização temporal e utilizá-la na Área do Aluno.
