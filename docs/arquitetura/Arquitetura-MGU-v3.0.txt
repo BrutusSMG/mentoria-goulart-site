@@ -1586,7 +1586,92 @@ Critério de aceite:
 Critério atendido.
 
 E1.5 — Fazer a vigência controlar o acesso
-Centralizar a regra de autorização temporal e utilizá-la na Área do Aluno.
+STATUS: CONCLUÍDO EM 09/09/2026
+
+Objetivo:
+Centralizar a autorização da Área do Aluno utilizando os conceitos de Aluno, Matricula e VigenciaMatricula, mantendo autenticação de credencial separada do direito comercial de acesso.
+
+Regra central de acesso:
+- ADMIN possui exceção administrativa e pode acessar a Área do Aluno;
+- ALUNO precisa estar com status ATIVO;
+- deve existir pelo menos uma Matricula com status ATIVA;
+- essa matrícula deve possuir pelo menos uma VigenciaMatricula capaz de conceder acesso no momento da consulta;
+- status de vigência SUSPENSA, CANCELADA ou ENCERRADA bloqueia acesso;
+- status AGENDADA ou ATIVA pode conceder acesso, desde que as datas permitam;
+- iniciaEm deve ser menor ou igual ao momento atual;
+- expiraEm pode ser nulo;
+- quando expiraEm estiver preenchido, o momento atual deve ser estritamente anterior a expiraEm;
+- uma vigência AGENDADA cuja data de início já chegou pode conceder acesso mesmo antes de eventual atualização persistida para ATIVA;
+- uma vigência ATIVA cuja data final já chegou não concede acesso, mesmo antes de eventual atualização persistida para ENCERRADA;
+- Matricula SUSPENSA, CANCELADA, ENCERRADA ou PENDENTE não concede acesso;
+- ausência de matrícula ou ausência de vigência válida bloqueia acesso.
+
+Separação de responsabilidades:
+- autenticação continua sendo responsabilidade do NextAuth;
+- login valida identidade, credencial e situação da conta do aluno;
+- matrícula e vigência não são validadas dentro do authorize() do NextAuth;
+- autorização comercial/temporal é realizada após a autenticação;
+- possuir uma sessão válida não significa possuir direito de acesso;
+- a mensagem de erro do login foi ajustada para não afirmar incorretamente que o login valida matrícula.
+
+Execução realizada:
+- criado src/lib/acesso-aluno.js;
+- criada vigenciaPermiteAcesso para expressar e testar a regra temporal de uma vigência;
+- criada alunoTemAcessoAtivo para consultar no banco a combinação válida de Aluno, Matricula e VigenciaMatricula;
+- a consulta utiliza o horário atual e não depende exclusivamente de atualizações assíncronas do status persistido da vigência;
+- o layout src/app/aluno/(protegido)/layout.jsx passou a aplicar a autorização central;
+- ADMIN continua acessando a Área do Aluno por exceção administrativa;
+- ALUNO autenticado sem direito ativo é redirecionado para /aluno/acesso-indisponivel;
+- criada a página pública /aluno/acesso-indisponivel;
+- API /api/alunos/comunidade passou a aplicar a mesma regra;
+- API /api/alunos/meu-perfil passou a aplicar a mesma regra em GET e PATCH;
+- APIs retornam 401 quando não existe autenticação apropriada;
+- APIs retornam 403 quando o aluno está autenticado, mas não possui direito ativo;
+- primeiro acesso, recuperação de senha, redefinição de senha e reenvio de convite permanecem fora da proteção temporal da Área do Aluno;
+- nenhuma regra de renovação foi implementada nesta etapa.
+
+Validação automatizada:
+- vigência inexistente bloqueia acesso;
+- vigência SUSPENSA bloqueia acesso;
+- vigência CANCELADA bloqueia acesso;
+- vigência ENCERRADA bloqueia acesso;
+- vigência futura bloqueia acesso;
+- vigência AGENDADA com iniciaEm já atingido concede acesso;
+- vigência ATIVA dentro do período concede acesso;
+- acesso é bloqueado exatamente no instante de expiraEm;
+- vigência sem expiraEm pode conceder acesso;
+- alunoId vazio não consulta o banco;
+- consulta válida encontrada retorna acesso verdadeiro;
+- ausência de combinação válida retorna acesso falso;
+- suíte completa: 43 testes aprovados em 4 arquivos;
+- lint com 0 erros e somente o warning já conhecido de <img>;
+- build de produção executado com sucesso.
+
+Validação funcional em homologação:
+- banco utilizado exclusivamente de homologação;
+- dados existentes eram registros de teste;
+- criada uma vigência MANUAL, INDEFINIDA e ATIVA para uma matrícula TESTE_LOCAL;
+- aluno com matrícula ATIVA e vigência válida obteve acesso à Área do Aluno;
+- aluno sem vigência foi redirecionado para /aluno/acesso-indisponivel;
+- aluno autenticado sem vigência recebeu HTTP 403 em /api/alunos/meu-perfil;
+- aluno autenticado sem vigência recebeu HTTP 403 em /api/alunos/comunidade;
+- aluno com vigência válida recebeu HTTP 200 nas duas APIs;
+- consulta direta ao banco confirmou simultaneamente um aluno com acesso=true e outro com acesso=false.
+
+Observação:
+A verificação temporal de expiraEm já faz parte da regra central de autorização da E1.5. A E1.6 continuará responsável por formalizar e validar especificamente o comportamento de expiração natural dentro do fluxo do domínio, sem transformar a manutenção do status persistido em requisito para bloquear acesso.
+
+Critério de aceite:
+- autenticação e autorização permanecem conceitos separados;
+- aluno sem matrícula válida não acessa a Área do Aluno;
+- aluno sem vigência válida não acessa a Área do Aluno;
+- aluno com direito temporal válido acessa normalmente;
+- status persistido da vigência não substitui a verificação das datas;
+- páginas e APIs atuais da Área do Aluno aplicam a mesma regra;
+- ADMIN mantém exceção administrativa;
+- testes, lint, build e validação funcional em homologação permanecem saudáveis.
+
+Critério atendido.
 
 E1.6 — Tratar expiração natural
 Vigência expirada deve deixar de conceder acesso mesmo antes de eventual atualização de status por rotina de manutenção.

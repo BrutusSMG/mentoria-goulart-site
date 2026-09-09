@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
+import { alunoTemAcessoAtivo } from '@/lib/acesso-aluno';
 import {
   normalizarUf,
   ufValida,
@@ -18,8 +19,23 @@ function respostaErro(erro, status = 400) {
 
 async function obterAlunoAutenticado() {
   const session = await getServerSession(authOptions);
-  const alunoId = session?.user?.tipoConta === 'ALUNO' ? session.user.alunoId : null;
-  return alunoId || null;
+
+  if (session?.user?.tipoConta !== 'ALUNO') {
+    return null;
+  }
+
+  const alunoId = session?.user?.alunoId;
+
+  if (!alunoId) {
+    return null;
+  }
+
+  const acessoAtivo = await alunoTemAcessoAtivo(alunoId);
+
+  return {
+    alunoId,
+    acessoAtivo,
+  };
 }
 
 function textoSeguro(valor, limite) {
@@ -109,8 +125,17 @@ function formatoPerfil(aluno) {
 }
 
 export async function GET() {
-  const alunoId = await obterAlunoAutenticado();
-  if (!alunoId) return respostaErro('Acesso não autorizado.', 401);
+  const autenticacao = await obterAlunoAutenticado();
+
+  if (!autenticacao) {
+    return respostaErro('Acesso não autorizado.', 401);
+  }
+
+  if (!autenticacao.acessoAtivo) {
+    return respostaErro('Acesso indisponível.', 403);
+  }
+
+  const { alunoId } = autenticacao;
 
   const aluno = await prisma.aluno.findUnique({
     where: { id: alunoId },
@@ -127,8 +152,17 @@ export async function GET() {
 }
 
 export async function PATCH(request) {
-  const alunoId = await obterAlunoAutenticado();
-  if (!alunoId) return respostaErro('Acesso não autorizado.', 401);
+  const autenticacao = await obterAlunoAutenticado();
+
+  if (!autenticacao) {
+    return respostaErro('Acesso não autorizado.', 401);
+  }
+
+  if (!autenticacao.acessoAtivo) {
+    return respostaErro('Acesso indisponível.', 403);
+  }
+
+  const { alunoId } = autenticacao;
 
   try {
     const body = await request.json();

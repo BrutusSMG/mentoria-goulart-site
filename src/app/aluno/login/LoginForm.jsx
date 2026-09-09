@@ -31,7 +31,7 @@ export default function LoginAlunoPage() {
 
     if (!resultado?.ok) {
       setStatus('error');
-      setErro('E-mail ou senha incorretos, ou sua matrícula ainda não está ativa.');
+      setErro('E-mail ou senha incorretos, ou sua conta não está ativa.');
       return;
     }
 

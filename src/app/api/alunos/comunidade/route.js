@@ -3,13 +3,28 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
+import { alunoTemAcessoAtivo } from '@/lib/acesso-aluno';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
   const tipoConta = session?.user?.tipoConta;
-  
+
   if (!['ALUNO', 'ADMIN'].includes(tipoConta)) {
-    return NextResponse.json({ ok: false, erro: 'Acesso não autorizado.' }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, erro: 'Acesso não autorizado.' },
+      { status: 401 },
+    );
+  }
+
+  if (tipoConta === 'ALUNO') {
+    const acessoAtivo = await alunoTemAcessoAtivo(session?.user?.alunoId);
+
+    if (!acessoAtivo) {
+      return NextResponse.json(
+        { ok: false, erro: 'Acesso indisponível.' },
+        { status: 403 },
+      );
+    }
   }
 
   const perfis = await prisma.perfilAluno.findMany({
