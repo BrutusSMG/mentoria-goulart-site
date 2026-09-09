@@ -107,6 +107,26 @@ enum OrigemMatricula {
   MANUAL
 }
 
+enum OrigemVigencia {
+  HOTMART
+  LEGADO
+  MANUAL
+}
+
+enum TipoDuracaoVigencia {
+  DEFINIDA
+  INDEFINIDA
+  VITALICIA
+}
+
+enum StatusVigenciaMatricula {
+  AGENDADA
+  ATIVA
+  SUSPENSA
+  CANCELADA
+  ENCERRADA
+}
+
 enum StatusMatricula {
   PENDENTE
   ATIVA
@@ -161,11 +181,40 @@ model Matricula {
 
   aluno             Aluno                @relation(fields: [alunoId], references: [id], onDelete: Cascade)
   transacoesHotmart HotmartTransaction[]
+  vigencias         VigenciaMatricula[]
 
   @@unique([alunoId, produtoId])
   @@index([alunoId])
   @@index([produtoId])
   @@index([status])
+}
+
+model VigenciaMatricula {
+  id                      String                  @id @default(cuid())
+  matriculaId             String
+  transacaoOrigemId       String?                 @unique
+  origem                  OrigemVigencia
+  tipoDuracao             TipoDuracaoVigencia
+  status                  StatusVigenciaMatricula
+  concedidaEm             DateTime?
+  iniciaEm                DateTime
+  garantiaAte             DateTime?
+  expiraEm                DateTime?
+  statusAlteradoEm        DateTime                @default(now())
+  canceladaEm             DateTime?
+  encerradaEm             DateTime?
+  avisoExpiracaoEnviadoEm DateTime?
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+
+  matricula       Matricula           @relation(fields: [matriculaId], references: [id], onDelete: Restrict)
+  transacaoOrigem HotmartTransaction? @relation("VigenciaTransacaoOrigem", fields: [transacaoOrigemId], references: [id], onDelete: Restrict)
+
+  @@index([matriculaId])
+  @@index([matriculaId, status])
+  @@index([status])
+  @@index([iniciaEm])
+  @@index([expiraEm])
 }
 
 model AlunoAccessToken {
@@ -298,9 +347,10 @@ model HotmartTransaction {
   criadoEm        DateTime  @default(now())
   atualizadoEm    DateTime  @updatedAt
 
-  lead      Lead?      @relation(fields: [leadId], references: [id], onDelete: SetNull)
-  aluno     Aluno?     @relation(fields: [alunoId], references: [id], onDelete: SetNull)
-  matricula Matricula? @relation(fields: [matriculaId], references: [id], onDelete: SetNull)
+  lead           Lead?              @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  aluno          Aluno?             @relation(fields: [alunoId], references: [id], onDelete: SetNull)
+  matricula      Matricula?         @relation(fields: [matriculaId], references: [id], onDelete: SetNull)
+  vigenciaOrigem VigenciaMatricula? @relation("VigenciaTransacaoOrigem")
 
   @@index([leadId])
   @@index([alunoId])

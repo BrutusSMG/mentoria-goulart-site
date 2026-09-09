@@ -1485,7 +1485,43 @@ Os campos administrativos existentes em Matricula não deverão ser reinterpreta
 Nenhum dado existente deverá receber retroativamente uma regra temporal inventada apenas para satisfazer o novo modelo.
 
 E1.3 — Criar VigenciaMatricula de forma evolutiva
-Adicionar estrutura e migration sem apagar ou reinterpretar dados existentes de forma destrutiva.
+STATUS: CONCLUÍDO EM 08/09/2026
+
+Objetivo:
+Adicionar a entidade temporal VigenciaMatricula de forma evolutiva, preservando o modelo e os dados existentes durante a transição.
+
+Execução realizada:
+- adicionados os enums OrigemVigencia, TipoDuracaoVigencia e StatusVigenciaMatricula;
+- criado o model VigenciaMatricula com vínculo obrigatório à Matricula;
+- definida relação Matricula → VigenciaMatricula como 1:N;
+- definida relação HotmartTransaction → VigenciaMatricula como 1:0..1 por meio de transacaoOrigemId opcional e único;
+- transacaoOrigemId permanece opcional para permitir vigências LEGADO e MANUAL sem transação externa;
+- iniciaEm é obrigatório;
+- concedidaEm, garantiaAte, expiraEm, canceladaEm, encerradaEm e avisoExpiracaoEnviadoEm permanecem opcionais conforme a natureza da vigência;
+- statusAlteradoEm possui valor inicial técnico em criação;
+- as relações com Matricula e HotmartTransaction utilizam ON DELETE RESTRICT para preservar histórico;
+- o campo legado Matricula.concedidaEm foi preservado nesta etapa;
+- nenhum registro existente de Matricula foi reinterpretado ou convertido automaticamente em vigência;
+- nenhum backfill de vigências foi executado;
+- nenhuma data de expiração foi inventada para registros existentes;
+- criada a migration 20260908211355_add_vigencia_matricula;
+- a migration adiciona somente enums, a nova tabela, índices e chaves estrangeiras, sem DROP, UPDATE ou alteração destrutiva em tabelas existentes;
+- durante a geração foi identificado que o histórico antigo de migrations não pode ser reconstruído atualmente pelo shadow database porque 20260728221230_add_utm_fields tenta recriar estruturas já presentes em 00000000000000_baseline;
+- as migrations históricas existentes não foram modificadas;
+- como o banco de homologação estava alinhado com o schema anterior e o histórico registrado estava íntegro, o SQL da nova migration foi gerado e revisado por prisma migrate diff e aplicado deliberadamente com prisma migrate deploy;
+- prisma migrate status confirmou 8 migrations aplicadas e banco atualizado;
+- prisma migrate diff entre o banco de homologação e o schema atual retornou migration vazia, confirmando ausência de drift após a aplicação.
+
+Critério de aceite:
+- VigenciaMatricula existe no schema e no banco de homologação;
+- a estrutura suporta múltiplas vigências históricas por matrícula;
+- vigências HOTMART podem referenciar sua transação de origem;
+- vigências LEGADO e MANUAL podem existir sem transação externa;
+- dados existentes permanecem preservados;
+- nenhum backfill temporal é realizado automaticamente;
+- banco de homologação e schema.prisma permanecem alinhados.
+
+Critério atendido.
 
 E1.4 — Provisionar primeira vigência
 Compra válida deverá criar ou localizar a matrícula correspondente e criar a vigência adequada de forma idempotente.
