@@ -1,10 +1,11 @@
 // src/app/aluno/(protegido)/page.jsx
 import Link from 'next/link';
+import MinhasVigencias from '@/components/aluno/MinhasVigencias';
 
 export default function AreaAlunoPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-black px-4 py-12 text-white">
-      <section className="w-full max-w-xl rounded-2xl border border-zinc-800 bg-zinc-950 p-8 text-center shadow-2xl">
+      <section className="w-full max-w-3xl rounded-2xl border border-zinc-800 bg-zinc-950 p-8 text-center shadow-2xl">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d89900]">
           Garimpo Urbano
         </p>
@@ -12,6 +13,24 @@ export default function AreaAlunoPage() {
         <p className="mt-4 text-zinc-400">
           Acesse suas aulas na Hotmart ou complete seu perfil para se conectar com outros alunos.
         </p>
+
+        <div className="mt-8 text-left">
+          <div className="mb-4">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">
+              Meus acessos
+            </p>
+
+            <h2 className="mt-2 text-xl font-bold text-white">
+              Vigências dos seus produtos
+            </h2>
+
+            <p className="mt-1 text-sm text-zinc-500">
+              Consulte o período e a situação atual de cada acesso.
+            </p>
+          </div>
+
+          <MinhasVigencias />
+        </div>
 
         <div className="mt-7 flex flex-col items-center gap-3">
           <a

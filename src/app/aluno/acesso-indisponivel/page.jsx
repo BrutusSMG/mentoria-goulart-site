@@ -1,10 +1,11 @@
 // src/app/aluno/acesso-indisponivel/page.jsx
 import Link from 'next/link';
+import MinhasVigencias from '@/components/aluno/MinhasVigencias';
 
 export default function AcessoIndisponivelPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-black px-4 py-12 text-white">
-      <div className="w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-950 p-8 text-center shadow-xl">
+      <div className="w-full max-w-3xl rounded-2xl border border-zinc-800 bg-zinc-950 p-8 text-center shadow-xl">
         <h1 className="text-2xl font-semibold">
           Acesso indisponível
         </h1>
@@ -18,6 +19,18 @@ export default function AcessoIndisponivelPage() {
           Se você acredita que isso está incorreto, entre em contato com o
           suporte.
         </p>
+
+        <div className="mt-7 border-t border-zinc-800 pt-6 text-left">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">
+            Situação dos seus acessos
+          </p>
+
+          <p className="mt-2 mb-4 text-sm text-zinc-500">
+            Consulte abaixo o período e a situação registrada para seus produtos.
+          </p>
+
+          <MinhasVigencias />
+        </div>
 
         <Link
           href="/aluno/login"

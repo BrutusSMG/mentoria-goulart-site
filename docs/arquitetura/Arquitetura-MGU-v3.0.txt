@@ -1873,8 +1873,55 @@ Critério de aceite:
 Critério atendido.
 
 E1.8 — Exibir vigências
+STATUS: CONCLUÍDO EM 10/09/2026
+
+Objetivo:
+- permitir que o aluno visualize claramente seus períodos de acesso;
+- permitir que o ADMIN consulte o histórico completo de vigências para suporte;
+- apresentar a situação efetiva da vigência sem depender exclusivamente do status persistido no banco.
+
+Regras consolidadas:
+- o aluno visualiza produto, situação, início e término do acesso;
+- vigência VITALICIA é apresentada como "Vitalício";
+- vigência não vitalícia sem expiraEm é apresentada como "Sem vencimento definido";
+- a situação exibida ao aluno considera tanto o estado administrativo da Matricula quanto o estado temporal da VigenciaMatricula;
+- estados administrativos SUSPENSA, CANCELADA, ENCERRADA e PENDENTE da Matricula têm precedência na apresentação ao aluno;
+- uma VigenciaMatricula persistida como ATIVA cuja expiraEm já passou é apresentada como EXPIRADA;
+- o aluno autenticado pode consultar suas vigências mesmo quando já não possui acesso comercial ativo;
+- essa consulta não concede acesso à área protegida;
+- múltiplas vigências da mesma Matricula são preservadas e exibidas individualmente;
+- o ADMIN visualiza separadamente:
+  - status administrativo da Matricula;
+  - status persistido da VigenciaMatricula;
+  - situação temporal calculada da vigência;
+- essa separação evita que o suporte confunda um status persistido ATIVA com uma vigência temporalmente EXPIRADA.
+
+Implementação realizada:
+- criado `src/lib/situacao-vigencia.js` para cálculo da situação temporal da vigência;
+- criado `src/lib/vigencias-aluno.js` para consulta e preparação das vigências apresentadas ao aluno;
+- criada a rota `GET /api/alunos/minhas-vigencias`;
+- a rota exige sessão ALUNO válida, mas não exige vigência comercial ativa;
+- criado `src/components/aluno/MinhasVigencias.jsx`;
+- o componente foi incluído na Área do Aluno;
+- o mesmo componente foi incluído na página de acesso indisponível, permitindo ao aluno expirado compreender sua situação;
+- `GET /api/admin/alunos/[id]` foi ampliado para retornar o histórico de vigências;
+- a tela administrativa de detalhe do aluno ganhou a seção "Histórico de vigências";
+- o ADMIN passa a visualizar origem, tipo de duração, concessão, início, garantia, término, alteração de status, cancelamento, encerramento, aviso de expiração e vínculo com transação de origem quando existente.
+
+Validações realizadas:
+- aluno com vigência válida visualizou corretamente produto, situação ATIVA e período;
+- aluno com vigência expirada foi corretamente bloqueado da área protegida e visualizou sua vigência como EXPIRADA na página de acesso indisponível;
+- ADMIN visualizou corretamente, no mesmo registro, Matricula ATIVA, VigenciaMatricula com status persistido ATIVA e situação temporal EXPIRADA;
+- testes automatizados: 92/92 aprovados em 8 arquivos;
+- `npm run lint` executado com 0 erros e apenas o warning já conhecido de `<img>` em `src/app/aluno/(protegido)/comunidade/page.jsx`;
+- `npm run build` executado com sucesso;
+- a rota `/api/alunos/minhas-vigencias` foi incluída normalmente no build do Next.js.
+
+Critério de aceite:
 Aluno deverá visualizar ao menos produto, situação e data final de acesso.
 ADMIN deverá visualizar histórico e informações necessárias para suporte.
+
+Critério atendido.
 
 E1.9 — Preparar renovação
 Nova compra do mesmo produto deverá poder gerar nova vigência sem sobrescrever ou perder o período vigente.

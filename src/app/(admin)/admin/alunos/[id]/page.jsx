@@ -48,6 +48,37 @@ function classeStatus(status) {
   return "bg-zinc-700/50 text-zinc-300";
 }
 
+function classeSituacaoVigencia(status) {
+  if (status === "ATIVA") {
+    return "bg-green-500/15 text-green-400";
+  }
+
+  if (status === "AGENDADA" || status === "PENDENTE") {
+    return "bg-amber-500/15 text-amber-300";
+  }
+
+  if (status === "SUSPENSA") {
+    return "bg-orange-500/15 text-orange-300";
+  }
+
+  if (
+    status === "EXPIRADA" ||
+    status === "CANCELADA" ||
+    status === "ENCERRADA"
+  ) {
+    return "bg-red-500/15 text-red-300";
+  }
+
+  return "bg-zinc-700/50 text-zinc-300";
+}
+
+function formatarDuracao(tipoDuracao) {
+  if (tipoDuracao === "DEFINIDA") return "Definida";
+  if (tipoDuracao === "INDEFINIDA") return "Sem vencimento definido";
+  if (tipoDuracao === "VITALICIA") return "Vitalícia";
+  return tipoDuracao || "Não informado";
+}
+
 function Campo({ rotulo, valor, children }) {
   return (
     <div>
@@ -199,6 +230,182 @@ export default function AlunoDetalhePage() {
             </table>
           </div>
         ) : <p className="text-sm text-zinc-500">Nenhuma matrícula encontrada.</p>}
+      </Secao>
+
+      <Secao titulo="Histórico de vigências" icone={CalendarDays}>
+        {aluno.matriculas?.some(
+          (matricula) => matricula.vigencias?.length,
+        ) ? (
+          <div className="space-y-6">
+            {aluno.matriculas.map((matricula) => {
+              if (!matricula.vigencias?.length) {
+                return null;
+              }
+
+              return (
+                <div
+                  key={matricula.id}
+                  className="rounded-xl border border-zinc-800 bg-zinc-950 p-5"
+                >
+                  <div className="flex flex-col gap-3 border-b border-zinc-800 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                        Produto
+                      </p>
+
+                      <p className="mt-1 font-bold text-white">
+                        {matricula.produtoNome}
+                      </p>
+                    </div>
+
+                    <div className="text-sm text-zinc-400">
+                      Matrícula:{" "}
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs ${classeSituacaoVigencia(
+                          matricula.status,
+                        )}`}
+                      >
+                        {matricula.status}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 space-y-4">
+                    {matricula.vigencias.map((vigencia) => (
+                      <div
+                        key={vigencia.id}
+                        className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-4"
+                      >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <p className="text-xs uppercase tracking-wide text-zinc-500">
+                              Vigência
+                            </p>
+
+                            <p className="mt-1 font-mono text-xs text-zinc-400">
+                              {vigencia.id}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-wrap gap-2">
+                            <span
+                              className={`rounded-full px-2.5 py-1 text-xs ${classeSituacaoVigencia(
+                                vigencia.status,
+                              )}`}
+                            >
+                              Banco: {vigencia.status}
+                            </span>
+
+                            <span
+                              className={`rounded-full px-2.5 py-1 text-xs ${classeSituacaoVigencia(
+                                vigencia.situacaoTemporal,
+                              )}`}
+                            >
+                              Temporal: {vigencia.situacaoTemporal}
+                            </span>
+                          </div>
+                        </div>
+
+                        <dl className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                          <Campo
+                            rotulo="Origem"
+                            valor={vigencia.origem}
+                          />
+
+                          <Campo
+                            rotulo="Duração"
+                            valor={formatarDuracao(
+                              vigencia.tipoDuracao,
+                            )}
+                          />
+
+                          <Campo
+                            rotulo="Concedida em"
+                            valor={formatarData(
+                              vigencia.concedidaEm,
+                            )}
+                          />
+
+                          <Campo
+                            rotulo="Início"
+                            valor={formatarData(
+                              vigencia.iniciaEm,
+                            )}
+                          />
+
+                          <Campo
+                            rotulo="Garantia até"
+                            valor={formatarData(
+                              vigencia.garantiaAte,
+                            )}
+                          />
+
+                          <Campo
+                            rotulo="Término"
+                            valor={
+                              vigencia.tipoDuracao === "VITALICIA"
+                                ? "Vitalício"
+                                : vigencia.expiraEm
+                                  ? formatarData(vigencia.expiraEm)
+                                  : "Sem vencimento definido"
+                            }
+                          />
+
+                          <Campo
+                            rotulo="Aviso de expiração"
+                            valor={
+                              vigencia.avisoExpiracaoEnviadoEm
+                                ? formatarData(
+                                    vigencia.avisoExpiracaoEnviadoEm,
+                                  )
+                                : "Não enviado"
+                            }
+                          />
+
+                          <Campo
+                            rotulo="Status alterado em"
+                            valor={formatarData(
+                              vigencia.statusAlteradoEm,
+                            )}
+                          />
+
+                          {vigencia.canceladaEm && (
+                            <Campo
+                              rotulo="Cancelada em"
+                              valor={formatarData(
+                                vigencia.canceladaEm,
+                              )}
+                            />
+                          )}
+
+                          {vigencia.encerradaEm && (
+                            <Campo
+                              rotulo="Encerrada em"
+                              valor={formatarData(
+                                vigencia.encerradaEm,
+                              )}
+                            />
+                          )}
+
+                          {vigencia.transacaoOrigemId && (
+                            <Campo
+                              rotulo="Transação de origem"
+                              valor={vigencia.transacaoOrigemId}
+                            />
+                          )}
+                        </dl>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-500">
+            Nenhuma vigência encontrada para este aluno.
+          </p>
+        )}
       </Secao>
 
       <Secao titulo="Transações Hotmart" icone={CreditCard}>

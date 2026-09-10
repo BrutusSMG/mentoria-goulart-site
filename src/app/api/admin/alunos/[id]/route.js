@@ -1,5 +1,6 @@
 // src/app/api/admin/alunos/[id]/route.js
 import { obterAcessoAdmin, prisma, respostaAcessoNegado } from "@/lib/admin-permissoes";
+import { obterSituacaoVigencia } from '@/lib/situacao-vigencia';
 
 function respostaPrivada(data, status = 200) {
   return Response.json(data, {
@@ -71,6 +72,33 @@ export async function GET(_req, { params }) {
             encerradaEm: true,
             createdAt: true,
             updatedAt: true,
+            vigencias: {
+              select: {
+                id: true,
+                transacaoOrigemId: true,
+                origem: true,
+                tipoDuracao: true,
+                status: true,
+                concedidaEm: true,
+                iniciaEm: true,
+                garantiaAte: true,
+                expiraEm: true,
+                statusAlteradoEm: true,
+                canceladaEm: true,
+                encerradaEm: true,
+                avisoExpiracaoEnviadoEm: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+              orderBy: [
+                {
+                  iniciaEm: 'desc',
+                },
+                {
+                  createdAt: 'desc',
+                },
+              ],
+            },
           },
           orderBy: { createdAt: "desc" },
         },
@@ -102,6 +130,16 @@ export async function GET(_req, { params }) {
     return respostaPrivada({
       item: {
         ...aluno,
+
+        matriculas: aluno.matriculas.map((matricula) => ({
+          ...matricula,
+
+          vigencias: matricula.vigencias.map((vigencia) => ({
+            ...vigencia,
+            situacaoTemporal: obterSituacaoVigencia(vigencia),
+          })),
+        })),
+
         transacoesHotmart: aluno.transacoesHotmart.map((transacao) => ({
           ...transacao,
           valorBruto: serializarValor(transacao.valorBruto),
