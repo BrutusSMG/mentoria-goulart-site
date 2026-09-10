@@ -1722,7 +1722,155 @@ Critério de aceite:
 Critério atendido.
 
 E1.7 — Implementar aviso de expiração
-Enviar aviso único aproximadamente 30 dias antes do término e registrar o envio.
+STATUS: CONCLUÍDO EM 09/09/2026
+
+Objetivo:
+Enviar aviso único ao aluno quando uma vigência com término definido entrar na janela aproximada de 30 dias para expiração, registrando o envio para impedir reenvios posteriores.
+
+Regra de elegibilidade:
+- antecedência padrão definida em 30 dias;
+- não é exigido que a rotina execute exatamente no instante de 30 dias;
+- a vigência permanece elegível enquanto estiver dentro da janela de até 30 dias e o aviso ainda não tiver sido registrado;
+- avisoExpiracaoEnviadoEm deve estar nulo;
+- VigenciaMatricula deve possuir expiraEm preenchido;
+- expiraEm deve ser maior que o momento atual;
+- expiraEm deve ser menor ou igual ao limite de agora + 30 dias;
+- iniciaEm deve ser menor ou igual ao momento atual;
+- status da vigência deve ser AGENDADA ou ATIVA;
+- Matricula deve estar ATIVA;
+- Aluno deve estar ATIVO;
+- vigências SUSPENSA, CANCELADA ou ENCERRADA não recebem aviso;
+- vigências já expiradas não recebem aviso;
+- vigências sem expiraEm não recebem aviso;
+- vigências ainda não iniciadas não recebem aviso;
+- aviso já registrado não é enviado novamente.
+
+Implementação de domínio:
+- criado src/lib/aviso-expiracao.js;
+- definida constante DIAS_AVISO_EXPIRACAO = 30;
+- criada vigenciaElegivelParaAviso para representar e testar a regra temporal;
+- criada buscarVigenciasParaAviso para consultar somente registros elegíveis;
+- consulta inclui Aluno ATIVO, Matricula ATIVA e VigenciaMatricula temporalmente elegível;
+- resultados são ordenados por expiraEm crescente;
+- criada criarEmailAvisoExpiracao para montar o conteúdo do e-mail;
+- nome e nome do produto são escapados antes de inclusão no HTML;
+- data final é apresentada em formato brasileiro e timezone America/Sao_Paulo;
+- remetente utilizado:
+  Prof. Goulart <contato@mentoriagarimpourbano.com.br>;
+- criada chave de idempotência baseada no id da vigência:
+  aviso-expiracao/<vigenciaId>.
+
+Envio e registro:
+- criada enviarAvisoExpiracao;
+- o Resend é chamado antes da gravação de avisoExpiracaoEnviadoEm;
+- avisoExpiracaoEnviadoEm só é preenchido após resposta de sucesso do Resend;
+- erro retornado pelo Resend não registra o aviso;
+- exceção durante o envio não registra o aviso;
+- updateMany utiliza simultaneamente id da vigência e avisoExpiracaoEnviadoEm = null;
+- dessa forma, registro já realizado não é sobrescrito;
+- a chave de idempotência do Resend funciona como proteção complementar contra execuções repetidas próximas;
+- avisoExpiracaoEnviadoEm permanece sendo a proteção persistente no banco.
+
+Processamento em lote:
+- criada processarAvisosExpiracao;
+- cada vigência é processada isoladamente;
+- falha de um envio não interrompe os demais;
+- execução retorna quantidade encontrada, enviada e quantidade de falhas;
+- ausência de vigências elegíveis encerra normalmente com zero envios.
+
+Cron:
+- criada rota GET /api/cron/avisar-expiracoes;
+- rota utiliza runtime nodejs e force-dynamic;
+- autenticação utiliza Authorization: Bearer CRON_SECRET;
+- ausência de CRON_SECRET ou Bearer incorreto retorna HTTP 401;
+- ausência de RESEND_API_KEY retorna HTTP 500;
+- erro global de processamento retorna HTTP 500;
+- execução sem falhas retorna HTTP 200;
+- execução com falha em algum aviso retorna HTTP 500;
+- vercel.json passou a registrar execução diária:
+  /api/cron/avisar-expiracoes
+  schedule: 0 14 * * *
+- cron existente de atualização de cotações foi preservado;
+- nenhuma nova infraestrutura externa, fila, Redis ou worker permanente foi necessária.
+
+Banco:
+- o campo avisoExpiracaoEnviadoEm já existia em VigenciaMatricula;
+- expiraEm já possuía índice;
+- nenhuma alteração de schema foi necessária;
+- nenhuma migration foi necessária.
+
+Validação automatizada:
+- antecedência padrão de 30 dias;
+- elegibilidade exatamente 30 dias antes;
+- bloqueio quando faltam mais de 30 dias;
+- elegibilidade quando faltam menos de 30 dias;
+- bloqueio de vigência já expirada;
+- bloqueio exatamente no instante da expiração;
+- bloqueio quando expiraEm é nulo;
+- bloqueio quando aviso já foi registrado;
+- bloqueio para SUSPENSA;
+- bloqueio para CANCELADA;
+- bloqueio para ENCERRADA;
+- bloqueio para vigência ainda não iniciada;
+- AGENDADA já iniciada pode receber aviso;
+- consulta Prisma validada com Aluno ATIVO e Matricula ATIVA;
+- montagem do destinatário, assunto e chave de idempotência validada;
+- data de expiração formatada validada;
+- escaping de nome e produto validado;
+- dados obrigatórios ausentes geram erro;
+- sucesso no Resend registra o aviso;
+- erro retornado pelo Resend não registra;
+- exceção do Resend não registra;
+- processamento em lote continua mesmo com falha individual;
+- processamento vazio não realiza envio;
+- suíte completa: 68 testes aprovados em 5 arquivos;
+- lint com 0 erros e somente o warning já conhecido de <img>;
+- build de produção executado com sucesso.
+
+Validação funcional em homologação:
+- chamada sem Authorization retornou HTTP 401;
+- chamada autorizada sem vigências elegíveis retornou:
+  encontrados = 0;
+  enviados = 0;
+  falhas = 0;
+- criado cenário temporário isolado utilizando delivered@resend.dev;
+- criado Aluno MANUAL e ATIVO;
+- criada Matricula MANUAL e ATIVA;
+- criada VigenciaMatricula DEFINIDA e ATIVA com término aproximadamente 20 dias no futuro;
+- antes do processamento, avisoExpiracaoEnviadoEm estava nulo;
+- execução autorizada encontrou exatamente 1 vigência;
+- Resend retornou sucesso e emailId;
+- execução retornou:
+  encontrados = 1;
+  enviados = 1;
+  falhas = 0;
+  registrado = true;
+- banco confirmou avisoExpiracaoEnviadoEm preenchido somente após o envio;
+- segunda execução encontrou 0 vigências e realizou 0 envios;
+- idempotência persistente foi confirmada;
+- os registros artificiais criados para o teste foram removidos após a validação.
+
+Observação operacional da homologação:
+- durante a validação local, Prisma 5.22 não conseguiu conectar ao Neon com channel_binding=require presente na DATABASE_URL;
+- conectividade TCP e resposta SSL do PostgreSQL foram confirmadas;
+- a causa foi isolada por teste removendo somente channel_binding;
+- a conexão Prisma voltou a funcionar mantendo sslmode=require;
+- o .env local foi ajustado sem versionar ou expor credenciais;
+- nenhuma alteração foi realizada no banco de produção.
+
+Critério de aceite:
+- vigência elegível recebe aviso aproximadamente 30 dias antes da expiração;
+- aviso é enviado apenas para aluno e matrícula aptos;
+- envio bem-sucedido registra avisoExpiracaoEnviadoEm;
+- falha de envio não registra o aviso e permite nova tentativa futura;
+- aviso registrado não é enviado novamente;
+- uma falha individual não impede o processamento dos demais avisos;
+- execução é automática e protegida por CRON_SECRET;
+- solução funciona utilizando a infraestrutura já existente de Neon, Vercel e Resend;
+- nenhuma migration é necessária;
+- testes, lint, build e validação funcional permanecem saudáveis.
+
+Critério atendido.
 
 E1.8 — Exibir vigências
 Aluno deverá visualizar ao menos produto, situação e data final de acesso.
