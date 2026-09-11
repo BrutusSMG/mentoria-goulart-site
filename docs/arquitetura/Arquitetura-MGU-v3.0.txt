@@ -2023,6 +2023,8 @@ Nova compra do mesmo produto deverá poder gerar nova vigência sem sobrescrever
 Critério atendido.
 
 E1.10 — Testar o domínio de acesso
+STATUS: CONCLUÍDO EM 11/09/2026
+
 Cobrir, no mínimo:
 primeira compra;
 compra duplicada;
@@ -2050,6 +2052,15 @@ recuperação de senha antes do primeiro acesso;
 vigência com expiraEm vazio;
 vigência com expiraEm preenchido;
 
+Validação realizada:
+- cobertura explícita dos cenários mínimos definidos para a E1.10;
+- 14 arquivos de teste executados com sucesso;
+- 111 testes aprovados de 111 executados;
+- npm run lint executado com sucesso, mantendo apenas o aviso conhecido de <img> na página da comunidade;
+- npm run build executado com sucesso;
+- nenhum código de produção precisou ser alterado nesta etapa;
+- os testes confirmam a separação entre aluno, autenticação, produto, matrícula, vigência e transação externa.
+
 Critério de aceite da Etapa 1
 A Área do Aluno deverá distinguir corretamente:
 
@@ -2061,6 +2072,7 @@ qual vigência concede acesso naquele momento.
 
 Nenhum desses conceitos poderá substituir indevidamente o outro.
 
+Critério atendido.
 
 ETAPA 2 — Hotmart, vigências e integrações
 Objetivo

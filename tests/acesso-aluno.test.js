@@ -128,6 +128,21 @@ describe('vigenciaPermiteAcesso', () => {
       ),
     ).toBe(true);
   });
+
+  it('permite acesso para aluno legado com vigência sem vencimento definido', () => {
+    expect(
+      vigenciaPermiteAcesso(
+        {
+          origem: 'LEGADO',
+          tipoDuracao: 'INDEFINIDA',
+          status: 'ATIVA',
+          iniciaEm: new Date('2020-01-01T12:00:00.000Z'),
+          expiraEm: null,
+        },
+        agora,
+      ),
+    ).toBe(true);
+  });
 });
 
 describe('alunoTemAcessoAtivo', () => {
@@ -206,5 +221,82 @@ describe('alunoTemAcessoAtivo', () => {
     await expect(
       alunoTemAcessoAtivo('aluno-1', agora, db),
     ).resolves.toBe(false);
+  });
+
+  it('nega acesso para aluno sem matrícula', async () => {
+    const db = {
+      aluno: {
+        findFirst: vi.fn().mockResolvedValue(null),
+      },
+    };
+
+    await expect(
+      alunoTemAcessoAtivo('aluno-sem-matricula', agora, db),
+    ).resolves.toBe(false);
+
+    expect(db.aluno.findFirst).toHaveBeenCalledTimes(1);
+  });
+
+  it('nega acesso para matrícula sem vigência', async () => {
+    const db = {
+      aluno: {
+        findFirst: vi.fn().mockResolvedValue(null),
+      },
+    };
+
+    await expect(
+      alunoTemAcessoAtivo('aluno-sem-vigencia', agora, db),
+    ).resolves.toBe(false);
+
+    expect(db.aluno.findFirst).toHaveBeenCalledTimes(1);
+  });
+
+  it('permite acesso para aluno manual sem transação Hotmart', async () => {
+    const db = {
+      aluno: {
+        findFirst: vi.fn().mockResolvedValue({
+          id: 'aluno-manual',
+        }),
+      },
+    };
+
+    await expect(
+      alunoTemAcessoAtivo('aluno-manual', agora, db),
+    ).resolves.toBe(true);
+
+    expect(db.aluno.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 'aluno-manual',
+        status: 'ATIVO',
+        matriculas: {
+          some: {
+            status: 'ATIVA',
+            vigencias: {
+              some: {
+                status: {
+                  in: ['AGENDADA', 'ATIVA'],
+                },
+                iniciaEm: {
+                  lte: agora,
+                },
+                OR: [
+                  {
+                    expiraEm: null,
+                  },
+                  {
+                    expiraEm: {
+                      gt: agora,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
   });
 });
