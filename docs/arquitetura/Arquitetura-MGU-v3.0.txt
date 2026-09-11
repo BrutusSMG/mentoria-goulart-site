@@ -1551,6 +1551,7 @@ Execução realizada:
 - adicionadas funções de cálculo de dias e anos-calendário em UTC;
 - criada calcularVigenciaInicialMgu para aplicar a regra comercial atual de 1 ano-calendário + 7 dias;
 - criada provisionarPrimeiraVigenciaHotmart para centralizar idempotência e criação da primeira vigência;
+- provisionarAlunoHotmart passou a exigir transacaoOrigemId e aprovadoEm para provisionamento Hotmart válido;
 - Matricula.concedidaEm passa a receber aprovadoEm somente na criação da matrícula;
 - recompras não sobrescrevem mais Matricula.concedidaEm;
 - o webhook Hotmart passa transacao.id e transacao.aprovadoEm ao provisionamento;
