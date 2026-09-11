@@ -902,6 +902,8 @@ Testes mínimos existentes
 Somente então entramos nas mudanças estruturais maiores.
 
 ETAPA 1 — Conclusão da Área do Aluno e fundação de vigências
+STATUS: CONCLUÍDA EM 11/09/2026
+
 Objetivo
 Concluir a Área do Aluno e estabelecer o modelo temporal de direito de acesso que sustentará o produto atual sem impedir a evolução futura para outros produtos, planos e serviços do MGU.
 
@@ -2073,6 +2075,30 @@ qual vigência concede acesso naquele momento.
 Nenhum desses conceitos poderá substituir indevidamente o outro.
 
 Critério atendido.
+
+Fechamento da Etapa 1
+
+A Etapa 1 foi concluída em homologação.
+
+Resultado consolidado:
+- subetapas E1.1 a E1.10 concluídas;
+- Área do Aluno distingue identidade, credencial, matrícula, vigência e transação financeira;
+- Matricula representa o vínculo administrativo do aluno com o produto;
+- VigenciaMatricula representa o direito temporal de acesso;
+- HotmartTransaction permanece separada do direito de acesso;
+- primeira compra e renovações preservam histórico de vigências;
+- expiração temporal bloqueia acesso independentemente de atualização posterior do status persistido;
+- alunos LEGADO e MANUAL são suportados sem dependência obrigatória de transação Hotmart;
+- convite, primeiro acesso, login, recuperação de senha e reenvio de convite possuem cobertura automatizada;
+- aviso de expiração e prevenção de reenvio duplicado permanecem cobertos;
+- validação final da suíte: 111 testes aprovados em 14 arquivos;
+- lint aprovado, mantendo somente o warning conhecido de <img> na página da comunidade;
+- build aprovado;
+- Vercel Preview do commit final da E1.10 validado com sucesso.
+
+O critério de aceite geral da Etapa 1 foi atendido.
+
+A partir deste ponto, alterações relacionadas ao ciclo comercial Hotmart, eventos externos, reembolsos, chargebacks, ordenação de eventos, reprocessamento e integrações assíncronas pertencem à Etapa 2.
 
 ETAPA 2 — Hotmart, vigências e integrações
 Objetivo
