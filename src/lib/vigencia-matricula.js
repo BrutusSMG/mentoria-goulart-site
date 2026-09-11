@@ -40,7 +40,7 @@ export function calcularVigenciaInicialMgu(aprovadoEm) {
   };
 }
 
-export async function provisionarPrimeiraVigenciaHotmart(
+export async function provisionarVigenciaHotmart(
   tx,
   {
     matriculaId,
@@ -64,19 +64,38 @@ export async function provisionarPrimeiraVigenciaHotmart(
   const vigenciaExistente = await tx.vigenciaMatricula.findFirst({
     where: {
       matriculaId,
+      status: {
+        in: ['AGENDADA', 'ATIVA'],
+      },
+      expiraEm: {
+        gt: aprovadoEm,
+      },
     },
     select: {
       id: true,
+      status: true,
+      expiraEm: true,
+    },
+    orderBy: {
+      expiraEm: 'desc',
     },
   });
 
-  // E1.4 cria somente a primeira vigência.
-  // Renovações/recompras serão tratadas com regra própria na E1.9.
-  if (vigenciaExistente) {
-    return null;
-  }
+  const concedidaEm = new Date(aprovadoEm);
+  const garantiaAte = adicionarDias(aprovadoEm, 7);
 
-  const periodo = calcularVigenciaInicialMgu(aprovadoEm);
+  const iniciaEm = vigenciaExistente?.expiraEm
+    ? new Date(vigenciaExistente.expiraEm)
+    : new Date(aprovadoEm);
+
+  const expiraEm = adicionarDias(
+    adicionarAnosCalendario(iniciaEm, 1),
+    7,
+  );
+
+  const status = iniciaEm > aprovadoEm
+    ? 'AGENDADA'
+    : 'ATIVA';
 
   return tx.vigenciaMatricula.create({
     data: {
@@ -84,12 +103,12 @@ export async function provisionarPrimeiraVigenciaHotmart(
       transacaoOrigemId,
       origem: 'HOTMART',
       tipoDuracao: 'DEFINIDA',
-      status: 'ATIVA',
-      concedidaEm: periodo.concedidaEm,
-      iniciaEm: periodo.iniciaEm,
-      garantiaAte: periodo.garantiaAte,
-      expiraEm: periodo.expiraEm,
-      statusAlteradoEm: periodo.iniciaEm,
+      status,
+      concedidaEm,
+      iniciaEm,
+      garantiaAte,
+      expiraEm,
+      statusAlteradoEm: concedidaEm,
     },
     select: {
       id: true,

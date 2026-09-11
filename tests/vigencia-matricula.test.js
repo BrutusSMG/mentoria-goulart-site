@@ -4,7 +4,7 @@ import {
   adicionarAnosCalendario,
   adicionarDias,
   calcularVigenciaInicialMgu,
-  provisionarPrimeiraVigenciaHotmart,
+  provisionarVigenciaHotmart,
 } from '../src/lib/vigencia-matricula';
 
 describe('vigencia-matricula', () => {
@@ -87,7 +87,7 @@ describe('vigencia-matricula', () => {
       },
     };
 
-    const resultado = await provisionarPrimeiraVigenciaHotmart(tx, {
+    const resultado = await provisionarVigenciaHotmart(tx, {
       matriculaId: 'matricula-1',
       transacaoOrigemId: 'transacao-1',
       aprovadoEm: new Date('2026-09-08T12:00:00.000Z'),
@@ -127,7 +127,7 @@ describe('vigencia-matricula', () => {
 
     const aprovadoEm = new Date('2026-09-08T12:00:00.000Z');
 
-    const resultado = await provisionarPrimeiraVigenciaHotmart(tx, {
+    const resultado = await provisionarVigenciaHotmart(tx, {
       matriculaId: 'matricula-1',
       transacaoOrigemId: 'transacao-1',
       aprovadoEm,
@@ -140,9 +140,20 @@ describe('vigencia-matricula', () => {
     expect(findFirst).toHaveBeenCalledWith({
       where: {
         matriculaId: 'matricula-1',
+        status: {
+          in: ['AGENDADA', 'ATIVA'],
+        },
+        expiraEm: {
+          gt: aprovadoEm,
+        },
       },
       select: {
         id: true,
+        status: true,
+        expiraEm: true,
+      },
+      orderBy: {
+        expiraEm: 'desc',
       },
     });
 
@@ -176,12 +187,18 @@ describe('vigencia-matricula', () => {
     );
   });
 
-  it('não cria segunda vigência na E1.4 quando outra transação chega para matrícula que já possui vigência', async () => {
+  it('agenda nova vigência quando a renovação ocorre antes do término da vigência atual', async () => {
     const findUnique = vi.fn().mockResolvedValue(null);
+
     const findFirst = vi.fn().mockResolvedValue({
-      id: 'vigencia-anterior',
+      id: 'vigencia-atual',
+      status: 'ATIVA',
+      expiraEm: new Date('2027-09-15T12:00:00.000Z'),
     });
-    const create = vi.fn();
+
+    const create = vi.fn().mockResolvedValue({
+      id: 'vigencia-renovacao',
+    });
 
     const tx = {
       vigenciaMatricula: {
@@ -191,13 +208,168 @@ describe('vigencia-matricula', () => {
       },
     };
 
-    const resultado = await provisionarPrimeiraVigenciaHotmart(tx, {
+    const aprovadoEm = new Date('2027-08-01T12:00:00.000Z');
+
+    const resultado = await provisionarVigenciaHotmart(tx, {
       matriculaId: 'matricula-1',
       transacaoOrigemId: 'transacao-renovacao',
-      aprovadoEm: new Date('2027-08-01T12:00:00.000Z'),
+      aprovadoEm,
     });
 
-    expect(resultado).toBeNull();
-    expect(create).not.toHaveBeenCalled();
+    expect(resultado).toEqual({
+      id: 'vigencia-renovacao',
+    });
+
+    expect(create).toHaveBeenCalledTimes(1);
+
+    const chamadaCreate = create.mock.calls[0][0];
+
+    expect(chamadaCreate.data).toMatchObject({
+      matriculaId: 'matricula-1',
+      transacaoOrigemId: 'transacao-renovacao',
+      origem: 'HOTMART',
+      tipoDuracao: 'DEFINIDA',
+      status: 'AGENDADA',
+    });
+
+    expect(chamadaCreate.data.concedidaEm.toISOString()).toBe(
+      '2027-08-01T12:00:00.000Z',
+    );
+
+    expect(chamadaCreate.data.garantiaAte.toISOString()).toBe(
+      '2027-08-08T12:00:00.000Z',
+    );
+
+    expect(chamadaCreate.data.iniciaEm.toISOString()).toBe(
+      '2027-09-15T12:00:00.000Z',
+    );
+
+    expect(chamadaCreate.data.expiraEm.toISOString()).toBe(
+      '2028-09-22T12:00:00.000Z',
+    );
+  });
+
+  it('inicia nova vigência imediatamente quando a compra ocorre após o término da anterior', async () => {
+    const findUnique = vi.fn().mockResolvedValue(null);
+
+    const findFirst = vi.fn().mockResolvedValue(null);
+
+    const create = vi.fn().mockResolvedValue({
+      id: 'vigencia-recompra',
+    });
+
+    const tx = {
+      vigenciaMatricula: {
+        findUnique,
+        findFirst,
+        create,
+      },
+    };
+
+    const aprovadoEm = new Date('2027-10-01T12:00:00.000Z');
+
+    const resultado = await provisionarVigenciaHotmart(tx, {
+      matriculaId: 'matricula-1',
+      transacaoOrigemId: 'transacao-recompra',
+      aprovadoEm,
+    });
+
+    expect(resultado).toEqual({
+      id: 'vigencia-recompra',
+    });
+
+    expect(create).toHaveBeenCalledTimes(1);
+
+    const chamadaCreate = create.mock.calls[0][0];
+
+    expect(chamadaCreate.data).toMatchObject({
+      matriculaId: 'matricula-1',
+      transacaoOrigemId: 'transacao-recompra',
+      origem: 'HOTMART',
+      tipoDuracao: 'DEFINIDA',
+      status: 'ATIVA',
+    });
+
+    expect(chamadaCreate.data.concedidaEm.toISOString()).toBe(
+      '2027-10-01T12:00:00.000Z',
+    );
+
+    expect(chamadaCreate.data.iniciaEm.toISOString()).toBe(
+      '2027-10-01T12:00:00.000Z',
+    );
+
+    expect(chamadaCreate.data.garantiaAte.toISOString()).toBe(
+      '2027-10-08T12:00:00.000Z',
+    );
+
+    expect(chamadaCreate.data.expiraEm.toISOString()).toBe(
+      '2028-10-08T12:00:00.000Z',
+    );
+  });
+
+  it('encadeia nova renovação após a última vigência já agendada', async () => {
+    const findUnique = vi.fn().mockResolvedValue(null);
+
+    const findFirst = vi.fn().mockResolvedValue({
+      id: 'vigencia-ja-agendada',
+      status: 'AGENDADA',
+      expiraEm: new Date('2028-09-22T12:00:00.000Z'),
+    });
+
+    const create = vi.fn().mockResolvedValue({
+      id: 'vigencia-terceira',
+    });
+
+    const tx = {
+      vigenciaMatricula: {
+        findUnique,
+        findFirst,
+        create,
+      },
+    };
+
+    const aprovadoEm = new Date('2027-08-15T12:00:00.000Z');
+
+    const resultado = await provisionarVigenciaHotmart(tx, {
+      matriculaId: 'matricula-1',
+      transacaoOrigemId: 'transacao-terceira',
+      aprovadoEm,
+    });
+
+    expect(resultado).toEqual({
+      id: 'vigencia-terceira',
+    });
+
+    expect(findFirst).toHaveBeenCalledWith({
+      where: {
+        matriculaId: 'matricula-1',
+        status: {
+          in: ['AGENDADA', 'ATIVA'],
+        },
+        expiraEm: {
+          gt: aprovadoEm,
+        },
+      },
+      select: {
+        id: true,
+        status: true,
+        expiraEm: true,
+      },
+      orderBy: {
+        expiraEm: 'desc',
+      },
+    });
+
+    const chamadaCreate = create.mock.calls[0][0];
+
+    expect(chamadaCreate.data.status).toBe('AGENDADA');
+
+    expect(chamadaCreate.data.iniciaEm.toISOString()).toBe(
+      '2028-09-22T12:00:00.000Z',
+    );
+
+    expect(chamadaCreate.data.expiraEm.toISOString()).toBe(
+      '2029-09-29T12:00:00.000Z',
+    );
   });
 });

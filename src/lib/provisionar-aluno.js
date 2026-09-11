@@ -5,7 +5,7 @@ import {
   gerarTokenPrimeiroAcesso,
   hashTokenAcesso,
 } from '@/lib/convite-primeiro-acesso';
-import { provisionarPrimeiraVigenciaHotmart } from '@/lib/vigencia-matricula';
+import { provisionarVigenciaHotmart } from '@/lib/vigencia-matricula';
 
 function normalizarEmail(email) {
   const valor = String(email || '').trim().toLowerCase();
@@ -42,6 +42,32 @@ export async function provisionarAlunoHotmart(tx, {
     throw new TypeError(
       'Transação de origem e data de aprovação são obrigatórias para vigência Hotmart.',
     );
+  }
+
+  const vigenciaJaProvisionada =
+    await tx.vigenciaMatricula.findUnique({
+      where: {
+        transacaoOrigemId: transacaoOrigemIdNormalizado,
+      },
+      select: {
+        id: true,
+        matriculaId: true,
+        matricula: {
+          select: {
+            alunoId: true,
+          },
+        },
+      },
+    });
+
+  if (vigenciaJaProvisionada) {
+    return {
+      alunoId: vigenciaJaProvisionada.matricula.alunoId,
+      matriculaId: vigenciaJaProvisionada.matriculaId,
+      vigenciaId: vigenciaJaProvisionada.id,
+      conviteToken: null,
+      conviteNovo: false,
+    };
   }
 
   const alunoExistente = await tx.aluno.findUnique({
@@ -105,7 +131,7 @@ export async function provisionarAlunoHotmart(tx, {
     },
   });
 
-  const vigencia = await provisionarPrimeiraVigenciaHotmart(tx, {
+  const vigencia = await provisionarVigenciaHotmart(tx, {
     matriculaId: matricula.id,
     transacaoOrigemId: transacaoOrigemIdNormalizado,
     aprovadoEm,

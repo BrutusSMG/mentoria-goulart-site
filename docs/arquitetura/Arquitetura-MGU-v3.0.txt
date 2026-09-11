@@ -1551,7 +1551,6 @@ Execução realizada:
 - adicionadas funções de cálculo de dias e anos-calendário em UTC;
 - criada calcularVigenciaInicialMgu para aplicar a regra comercial atual de 1 ano-calendário + 7 dias;
 - criada provisionarPrimeiraVigenciaHotmart para centralizar idempotência e criação da primeira vigência;
-- provisionarAlunoHotmart passou a exigir transacaoOrigemId e aprovadoEm para provisionamento Hotmart válido;
 - Matricula.concedidaEm passa a receber aprovadoEm somente na criação da matrícula;
 - recompras não sobrescrevem mais Matricula.concedidaEm;
 - o webhook Hotmart passa transacao.id e transacao.aprovadoEm ao provisionamento;
@@ -1966,7 +1965,61 @@ Componentes compartilhados ou específicos de uma área devem estar organizados 
 Critério atendido.
 
 E1.9 — Preparar renovação
+STATUS: CONCLUÍDO EM 10/09/2026
+
+Objetivo:
+- permitir que uma nova compra do mesmo produto gere uma nova VigenciaMatricula;
+- preservar integralmente a vigência atual;
+- impedir duplicidade quando o mesmo evento/transação da Hotmart for reprocessado;
+- permitir o encadeamento de renovações antecipadas sem sobreposição ou perda de período contratado.
+
+Regras consolidadas:
+- permanece uma única Matricula histórica por aluno + produto;
+- cada nova compra válida pode gerar uma nova VigenciaMatricula vinculada à mesma Matricula;
+- a mesma transacaoOrigemId nunca gera uma segunda vigência;
+- quando a compra ocorre sem vigência futura válida, a nova vigência inicia em aprovadoEm e recebe status ATIVA;
+- quando a compra ocorre antes do término de uma vigência válida, a nova vigência inicia em expiraEm da última vigência ainda programada e recebe status AGENDADA;
+- quando já existe uma vigência AGENDADA, uma nova renovação é encadeada após o término da última vigência programada;
+- concedidaEm corresponde à data de aprovação da nova compra;
+- garantiaAte corresponde à aprovação da nova compra + 7 dias;
+- expiraEm corresponde ao novo iniciaEm + 1 ano-calendário + 7 dias;
+- uma renovação antecipada não reduz nem sobrescreve o período da vigência atual;
+- Matricula suspensa, cancelada ou encerrada é reutilizada pela nova compra e volta ao status ATIVA, com suspensaEm e encerradaEm limpos quando aplicável;
+- nenhuma alteração de schema ou migration foi necessária.
+
+Idempotência:
+- HotmartTransaction.transacaoCodigo permanece único;
+- o reprocessamento da mesma compra reutiliza a mesma HotmartTransaction;
+- quando a transação já possui VigenciaMatricula provisionada, provisionarAlunoHotmart retorna os vínculos existentes antes de alterar Aluno, Matricula, PerfilAluno ou convite de primeiro acesso;
+- VigenciaMatricula.transacaoOrigemId permanece único;
+- consequentemente, a mesma compra não pode originar duas vigências;
+- uma nova compra possui nova HotmartTransaction e pode originar uma nova VigenciaMatricula.
+
+Implementação realizada:
+- `provisionarPrimeiraVigenciaHotmart` foi renomeada para `provisionarVigenciaHotmart`;
+- `src/lib/vigencia-matricula.js` passou a localizar a última vigência ATIVA ou AGENDADA ainda futura antes de definir o início da nova vigência;
+- a busca prioriza a maior expiraEm, permitindo encadear múltiplas renovações antecipadas;
+- `src/lib/provisionar-aluno.js` continua reutilizando a mesma Matricula através do upsert por alunoId + produtoId;
+- `src/lib/provisionar-aluno.js` passou a verificar antecipadamente se transacaoOrigemId já possui vigência, impedindo que o reprocessamento da mesma compra reative administrativamente uma Matricula suspensa ou encerrada;
+- foi criado `tests/provisionar-aluno.test.js` para validar o reaproveitamento e reativação da Matricula em nova compra;
+- foi criado `vitest.config.mjs` para que os testes utilizem o mesmo alias `@/` definido no jsconfig.json.
+
+Validações realizadas:
+- mesma transação já provisionada reutiliza a vigência existente;
+- primeira compra cria vigência ATIVA;
+- renovação antecipada cria nova vigência AGENDADA;
+- recompra após expiração cria nova vigência ATIVA iniciando na nova aprovação;
+- múltiplas renovações antecipadas são encadeadas após a última vigência já programada;
+- nova compra reutiliza a Matricula existente e a mantém/reativa como ATIVA;
+- reprocessamento da mesma compra não altera novamente Aluno, Matricula, PerfilAluno ou convite;
+- testes automatizados: 96/96 aprovados em 9 arquivos;
+- `npm run lint` executado sem erros;
+- `npm run build` executado com sucesso.
+
+Critério de aceite:
 Nova compra do mesmo produto deverá poder gerar nova vigência sem sobrescrever ou perder o período vigente.
+
+Critério atendido.
 
 E1.10 — Testar o domínio de acesso
 Cobrir, no mínimo:
