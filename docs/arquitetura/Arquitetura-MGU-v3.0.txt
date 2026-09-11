@@ -1923,6 +1923,48 @@ ADMIN deverá visualizar histórico e informações necessárias para suporte.
 
 Critério atendido.
 
+ADENDO E1.8-A — Organização de componentes
+STATUS: CONCLUÍDO EM 10/09/2026
+
+Objetivo:
+- eliminar componentes soltos na raiz de `src/components`;
+- organizar os componentes por contexto de uso;
+- remover componentes antigos sem uso comprovado;
+- realizar a reorganização sem alterar o comportamento funcional das páginas.
+
+Organização realizada:
+- componentes exclusivos da página inicial foram movidos para `src/components/homepage`:
+  - HomePageAuthor.jsx;
+  - HomePageProducts.jsx;
+  - HomepageHero.jsx;
+  - LeadCapture.jsx;
+- o componente Products.jsx, utilizado pela área comercial, foi movido para `src/components/vendas`;
+- foram preservadas as estruturas já existentes:
+  - `src/components/admin`;
+  - `src/components/aluno`;
+  - `src/components/mentoria`;
+  - `src/components/shared`;
+- os imports das páginas consumidoras foram atualizados para os novos caminhos.
+
+Remoção de legado:
+- `HomePageLeadCapture.jsx` foi removido após confirmação de que era apenas importado, mas não renderizado, e não possuía outro consumidor;
+- `EbookLeadCapture.jsx` foi removido após confirmação de que não possuía consumidor ativo e continha uma implementação antiga/incompleta;
+- imports não utilizados de Link e HomePageLeadCapture foram removidos de `src/app/page.jsx`.
+
+Escopo:
+- este adendo trata exclusivamente de organização estrutural;
+- problemas antigos de encoding, textos e estilos encontrados em alguns componentes não foram corrigidos neste momento para evitar misturar refatoração estrutural com alteração funcional ou visual.
+
+Validações realizadas:
+- busca no diretório `src` não encontrou referências aos caminhos antigos dos componentes movidos ou removidos;
+- a raiz de `src/components` passou a conter somente diretórios de contexto;
+- ESLint executado nos componentes movidos e nas páginas com imports alterados sem erros.
+
+Critério de aceite:
+Componentes compartilhados ou específicos de uma área devem estar organizados em diretórios coerentes com seu contexto de uso, sem referências quebradas ou código legado comprovadamente sem uso.
+
+Critério atendido.
+
 E1.9 — Preparar renovação
 Nova compra do mesmo produto deverá poder gerar nova vigência sem sobrescrever ou perder o período vigente.
 

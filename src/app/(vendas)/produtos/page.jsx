@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import Products from '@/components/Products';
+import Products from '@/components/vendas/Products';
 
 // Otimização de SEO para a página de produtos
 export const metadata = {

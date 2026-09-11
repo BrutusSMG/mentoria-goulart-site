@@ -1,4 +1,4 @@
-// src/components/HomePageAuthor.jsx
+// src/components/homepage/HomePageAuthor.jsx
 import Image from 'next/image';
 
 const HomePageAuthor = () => {

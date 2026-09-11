@@ -1,4 +1,4 @@
-// src/components/LeadCapture.jsx
+// src/components/homepage/LeadCapture.jsx
 "use client";
 
 import { getUtms } from '@/utils/utm';

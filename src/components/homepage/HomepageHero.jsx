@@ -1,4 +1,4 @@
-// src/components/HomepageHero.jsx
+// src/components/homepage/HomepageHero.jsx
 "use client";
 
 import Link from 'next/link';

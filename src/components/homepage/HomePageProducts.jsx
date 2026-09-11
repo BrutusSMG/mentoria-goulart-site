@@ -1,4 +1,4 @@
-// src/components/HomePageProducts.jsx
+// src/components/homepage/HomePageProducts.jsx
 import React from 'react';
 
 const HomePageProducts = () => {
