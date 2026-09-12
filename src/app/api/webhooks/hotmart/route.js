@@ -6,6 +6,12 @@ import { enviarConvitePrimeiroAcesso } from '@/lib/convite-primeiro-acesso';
 import { timingSafeEqual } from "crypto";
 import { moverCompradorParaPosVenda } from '@/lib/brevo';
 import { provisionarAlunoHotmart } from '@/lib/provisionar-aluno';
+import {
+  decidirConsolidacaoFinanceiraHotmart,
+  EFEITO_DIREITO_HOTMART,
+  EVENTOS_TERMINAIS_DIREITO_HOTMART,
+  traduzirEventoHotmart,
+} from '@/lib/hotmart-traducao';
 
 export const runtime = "nodejs";
 
@@ -113,7 +119,7 @@ export async function POST(req) {
     : String(produto.id).trim();
 
   const produtoNome = String(produto.name || "Produto não identificado").trim();
-  const status = String(compra.status || evento || "STATUS_NAO_INFORMADO").trim();
+  const criadoNaHotmartEm = dataHotmart(payload?.creation_date);
 
   // Somente o ID único e o tipo de evento são indispensáveis para auditar a chamada.
   if (!hotmartEventId || !evento) {
@@ -145,7 +151,7 @@ export async function POST(req) {
         versao: payload?.version ? String(payload.version) : null,
         transacaoCodigo: transacaoCodigo || null,
         produtoId: produtoId || null,
-        criadoNaHotmartEm: dataHotmart(payload?.creation_date),
+        criadoNaHotmartEm,
         processadoEm: new Date(),
       },
     });
@@ -169,21 +175,19 @@ export async function POST(req) {
   const valorBruto = new Prisma.Decimal(String(valorRecebido));
   const nomeDoAluno = nomeDoComprador(comprador);
   const whatsappDoAluno = whatsappDoComprador(comprador);
+  const traducaoEvento = traduzirEventoHotmart(evento);
+  const compraConfirmada = traducaoEvento.efeitoDireito === EFEITO_DIREITO_HOTMART.GARANTIR;
   const aprovadoEmRecebido = dataHotmart(compra?.approved_date);
+  const aprovadoEmDoEvento = compraConfirmada ? aprovadoEmRecebido : null;
   let conviteParaEnviar = null;
-
-  const compraConfirmada = [
-    "PURCHASE_APPROVED",
-    "PURCHASE_COMPLETE",
-  ].includes(evento);
-
+  let podeGarantirDireito = compraConfirmada;
   try {
     await prisma.$transaction(async (tx) => {
       const lead = emailComprador
         ? await tx.lead.findUnique({
-            where: { email: emailComprador },
-            select: { id: true },
-          })
+          where: { email: emailComprador },
+          select: { id: true },
+        })
         : null;
 
       await tx.hotmartWebhookEvent.create({
@@ -193,10 +197,48 @@ export async function POST(req) {
           versao: payload?.version ? String(payload.version) : null,
           transacaoCodigo,
           produtoId,
-          criadoNaHotmartEm: dataHotmart(payload?.creation_date),
+          criadoNaHotmartEm,
           processadoEm: new Date(),
         },
       });
+
+      if (compraConfirmada) {
+        const eventoTerminalExistente = await tx.hotmartWebhookEvent.findFirst({
+          where: {
+            transacaoCodigo,
+            evento: {
+              in: EVENTOS_TERMINAIS_DIREITO_HOTMART,
+            },
+          },
+          select: { id: true },
+        });
+
+        if (eventoTerminalExistente) {
+          podeGarantirDireito = false;
+        }
+      }
+
+      const transacaoAtual = await tx.hotmartTransaction.findUnique({
+        where: { transacaoCodigo },
+        select: {
+          id: true,
+          status: true,
+          ultimoEventoHotmartEm: true,
+          ultimoEventoHotmartId: true,
+        },
+      });
+
+      const consolidacaoFinanceira = decidirConsolidacaoFinanceiraHotmart({
+        traducaoEvento,
+        hotmartEventId,
+        criadoNaHotmartEm,
+        transacaoAtual,
+      });
+
+      // Evento desconhecido sem transação anterior permanece apenas na auditoria.
+      if (!transacaoAtual && !consolidacaoFinanceira.deveAtualizar) {
+        return;
+      }
 
       const transacao = await tx.hotmartTransaction.upsert({
         where: { transacaoCodigo },
@@ -207,17 +249,25 @@ export async function POST(req) {
           produtoId,
           produtoUcode: produto.ucode ? String(produto.ucode) : null,
           produtoNome,
-          status,
+          status: consolidacaoFinanceira.status,
+          ultimoEventoHotmartEm: consolidacaoFinanceira.ultimoEventoHotmartEm,
+          ultimoEventoHotmartId: consolidacaoFinanceira.ultimoEventoHotmartId,
           valorBruto,
-          moeda: String(compra?.full_price?.currency_value || compra?.price?.currency_value || "BRL"),
-          formaPagamento: compra?.payment?.type ? String(compra.payment.type) : null,
+          moeda: String(
+            compra?.full_price?.currency_value ||
+            compra?.price?.currency_value ||
+            "BRL",
+          ),
+          formaPagamento: compra?.payment?.type
+            ? String(compra.payment.type)
+            : null,
           parcelas: Number.isInteger(compra?.payment?.installments_number)
             ? compra.payment.installments_number
             : null,
           origemSrc: compra?.origin?.src ? String(compra.origin.src) : null,
           origemSck: compra?.origin?.sck ? String(compra.origin.sck) : null,
           origemXcod: compra?.origin?.xcod ? String(compra.origin.xcod) : null,
-          aprovadoEm: aprovadoEmRecebido,
+          aprovadoEm: aprovadoEmDoEvento,
         },
         update: {
           leadId: lead?.id || null,
@@ -225,23 +275,55 @@ export async function POST(req) {
           produtoId,
           produtoUcode: produto.ucode ? String(produto.ucode) : null,
           produtoNome,
-          status,
           valorBruto,
-          moeda: String(compra?.full_price?.currency_value || compra?.price?.currency_value || "BRL"),
-          formaPagamento: compra?.payment?.type ? String(compra.payment.type) : null,
+          moeda: String(
+            compra?.full_price?.currency_value ||
+            compra?.price?.currency_value ||
+            "BRL",
+          ),
+          formaPagamento: compra?.payment?.type
+            ? String(compra.payment.type)
+            : null,
           parcelas: Number.isInteger(compra?.payment?.installments_number)
             ? compra.payment.installments_number
             : null,
           origemSrc: compra?.origin?.src ? String(compra.origin.src) : null,
           origemSck: compra?.origin?.sck ? String(compra.origin.sck) : null,
           origemXcod: compra?.origin?.xcod ? String(compra.origin.xcod) : null,
-          ...(aprovadoEmRecebido
-            ? { aprovadoEm: aprovadoEmRecebido }
+          ...(aprovadoEmDoEvento
+          ? { aprovadoEm: aprovadoEmDoEvento }
+          : {}),
+          ...(consolidacaoFinanceira.deveAtualizar
+            ? {
+              status: consolidacaoFinanceira.status,
+              ultimoEventoHotmartEm:
+                consolidacaoFinanceira.ultimoEventoHotmartEm,
+              ultimoEventoHotmartId:
+                consolidacaoFinanceira.ultimoEventoHotmartId,
+            }
             : {}),
         },
       });
 
-      if (lead && compraConfirmada) {
+      if (
+        traducaoEvento.efeitoDireito ===
+        EFEITO_DIREITO_HOTMART.REVOGAR
+      ) {
+        const momentoRevogacao = criadoNaHotmartEm || new Date();
+
+        await tx.vigenciaMatricula.updateMany({
+          where: {
+            transacaoOrigemId: transacao.id,
+          },
+          data: {
+            status: 'CANCELADA',
+            canceladaEm: momentoRevogacao,
+            statusAlteradoEm: momentoRevogacao,
+          },
+        });
+      }
+
+      if (lead && podeGarantirDireito) {
         await tx.lead.update({
           where: { id: lead.id },
           data: {
@@ -251,7 +333,7 @@ export async function POST(req) {
         });
       }
 
-      if (compraConfirmada && emailComprador) {
+      if (podeGarantirDireito && emailComprador) {
         if (!transacao.aprovadoEm) {
           throw new Error(
             'Compra confirmada sem data de aprovação da Hotmart.',
@@ -292,7 +374,7 @@ export async function POST(req) {
     });
 
     if (
-      compraConfirmada
+      podeGarantirDireito
       && emailComprador
       && process.env.HOTMART_SYNC_BREVO !== 'false'
     ) {

@@ -2211,54 +2211,432 @@ Critério de aceite:
 
 Critério atendido.
 
-Máquina de tradução
+E2.2 — Formalizar máquina de tradução Hotmart
+STATUS: IMPLEMENTAÇÃO LOCAL VALIDADA — AGUARDANDO COMMIT/PUSH E PREVIEW
+
+Princípio central
+
+O estado financeiro de HotmartTransaction e o efeito de um evento sobre o direito de acesso são conceitos distintos.
+
+Um evento poderá atualizar ou representar o estado financeiro de uma transação sem necessariamente criar, cancelar ou alterar uma VigenciaMatricula.
+
+Classificação inicial dos eventos:
+
+PURCHASE_BILLET_PRINTED
+→ efeito financeiro: registrar estado BILLET_PRINTED;
+→ efeito de acesso: nenhum.
+
+PURCHASE_APPROVED
+→ efeito financeiro: registrar estado APPROVED;
+→ efeito de acesso: GARANTIR_DIREITO.
+
+PURCHASE_COMPLETE
+→ efeito financeiro: registrar estado COMPLETED;
+→ efeito de acesso: GARANTIR_DIREITO;
+→ deverá reutilizar o direito já originado pela mesma transação, sem criar vigência adicional.
+
+PURCHASE_CANCELED
+→ efeito financeiro: registrar estado CANCELED;
+→ efeito de acesso: nenhum;
+→ não revoga automaticamente uma vigência já concedida.
+
+PURCHASE_REFUNDED
+→ efeito financeiro: registrar estado REFUNDED;
+→ efeito de acesso: REVOGAR_DIREITO;
+→ somente a vigência originada pela respectiva transação poderá ser afetada.
+
+PURCHASE_CHARGEBACK
+→ efeito financeiro: registrar estado CHARGEBACK;
+→ efeito de acesso: REVOGAR_DIREITO;
+→ somente a vigência originada pela respectiva transação poderá ser afetada.
+
+Eventos terminais do direito
+
+PURCHASE_REFUNDED e PURCHASE_CHARGEBACK serão considerados terminais para o direito originado pela transação correspondente.
+
+Uma vez registrada uma dessas ocorrências para determinada transação, um PURCHASE_APPROVED ou PURCHASE_COMPLETE recebido posteriormente por atraso de entrega não poderá recriar, reativar ou conceder novamente a vigência daquela mesma transação.
+
+PURCHASE_BILLET_PRINTED e PURCHASE_CANCELED não serão considerados eventos de revogação do direito.
+
+A ordem de chegada HTTP não será considerada fonte de verdade para decidir a sequência comercial.
+
+Sempre que necessário, serão considerados:
+- hotmartEventId;
+- purchase.transaction;
+- creation_date da Hotmart;
+- eventos já auditados para a mesma transação;
+- efeito de domínio já aplicado.
+
+Controle do estado consolidado da transação
+
+HotmartWebhookEvent permanecerá como histórico imutável dos eventos externos recebidos.
+
+HotmartTransaction representará o estado financeiro consolidado da transação e não deverá ser sobrescrita simplesmente pela ordem de chegada HTTP.
+
+Para permitir essa proteção, a implementação deverá acrescentar conceitualmente a HotmartTransaction:
+
+ultimoEventoHotmartEm
+= creation_date do último evento Hotmart aceito para atualizar o estado consolidado da transação;
+
+ultimoEventoHotmartId
+= hotmartEventId do evento que originou o estado consolidado atual.
+
+Regra de atualização:
+
+quando criadoNaHotmartEm do novo evento for posterior a ultimoEventoHotmartEm
+→ o evento poderá atualizar o estado consolidado da HotmartTransaction conforme a máquina de tradução;
+
+quando criadoNaHotmartEm do novo evento for anterior a ultimoEventoHotmartEm
+→ o evento continuará sendo auditado em HotmartWebhookEvent;
+→ não poderá regredir o estado consolidado da HotmartTransaction;
+→ ainda deverá ser avaliado quanto a efeitos terminais de domínio quando aplicável.
+
+Eventos com a mesma data de origem não utilizarão a ordem de chegada HTTP como critério de desempate.
+Nesses casos, a decisão deverá considerar o tipo do evento, o histórico da transação e as regras terminais do direito.
+
+Empate temporal do estado financeiro
+
+Quando dois ou mais eventos da mesma transação possuírem o mesmo criadoNaHotmartEm e representarem estados financeiros diferentes, o MGU não inferirá uma ordem comercial inexistente.
+
+Nesse cenário:
+- a ordem de chegada HTTP não escolherá o estado vencedor;
+- não será criada precedência artificial entre tipos de evento apenas para definir HotmartTransaction.status;
+- todos os eventos permanecerão auditados em HotmartWebhookEvent;
+- os efeitos sobre VigenciaMatricula continuarão sendo avaliados pela precedência de domínio definida nesta etapa;
+- uma ocorrência posterior com criadoNaHotmartEm maior poderá voltar a definir normalmente o estado financeiro consolidado.
+
+A implementação deverá representar esse empate de forma explícita e determinística, sem apresentar como fato um estado financeiro que não possa ser concluído a partir dos eventos recebidos.
+
+Representação do empate financeiro
+
+Quando eventos com o mesmo criadoNaHotmartEm representarem estados financeiros diferentes:
+
+HotmartTransaction.status
+= CONFLITO_TEMPORAL;
+
+HotmartTransaction.ultimoEventoHotmartEm
+= criadoNaHotmartEm compartilhado pelos eventos conflitantes;
+
+HotmartTransaction.ultimoEventoHotmartId
+= null.
+
+CONFLITO_TEMPORAL será um estado interno de consolidação do MGU e não um status originado pela Hotmart.
+
+Se os eventos com a mesma data representarem o mesmo estado financeiro, não haverá conflito.
+
+Um evento conhecido posterior, com criadoNaHotmartEm maior, poderá substituir CONFLITO_TEMPORAL pelo novo estado financeiro consolidado e preencher novamente ultimoEventoHotmartId.
+
+O conflito financeiro não impedirá a aplicação independente das regras de direito de acesso.
+
+ultimoEventoHotmartEm e ultimoEventoHotmartId representam controle de consolidação financeira.
+Eles não substituem HotmartWebhookEvent e não representam, isoladamente, o estado da VigenciaMatricula.
+
+A proteção contra regressão do estado financeiro e a proteção do direito de acesso serão tratadas como regras relacionadas, porém distintas.
+
+Aplicação de REVOGAR_DIREITO
+
+PURCHASE_REFUNDED e PURCHASE_CHARGEBACK produzirão REVOGAR_DIREITO sobre a VigenciaMatricula originada pela mesma HotmartTransaction.
+
+Quando a vigência já existir:
+
+VigenciaMatricula.status
+= CANCELADA;
+
+VigenciaMatricula.canceladaEm
+= creation_date do evento Hotmart;
+
+VigenciaMatricula.statusAlteradoEm
+= creation_date do evento Hotmart;
+
+VigenciaMatricula.encerradaEm
+permanecerá inalterado.
+
+CANCELADA será utilizada porque reembolso e chargeback representam revogação comercial do direito concedido.
+
+ENCERRADA permanecerá reservada para término normal da vigência.
+
+SUSPENSA não será utilizada para reembolso ou chargeback na regra atual.
+
+A Matricula não será automaticamente cancelada por esses eventos.
+
+Isso é necessário porque uma mesma Matricula pode possuir outras vigências legítimas, anteriores ou futuras, originadas por outras transações.
+
+Quando o evento terminal for recebido antes da criação da VigenciaMatricula:
+
+- o evento continuará sendo auditado;
+- nenhum direito será criado naquele momento;
+- a ocorrência terminal deverá impedir que um PURCHASE_APPROVED ou PURCHASE_COMPLETE tardio da mesma transação crie posteriormente a vigência;
+- nenhuma outra vigência da Matricula poderá ser afetada.
+
+A causa da revogação permanecerá auditável pela combinação entre:
+- VigenciaMatricula.transacaoOrigemId;
+- HotmartTransaction.transacaoCodigo;
+- HotmartWebhookEvent.evento;
+- HotmartWebhookEvent.criadoNaHotmartEm.
+
+Nesta subetapa não será criado campo adicional de motivo na VigenciaMatricula.
+
+Se futuramente o suporte administrativo exigir motivo persistido diretamente na vigência, essa necessidade deverá ser tratada de forma evolutiva, sem substituir o histórico original de eventos Hotmart.
+
+Eventos sem creation_date válido
+
+HotmartWebhookEvent poderá possuir criadoNaHotmartEm nulo quando creation_date estiver ausente ou inválido.
+
+Nessa situação:
+
+- o evento continuará sendo auditado;
+- recebidoEm e processadoEm permanecerão como datas técnicas do MGU;
+- recebidoEm não será reinterpretado como data de ocorrência na Hotmart;
+- o evento não poderá, por ausência de data de origem, regredir um estado financeiro consolidado que já possua ultimoEventoHotmartEm confiável;
+- ultimoEventoHotmartEm não será preenchido com recebidoEm apenas para substituir uma data de origem ausente.
+
+Para eventos GARANTIR_DIREITO:
+- continuarão valendo as demais validações necessárias ao provisionamento;
+- ausência de creation_date não poderá, por si só, criar uma ordenação artificial sobre eventos anteriores ou posteriores.
+
+Para eventos REVOGAR_DIREITO:
+- PURCHASE_REFUNDED e PURCHASE_CHARGEBACK continuarão sendo terminais para o direito da respectiva transação;
+- se a vigência existir, a revogação deverá ser aplicada mesmo quando creation_date estiver ausente;
+- nesse caso, canceladaEm e statusAlteradoEm poderão utilizar o momento técnico de aplicação no MGU;
+- esse momento deverá ser tratado como data operacional da alteração, e não como data histórica da ocorrência na Hotmart.
+
+A ausência de creation_date deverá permanecer identificável pela auditoria original e não poderá ser ocultada por preenchimento artificial de criadoNaHotmartEm.
+
+Aplicação de GARANTIR_DIREITO
+
+PURCHASE_APPROVED e PURCHASE_COMPLETE produzirão GARANTIR_DIREITO.
+
+Antes de provisionar qualquer direito, a máquina de tradução deverá verificar se existe ocorrência terminal aplicável à mesma purchase.transaction.
+
+Se existir PURCHASE_REFUNDED ou PURCHASE_CHARGEBACK aplicável à transação:
+→ GARANTIR_DIREITO será bloqueado;
+→ nenhuma VigenciaMatricula será criada;
+→ nenhuma vigência cancelada será reativada;
+→ nenhum novo convite será gerado por causa desse evento tardio.
+
+Se não existir ocorrência terminal aplicável:
+→ o fluxo poderá utilizar provisionarAlunoHotmart.
+
+Quando a transação já possuir VigenciaMatricula:
+→ a vigência existente será reutilizada;
+→ nenhuma nova vigência será criada;
+→ o status existente da vigência não será alterado apenas por GARANTIR_DIREITO;
+→ nenhum novo convite será gerado por causa do reprocessamento da mesma transação.
+
+Quando a transação ainda não possuir VigenciaMatricula e não existir revogação terminal:
+→ PURCHASE_APPROVED ou PURCHASE_COMPLETE poderá criar o direito correspondente;
+→ primeira compra e renovação continuarão utilizando as regras já consolidadas em provisionarVigenciaHotmart.
+
+PURCHASE_COMPLETE não representa uma nova compra quando utiliza a mesma purchase.transaction de PURCHASE_APPROVED.
+
+A criação de nova vigência continuará dependendo de uma nova HotmartTransaction, identificada por novo transacaoCodigo.
+
+Aplicação de NENHUM_EFEITO_DIREITO
+
+PURCHASE_BILLET_PRINTED e PURCHASE_CANCELED produzirão NENHUM_EFEITO_DIREITO.
+
+Esses eventos poderão criar ou atualizar HotmartTransaction quando possuírem os dados mínimos necessários e forem aplicáveis ao estado financeiro consolidado.
+
+Eles não poderão, por si próprios:
+
+- criar Aluno;
+- criar ou reativar Matricula;
+- criar VigenciaMatricula;
+- alterar o status de VigenciaMatricula;
+- cancelar VigenciaMatricula;
+- gerar convite de primeiro acesso;
+- marcar Lead como comprador;
+- executar ação de pós-venda no Brevo.
+
+PURCHASE_BILLET_PRINTED recebido antes da aprovação poderá registrar a transação como BILLET_PRINTED sem conceder acesso.
+
+Se PURCHASE_APPROVED ou PURCHASE_COMPLETE válido for recebido posteriormente para a mesma transação:
+→ a mesma HotmartTransaction será reutilizada;
+→ o direito poderá então ser provisionado conforme GARANTIR_DIREITO.
+
+PURCHASE_CANCELED também poderá registrar o estado financeiro CANCELED sem revogar direito de acesso.
+
+Se uma VigenciaMatricula já tiver sido legitimamente concedida para a mesma transação, PURCHASE_CANCELED isoladamente não alterará essa vigência.
+
+Qualquer futura necessidade de fazer PURCHASE_CANCELED revogar direito deverá decorrer de regra comercial explicitamente validada, e não apenas do nome externo do evento.
+
+Precedência de efeitos de domínio
+
+Para proteção do direito de acesso, os efeitos terão a seguinte precedência conceitual:
+
+REVOGAR_DIREITO
+>
+GARANTIR_DIREITO
+>
+NENHUM_EFEITO_DIREITO
+
+Assim:
+
+PURCHASE_REFUNDED e PURCHASE_CHARGEBACK
+→ REVOGAR_DIREITO;
+
+PURCHASE_APPROVED e PURCHASE_COMPLETE
+→ GARANTIR_DIREITO;
+
+PURCHASE_CANCELED e PURCHASE_BILLET_PRINTED
+→ NENHUM_EFEITO_DIREITO.
+
+Quando eventos da mesma transação possuírem a mesma creation_date, um efeito REVOGAR_DIREITO prevalecerá sobre GARANTIR_DIREITO para fins de VigenciaMatricula.
+
+GARANTIR_DIREITO não poderá reativar uma vigência quando já existir evento terminal de revogação aplicável à mesma transação.
+
+Eventos classificados como NENHUM_EFEITO_DIREITO não poderão criar, reativar, suspender ou cancelar vigências.
+
+Essa precedência é exclusiva do efeito sobre o direito de acesso.
+
+Não será criada uma ordenação artificial entre PURCHASE_REFUNDED e PURCHASE_CHARGEBACK apenas para escolher um status financeiro.
+
+Também não será criada uma ordenação artificial entre PURCHASE_APPROVED e PURCHASE_COMPLETE apenas para desempate temporal.
+
+O estado financeiro consolidado deverá considerar o histórico efetivo da transação e será tratado separadamente da precedência do direito.
+
+Eventos não mapeados
+
+Qualquer evento Hotmart que não esteja explicitamente classificado pela máquina de tradução deverá utilizar comportamento seguro por padrão.
+
+Evento não mapeado:
+→ deverá ser auditado em HotmartWebhookEvent quando possuir os dados mínimos necessários;
+→ não poderá produzir GARANTIR_DIREITO;
+→ não poderá produzir REVOGAR_DIREITO;
+→ não poderá criar ou alterar VigenciaMatricula;
+→ não poderá criar ou reativar Matricula;
+→ não poderá gerar convite;
+→ não poderá executar ações de pós-venda;
+→ não deverá sobrescrever automaticamente o estado financeiro consolidado da HotmartTransaction apenas porque purchase.status estiver presente.
+
+A introdução de um novo evento pela Hotmart exigirá classificação explícita antes que esse evento possa produzir efeitos de domínio no MGU.
+
+Essa regra evita que mudanças futuras na integração externa alterem direitos de acesso sem decisão arquitetural e comercial deliberada.
+
 Teremos uma regra central de tradução entre evento externo e efeito interno.
+
+Implementação da máquina central de tradução
+
+A classificação dos eventos Hotmart não permanecerá espalhada no route.js do webhook.
+
+Será criada uma regra central de tradução, preferencialmente isolada em:
+
+src/lib/hotmart-traducao.js
+
+Essa camada será responsável por traduzir o nome técnico do evento externo para uma classificação interna estável.
+
+Conceitualmente, a tradução deverá fornecer pelo menos:
+
+- se o evento é conhecido pelo MGU;
+- estado financeiro representado pelo evento;
+- efeito sobre o direito de acesso;
+- se o evento é terminal para o direito da respectiva transação.
 
 Exemplo conceitual:
 
 PURCHASE_APPROVED
+→ conhecido: sim
+→ estado financeiro: APPROVED
+→ efeito do direito: GARANTIR_DIREITO
+→ terminal do direito: não
+
+PURCHASE_REFUNDED
+→ conhecido: sim
+→ estado financeiro: REFUNDED
+→ efeito do direito: REVOGAR_DIREITO
+→ terminal do direito: sim
+
+Evento não mapeado
+→ conhecido: não
+→ nenhum efeito de direito
+→ não poderá receber comportamento implícito a partir de purchase.status.
+
+A tradução estática do tipo de evento será separada da decisão transacional de aplicação.
+
+A decisão transacional deverá considerar, além da tradução:
+- histórico de HotmartWebhookEvent da mesma purchase.transaction;
+- VigenciaMatricula já existente;
+- ocorrência terminal já auditada;
+- criadoNaHotmartEm;
+- estado consolidado atual da HotmartTransaction.
+
+Dessa forma, traduzir PURCHASE_APPROVED como GARANTIR_DIREITO não significa automaticamente conceder o direito.
+
+Significa apenas que esse é o efeito potencial do evento, que somente será aplicado depois das proteções de idempotência, precedência e eventos fora de ordem definidas nesta etapa.
+
+O route.js deverá atuar como orquestrador do webhook e não como fonte das regras comerciais da tradução.
+
+Fluxo conceitual consolidado:
+
+PURCHASE_BILLET_PRINTED
         ↓
-cria ou localiza Aluno
+registra estado financeiro quando aplicável
+        ↓
+não altera direito de acesso
+
+PURCHASE_APPROVED
+        ↓
+verifica ocorrência terminal da mesma transação
+        ↓
+se permitido, cria ou localiza Aluno
         ↓
 cria ou localiza Matricula
         ↓
-cria VigenciaMatricula
+cria ou reutiliza VigenciaMatricula
         ↓
-gera convite apenas se ainda não existir credencial válida
+gera convite apenas quando aplicável
 
 PURCHASE_COMPLETE
         ↓
-mantém estado válido sem duplicar vigência
+verifica ocorrência terminal da mesma transação
+        ↓
+garante o mesmo direito de forma idempotente
+        ↓
+não cria vigência adicional para a mesma transação
 
-REFUND
+PURCHASE_CANCELED
         ↓
-cancela a vigência relacionada à compra reembolsada
+registra estado financeiro quando aplicável
+        ↓
+não revoga automaticamente VigenciaMatricula
 
-CHARGEBACK
+PURCHASE_REFUNDED
         ↓
-suspende ou cancela a vigência relacionada conforme regra comercial definida
+REVOGAR_DIREITO
+        ↓
+cancela somente a VigenciaMatricula originada pela transação reembolsada
 
-CANCELAMENTO DE RENOVAÇÃO
+PURCHASE_CHARGEBACK
         ↓
-não deve necessariamente encerrar o período já pago
+REVOGAR_DIREITO
         ↓
-impede apenas nova concessão quando essa for a semântica real do evento
+cancela somente a VigenciaMatricula originada pela transação atingida pelo chargeback
 
 NOVA COMPRA / RENOVAÇÃO
         ↓
-cria nova vigência
+nova transação Hotmart
         ↓
-preserva vigências anteriores
+nova VigenciaMatricula
+        ↓
+preserva integralmente as vigências anteriores
 
 Eventos fora de ordem
-O sistema deverá evitar que um evento antigo recebido tardiamente reverta indevidamente um estado mais recente.
 
-Quando necessário, a decisão deverá considerar:
-identificador do evento;
-data do evento na origem;
-transação relacionada;
-estado atual;
-histórico já processado.
+A ordem de chegada HTTP não determinará o estado financeiro consolidado nem o direito de acesso.
+
+Para cada evento serão considerados, conforme aplicável:
+- hotmartEventId;
+- purchase.transaction;
+- criadoNaHotmartEm;
+- estado financeiro consolidado da HotmartTransaction;
+- histórico já auditado em HotmartWebhookEvent;
+- efeito de domínio já aplicado à VigenciaMatricula.
+
+Eventos antigos recebidos tardiamente não poderão regredir o estado financeiro consolidado.
+
+PURCHASE_REFUNDED e PURCHASE_CHARGEBACK continuarão produzindo seu efeito terminal sobre o direito da respectiva transação mesmo quando recebidos fora de ordem.
+
+PURCHASE_APPROVED e PURCHASE_COMPLETE não poderão recriar ou reativar direito já revogado por evento terminal da mesma transação.
 
 Integrações externas
 Falhas de Brevo, Resend ou futuras integrações não deverão desfazer uma alteração de banco já validamente confirmada.

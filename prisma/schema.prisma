@@ -326,26 +326,28 @@ model HotmartWebhookEvent {
 // Estado mais recente de cada transação Hotmart.
 // O código da transação impede que o mesmo pedido gere uma venda duplicada.
 model HotmartTransaction {
-  id              String    @id @default(cuid())
-  transacaoCodigo String    @unique
-  leadId          String?
-  alunoId         String?
-  matriculaId     String?
-  emailComprador  String?
-  produtoId       String
-  produtoUcode    String?
-  produtoNome     String
-  status          String
-  valorBruto      Decimal   @db.Decimal(12, 2)
-  moeda           String    @default("BRL")
-  formaPagamento  String?
-  parcelas        Int?
-  origemSrc       String?
-  origemSck       String?
-  origemXcod      String?
-  aprovadoEm      DateTime?
-  criadoEm        DateTime  @default(now())
-  atualizadoEm    DateTime  @updatedAt
+  id                    String    @id @default(cuid())
+  transacaoCodigo       String    @unique
+  leadId                String?
+  alunoId               String?
+  matriculaId           String?
+  emailComprador        String?
+  produtoId             String
+  produtoUcode          String?
+  produtoNome           String
+  status                String
+  valorBruto            Decimal   @db.Decimal(12, 2)
+  moeda                 String    @default("BRL")
+  formaPagamento        String?
+  parcelas              Int?
+  origemSrc             String?
+  origemSck             String?
+  origemXcod            String?
+  aprovadoEm            DateTime?
+  ultimoEventoHotmartEm DateTime?
+  ultimoEventoHotmartId String?
+  criadoEm              DateTime  @default(now())
+  atualizadoEm          DateTime  @updatedAt
 
   lead           Lead?              @relation(fields: [leadId], references: [id], onDelete: SetNull)
   aluno          Aluno?             @relation(fields: [alunoId], references: [id], onDelete: SetNull)
