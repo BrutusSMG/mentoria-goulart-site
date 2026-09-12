@@ -2146,6 +2146,71 @@ eventos recebidos fora de ordem.
 Os nomes oficiais e a semântica dos eventos serão confirmados durante a implementação.
 Não assumiremos que todo evento contendo a palavra “cancelamento” possui o mesmo efeito comercial.
 
+E2.1 — Inventariar eventos Hotmart do produto atual
+STATUS: CONCLUÍDO EM 11/09/2026
+
+Inventário realizado diretamente na configuração e no histórico do webhook Hotmart utilizado pelo MGU.
+
+Eventos atualmente selecionados:
+
+PURCHASE_BILLET_PRINTED
+Nome exibido pela Hotmart: Aguardando pagamento.
+purchase.status observado: BILLET_PRINTED.
+Não concede acesso.
+Não cria vigência.
+Não envia convite.
+Representa estado financeiro anterior à confirmação da compra.
+
+PURCHASE_APPROVED
+Nome exibido pela Hotmart: Compra aprovada.
+purchase.status observado: APPROVED.
+Concede o direito correspondente à transação.
+Pode provisionar Aluno, Matricula e VigenciaMatricula conforme as regras do domínio.
+Uma nova transação válida poderá representar primeira compra ou renovação.
+
+PURCHASE_COMPLETE
+Nome exibido pela Hotmart: Compra completa.
+purchase.status observado: COMPLETED.
+Representa evolução da mesma transação já adquirida.
+Não representa nova compra.
+Não poderá criar vigência adicional quando a transação já possuir seu direito provisionado.
+
+PURCHASE_CANCELED
+Nome exibido pela Hotmart: Compra cancelada.
+purchase.status observado: CANCELED.
+Não deverá cancelar automaticamente Matricula ou VigenciaMatricula.
+Pode representar uma tentativa de compra que não foi concluída.
+Seu efeito deverá permanecer restrito à auditoria e ao estado financeiro da transação, salvo futura regra comercial explicitamente definida.
+
+PURCHASE_REFUNDED
+Nome exibido pela Hotmart: Compra reembolsada.
+purchase.status observado: REFUNDED.
+Deverá afetar somente a VigenciaMatricula originada pela transação reembolsada.
+Não deverá cancelar automaticamente toda a Matricula nem outras vigências legitimamente adquiridas.
+
+PURCHASE_CHARGEBACK
+Nome exibido pela Hotmart: Chargeback.
+purchase.status observado: CHARGEBACK.
+Deverá afetar somente a VigenciaMatricula originada pela transação atingida pelo chargeback.
+Não deverá cancelar automaticamente toda a Matricula nem outras vigências legitimamente adquiridas.
+
+Constatações do inventário:
+- os seis eventos utilizam purchase.transaction como identificador da transação comercial;
+- HotmartWebhookEvent já registra creation_date em criadoNaHotmartEm;
+- creation_date será a referência candidata para ordenação cronológica dos eventos externos;
+- os payloads de teste da Hotmart podem conter combinações artificiais de campos e não deverão ser usados para inferir uma sequência comercial real;
+- approved_date isoladamente não deverá ser usado para classificar o efeito de qualquer evento;
+- o tipo do evento e a regra de tradução do MGU deverão determinar o efeito de domínio;
+- eventos diferentes referentes à mesma purchase.transaction representam estados ou ocorrências sobre a mesma transação, e não novas compras por si próprios.
+
+Critério de aceite:
+- eventos atualmente configurados no webhook foram identificados pelos nomes técnicos reais;
+- cada evento possui efeito conceitual inicial definido;
+- nenhum evento externo substitui diretamente os conceitos de Matricula ou VigenciaMatricula;
+- o inventário está pronto para servir de entrada à máquina de tradução da E2.2.
+
+Critério atendido.
+
 Máquina de tradução
 Teremos uma regra central de tradução entre evento externo e efeito interno.
 
