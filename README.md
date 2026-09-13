@@ -161,41 +161,25 @@ src/lib/validacoes.js
 
 ## Documentação
 
-A documentação técnica está em:
+A documentação pública está em:
 
 ```text
 docs/
+├── README.md
+└── EVOLUCAO-MGU.md
 ```
 
-Estrutura:
+### Documentação pública
+
+A documentação pública apresenta a evolução da plataforma, as principais entregas concluídas e os próximos passos do projeto.
+
+Consulte:
 
 ```text
-docs/
-├── arquitetura/
-├── operacao/
-├── migracoes/
-└── historico/
+docs/EVOLUCAO-MGU.md
 ```
 
-### Arquitetura vigente
-
-A fonte de verdade arquitetural é:
-
-```text
-docs/arquitetura/Arquitetura-MGU-v3.0.txt
-```
-
-Sempre que uma alteração modificar decisões arquiteturais, regras estruturais ou o roadmap, esse documento deve ser atualizado no mesmo ciclo.
-
-### Histórico
-
-Documentos antigos permanecem em:
-
-```text
-docs/historico/
-```
-
-Eles servem como registro histórico e podem descrever estados que já não representam a aplicação atual.
+Detalhes de arquitetura, procedimentos operacionais, migrações, homologações e decisões internas de implementação são mantidos separadamente em documentação privada.
 
 ## Banco de dados
 

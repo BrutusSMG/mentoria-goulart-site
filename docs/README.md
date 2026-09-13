@@ -1,29 +1,22 @@
-﻿# Documentação do MGU
+# Documentação pública do MGU
 
-Esta pasta concentra a documentação técnica e operacional do projeto Mentoria Garimpo Urbano.
+Esta pasta reúne a documentação pública sobre a evolução da plataforma Mentoria Garimpo Urbano.
 
-## Estrutura
+## Conteúdo
 
-### `arquitetura/`
+### `EVOLUCAO-MGU.md`
 
-Documentação vigente da arquitetura, decisões técnicas, domínios, ambientes e roadmap do MGU.
+Apresenta, em alto nível:
 
-### `operacao/`
+- etapas concluídas;
+- principais evoluções da plataforma;
+- funcionalidades incorporadas ao projeto;
+- direção das próximas etapas.
 
-Procedimentos operacionais do projeto, como desenvolvimento local, homologação, deploy, integrações e rotinas de manutenção.
+A documentação pública tem como objetivo mostrar a evolução do MGU sem expor detalhes internos de implementação, infraestrutura, operação ou decisões ainda em desenvolvimento.
 
-### `migracoes/`
+## Documentação interna
 
-Documentação relacionada a mudanças de banco de dados, backfills, migrações de dados e procedimentos que exijam execução controlada por ambiente.
+Arquitetura detalhada, procedimentos operacionais, migrações de banco de dados, homologações, decisões técnicas e planejamento interno são mantidos separadamente em documentação privada.
 
-### `historico/`
-
-Documentos antigos preservados para consulta histórica.
-
-Os arquivos desta pasta podem descrever estados anteriores da aplicação e não devem ser usados como referência da arquitetura vigente sem validação.
-
-## Fonte de verdade
-
-A documentação em `arquitetura/` representa o estado vigente do projeto.
-
-Quando uma decisão arquitetural for alterada, a documentação correspondente deve ser atualizada no mesmo ciclo da mudança.
+A documentação pública registra o que foi consolidado e entregue. A documentação privada permanece como fonte de trabalho para decisões técnicas e evolução da plataforma.

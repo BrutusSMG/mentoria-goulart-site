@@ -1,2 +1,2 @@
 .gitattributes text eol=lf
-docs/arquitetura/Arquitetura-MGU-v3.0.txt text eol=lf
+*.md text eol=lf
