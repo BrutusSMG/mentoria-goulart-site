@@ -240,70 +240,81 @@ export async function POST(req) {
         return;
       }
 
-      const transacao = await tx.hotmartTransaction.upsert({
-        where: { transacaoCodigo },
-        create: {
-          transacaoCodigo,
-          leadId: lead?.id || null,
-          emailComprador,
-          produtoId,
-          produtoUcode: produto.ucode ? String(produto.ucode) : null,
-          produtoNome,
-          status: consolidacaoFinanceira.status,
-          ultimoEventoHotmartEm: consolidacaoFinanceira.ultimoEventoHotmartEm,
-          ultimoEventoHotmartId: consolidacaoFinanceira.ultimoEventoHotmartId,
-          valorBruto,
-          moeda: String(
-            compra?.full_price?.currency_value ||
-            compra?.price?.currency_value ||
-            "BRL",
-          ),
-          formaPagamento: compra?.payment?.type
-            ? String(compra.payment.type)
-            : null,
-          parcelas: Number.isInteger(compra?.payment?.installments_number)
-            ? compra.payment.installments_number
-            : null,
-          origemSrc: compra?.origin?.src ? String(compra.origin.src) : null,
-          origemSck: compra?.origin?.sck ? String(compra.origin.sck) : null,
-          origemXcod: compra?.origin?.xcod ? String(compra.origin.xcod) : null,
-          aprovadoEm: aprovadoEmDoEvento,
-        },
-        update: {
-          leadId: lead?.id || null,
-          emailComprador,
-          produtoId,
-          produtoUcode: produto.ucode ? String(produto.ucode) : null,
-          produtoNome,
-          valorBruto,
-          moeda: String(
-            compra?.full_price?.currency_value ||
-            compra?.price?.currency_value ||
-            "BRL",
-          ),
-          formaPagamento: compra?.payment?.type
-            ? String(compra.payment.type)
-            : null,
-          parcelas: Number.isInteger(compra?.payment?.installments_number)
-            ? compra.payment.installments_number
-            : null,
-          origemSrc: compra?.origin?.src ? String(compra.origin.src) : null,
-          origemSck: compra?.origin?.sck ? String(compra.origin.sck) : null,
-          origemXcod: compra?.origin?.xcod ? String(compra.origin.xcod) : null,
-          ...(aprovadoEmDoEvento
-          ? { aprovadoEm: aprovadoEmDoEvento }
-          : {}),
-          ...(consolidacaoFinanceira.deveAtualizar
-            ? {
-              status: consolidacaoFinanceira.status,
-              ultimoEventoHotmartEm:
-                consolidacaoFinanceira.ultimoEventoHotmartEm,
-              ultimoEventoHotmartId:
-                consolidacaoFinanceira.ultimoEventoHotmartId,
-            }
-            : {}),
-        },
-      });
+      let transacao;
+
+      if (transacaoAtual) {
+        transacao = await tx.hotmartTransaction.update({
+          where: { transacaoCodigo },
+          data: {
+            leadId: lead?.id || null,
+            emailComprador,
+            produtoId,
+            produtoUcode: produto.ucode ? String(produto.ucode) : null,
+            produtoNome,
+            valorBruto,
+            moeda: String(
+              compra?.full_price?.currency_value ||
+              compra?.price?.currency_value ||
+              "BRL",
+            ),
+            formaPagamento: compra?.payment?.type
+              ? String(compra.payment.type)
+              : null,
+            parcelas: Number.isInteger(compra?.payment?.installments_number)
+              ? compra.payment.installments_number
+              : null,
+            origemSrc: compra?.origin?.src ? String(compra.origin.src) : null,
+            origemSck: compra?.origin?.sck ? String(compra.origin.sck) : null,
+            origemXcod: compra?.origin?.xcod ? String(compra.origin.xcod) : null,
+
+            ...(aprovadoEmDoEvento && consolidacaoFinanceira.deveAtualizar
+              ? { aprovadoEm: aprovadoEmDoEvento }
+              : {}),
+
+            ...(consolidacaoFinanceira.deveAtualizar
+              ? {
+                  status: consolidacaoFinanceira.status,
+                  ultimoEventoHotmartEm:
+                    consolidacaoFinanceira.ultimoEventoHotmartEm,
+                  ultimoEventoHotmartId:
+                    consolidacaoFinanceira.ultimoEventoHotmartId,
+                }
+              : {}),
+          },
+        });
+      } else {
+        transacao = await tx.hotmartTransaction.create({
+          data: {
+            transacaoCodigo,
+            leadId: lead?.id || null,
+            emailComprador,
+            produtoId,
+            produtoUcode: produto.ucode ? String(produto.ucode) : null,
+            produtoNome,
+            status: consolidacaoFinanceira.status,
+            ultimoEventoHotmartEm:
+              consolidacaoFinanceira.ultimoEventoHotmartEm,
+            ultimoEventoHotmartId:
+              consolidacaoFinanceira.ultimoEventoHotmartId,
+            valorBruto,
+            moeda: String(
+              compra?.full_price?.currency_value ||
+              compra?.price?.currency_value ||
+              "BRL",
+            ),
+            formaPagamento: compra?.payment?.type
+              ? String(compra.payment.type)
+              : null,
+            parcelas: Number.isInteger(compra?.payment?.installments_number)
+              ? compra.payment.installments_number
+              : null,
+            origemSrc: compra?.origin?.src ? String(compra.origin.src) : null,
+            origemSck: compra?.origin?.sck ? String(compra.origin.sck) : null,
+            origemXcod: compra?.origin?.xcod ? String(compra.origin.xcod) : null,
+            aprovadoEm: aprovadoEmDoEvento,
+          },
+        });
+      }
 
       if (
         traducaoEvento.efeitoDireito ===

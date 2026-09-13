@@ -1,8 +1,8 @@
 // src/app/aluno/(protegido)/comunidade/page.jsx
 'use client';
-
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function ComunidadeAlunosPage() {
   const [alunos, setAlunos] = useState([]);
@@ -40,7 +40,19 @@ export default function ComunidadeAlunosPage() {
             {alunos.map((aluno) => (
               <article key={aluno.id} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6">
                 <div className="flex items-start gap-4">
-                  {aluno.fotoUrl ? <img src={aluno.fotoUrl} alt="" className="h-16 w-16 rounded-full object-cover" /> : <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-800 text-2xl font-black text-[#d89900]">{aluno.nome.charAt(0).toUpperCase()}</div>}
+                  {aluno.fotoUrl ? (
+                    <Image
+                      src={aluno.fotoUrl}
+                      alt={`Foto de ${aluno.nome}`}
+                      width={64}
+                      height={64}
+                      className="h-16 w-16 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-800 text-2xl font-black text-[#d89900]">
+                      {aluno.nome.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <div>
                     <h2 className="text-xl font-bold">{aluno.nome}</h2>
                     {aluno.cidade || aluno.estado ? <p className="text-sm text-zinc-500">{[aluno.cidade, aluno.estado].filter(Boolean).join(' / ')}</p> : null}
