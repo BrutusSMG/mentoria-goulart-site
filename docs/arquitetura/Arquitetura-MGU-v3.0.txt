@@ -1835,7 +1835,7 @@ Validação funcional em homologação:
   encontrados = 0;
   enviados = 0;
   falhas = 0;
-- criado cenário temporário isolado utilizando delivered@resend.dev;
+- criado cenário temporário isolado utilizando e-mail controlado de teste;
 - criado Aluno MANUAL e ATIVO;
 - criada Matricula MANUAL e ATIVA;
 - criada VigenciaMatricula DEFINIDA e ATIVA com término aproximadamente 20 dias no futuro;
@@ -2212,8 +2212,7 @@ Critério de aceite:
 Critério atendido.
 
 E2.2 — Formalizar máquina de tradução Hotmart
-STATUS: IMPLEMENTAÇÃO LOCAL VALIDADA — AGUARDANDO COMMIT/PUSH E PREVIEW
-
+STATUS: HOMOLOGADO EM 12/09/2026
 Princípio central
 
 O estado financeiro de HotmartTransaction e o efeito de um evento sobre o direito de acesso são conceitos distintos.
@@ -2637,6 +2636,197 @@ Eventos antigos recebidos tardiamente não poderão regredir o estado financeiro
 PURCHASE_REFUNDED e PURCHASE_CHARGEBACK continuarão produzindo seu efeito terminal sobre o direito da respectiva transação mesmo quando recebidos fora de ordem.
 
 PURCHASE_APPROVED e PURCHASE_COMPLETE não poderão recriar ou reativar direito já revogado por evento terminal da mesma transação.
+
+Implementação e validação do núcleo de domínio
+
+A máquina central de tradução foi implementada em:
+
+src/lib/hotmart-traducao.js
+
+O webhook em:
+
+src/app/api/webhooks/hotmart/route.js
+
+passou a utilizar essa tradução para separar o estado financeiro consolidado da HotmartTransaction do efeito de domínio aplicado ao direito de acesso.
+
+Durante a homologação foi identificado um erro no processamento de eventos financeiros recebidos fora de ordem.
+
+No cenário:
+
+PURCHASE_REFUNDED mais recente já consolidado
+↓
+PURCHASE_APPROVED com creation_date anterior recebido posteriormente
+
+a função decidirConsolidacaoFinanceiraHotmart retornava corretamente:
+
+deveAtualizar
+= false
+
+Porém, o route.js ainda utilizava upsert em HotmartTransaction e preenchia o bloco create com campos da consolidação que não existiam nesse caminho.
+
+Como consequência, o Prisma validava valores indefinidos no bloco create e o webhook retornava HTTP 500, mesmo com a HotmartTransaction já existente.
+
+A implementação foi corrigida separando explicitamente:
+
+HotmartTransaction inexistente
+→ create;
+
+HotmartTransaction existente
+→ update.
+
+Quando deveAtualizar for false, os campos financeiros consolidados não são alterados.
+
+aprovadoEm também não é sobrescrito por um evento antigo que não tenha autorização para alterar o estado financeiro consolidado.
+
+Após a correção:
+
+* npm run lint executado sem erros ou warnings;
+* npm run build executado com sucesso;
+* alteração publicada na branch homologacao;
+* Preview da Vercel gerado e utilizado na validação funcional.
+
+Validação funcional realizada
+
+Foram validados em homologação os seguintes cenários:
+
+PURCHASE_BILLET_PRINTED
+→ registra o estado financeiro;
+→ não cria Aluno;
+→ não cria Matricula;
+→ não cria VigenciaMatricula.
+
+PURCHASE_APPROVED
+→ registra APPROVED;
+→ provisiona o direito correspondente;
+→ associa Aluno, Matricula e VigenciaMatricula.
+
+PURCHASE_COMPLETE após PURCHASE_APPROVED da mesma transação
+→ consolida COMPLETED;
+→ reutiliza o direito existente;
+→ não cria segunda VigenciaMatricula.
+
+PURCHASE_REFUNDED após direito concedido
+→ consolida REFUNDED quando cronologicamente aplicável;
+→ cancela a VigenciaMatricula originada pela respectiva transação;
+→ preserva Aluno e Matricula.
+
+PURCHASE_CANCELED após direito concedido
+→ consolida CANCELED quando cronologicamente aplicável;
+→ não cancela VigenciaMatricula já legitimamente concedida.
+
+PURCHASE_CHARGEBACK após direito concedido
+→ consolida CHARGEBACK quando cronologicamente aplicável;
+→ cancela somente a VigenciaMatricula originada pela respectiva transação;
+→ preserva Aluno e Matricula.
+
+Evento terminal recebido antes de PURCHASE_APPROVED
+→ registra a ocorrência terminal;
+→ PURCHASE_APPROVED tardio não cria direito;
+→ não cria Aluno ou Matricula vinculados à transação;
+→ não cria VigenciaMatricula;
+→ evento tardio permanece auditado.
+
+Evento financeiro antigo recebido posteriormente
+→ permanece auditado;
+→ não regride o estado financeiro consolidado.
+
+PURCHASE_REFUNDED antigo recebido após PURCHASE_APPROVED mais recente
+→ não regride o financeiro consolidado;
+→ continua produzindo REVOGAR_DIREITO;
+→ cancela a VigenciaMatricula correspondente.
+
+Eventos com mesmo criadoNaHotmartEm e mesmo estado financeiro
+→ não geram CONFLITO_TEMPORAL;
+→ não duplicam direito.
+
+Eventos com mesmo criadoNaHotmartEm e estados financeiros diferentes
+→ HotmartTransaction.status = CONFLITO_TEMPORAL;
+→ HotmartTransaction.ultimoEventoHotmartId = null;
+→ os efeitos sobre o direito continuam sendo avaliados independentemente.
+
+Evento conhecido com criadoNaHotmartEm posterior ao conflito
+→ substitui CONFLITO_TEMPORAL;
+→ volta a definir normalmente status, ultimoEventoHotmartEm e ultimoEventoHotmartId.
+
+Evento não mapeado
+→ permanece auditado;
+→ não cria HotmartTransaction quando não existir estado financeiro explicitamente traduzido;
+→ não utiliza purchase.status como regra implícita;
+→ não concede nem revoga direito.
+
+Evento terminal sem creation_date válido
+→ permanece auditado com criadoNaHotmartEm nulo;
+→ não substitui estado financeiro consolidado que já possua data Hotmart confiável;
+→ continua produzindo REVOGAR_DIREITO;
+→ utiliza o momento técnico de aplicação para canceladaEm e statusAlteradoEm.
+
+Reprocessamento do mesmo hotmartEventId
+→ primeira chamada retorna received = true;
+→ segunda chamada retorna received = true e duplicate = true;
+→ permanece somente um HotmartWebhookEvent;
+→ permanece somente uma VigenciaMatricula para a transação;
+→ nenhum direito adicional é criado.
+
+Isolamento entre múltiplas vigências
+
+Foi validado um cenário real de homologação em que uma mesma Matricula possuía múltiplas VigenciaMatricula originadas por transações diferentes.
+
+Ao aplicar PURCHASE_CHARGEBACK:
+
+→ somente a vigência cuja transacaoOrigemId correspondia à HotmartTransaction do chargeback foi cancelada;
+→ outras vigências da mesma Matricula permaneceram com seus estados próprios;
+→ a Matricula não foi cancelada.
+
+Esse teste confirmou funcionalmente que eventos REVOGAR_DIREITO são isolados pela transação de origem e não operam sobre todas as vigências da matrícula.
+
+Observação sobre os dados utilizados na homologação
+
+Os testes passaram a reutilizar o comprador:
+
+comprador.teste@example.com
+
+Como esse aluno já possuía uma Matricula com outras vigências no banco de homologação, compras posteriores puderam gerar VigenciaMatricula com status AGENDADA em vez de ATIVA.
+
+Esse comportamento é esperado pelas regras de renovação da E1.9 e não representa falha da máquina de tradução Hotmart.
+
+Para a validação da E2.2, os critérios relevantes foram:
+
+* associação correta entre HotmartTransaction e VigenciaMatricula;
+* ausência de duplicação para a mesma transação;
+* preservação das demais vigências;
+* aplicação correta de GARANTIR_DIREITO, REVOGAR_DIREITO e NENHUM_EFEITO_DIREITO;
+* consolidação financeira independente do efeito sobre o direito;
+* preservação da auditoria dos eventos recebidos.
+
+Homologação das integrações externas
+
+A integração pós-venda com o Brevo foi validada em ambiente Preview da branch homologacao.
+
+No fluxo normal de PURCHASE_APPROVED, após a persistência do domínio, o contato foi removido da lista de e-book e incluído na lista de clientes da mentoria.
+
+Também foi executado teste de falha controlada do Brevo por meio de override exclusivo do ambiente Preview. Mesmo com a integração impossibilitada de executar, o webhook respondeu HTTP 200 e permaneceram persistidos HotmartTransaction, HotmartWebhookEvent, Aluno, Matricula e VigenciaMatricula.
+
+A integração de convite de primeiro acesso via Resend também foi validada em ambiente Preview.
+
+Para comprador novo, sem senha e sem convite de primeiro acesso válido, o fluxo criou Aluno, Matricula, VigenciaMatricula e AlunoAccessToken do tipo PRIMEIRO_ACESSO. O convite foi enviado e recebido corretamente.
+
+Durante a homologação foi identificado que NEXT_PUBLIC_ALUNO_URL estava configurada para a raiz do site, fazendo o convite apontar incorretamente para /primeiro-acesso. A rota existente é /aluno/primeiro-acesso.
+
+A variável foi corrigida para utilizar a base da Área do Aluno:
+
+NEXT_PUBLIC_ALUNO_URL=https://mentoria-goulart-site.vercel.app/aluno
+
+Após novo deploy, o convite passou a direcionar corretamente para /aluno/primeiro-acesso. O token foi consumido com sucesso, a senha foi criada, usadoEm foi preenchido e o login do aluno foi validado.
+
+Também foi executado teste de falha controlada do Resend com API key inválida exclusivamente no ambiente Preview. O Resend retornou HTTP 401 com mensagem "API key is invalid", nenhum e-mail foi entregue e, mesmo assim, o webhook respondeu HTTP 200.
+
+Nesse cenário permaneceram persistidos HotmartTransaction APPROVED, HotmartWebhookEvent, Aluno, Matricula, VigenciaMatricula e AlunoAccessToken PRIMEIRO_ACESSO.
+
+A homologação confirmou na prática a regra arquitetural:
+
+BANCO → COMMIT → BREVO / RESEND / OUTRAS INTEGRAÇÕES
+
+Falhas das integrações externas não desfazem alterações válidas já confirmadas no domínio.
 
 Integrações externas
 Falhas de Brevo, Resend ou futuras integrações não deverão desfazer uma alteração de banco já validamente confirmada.
