@@ -2865,6 +2865,37 @@ Isso poderá funcionar usando o PostgreSQL do Neon, sem exigir Redis pago, worke
 Critério de aceite da Etapa 2
 O ciclo Hotmart deverá conseguir refletir corretamente no domínio do MGU os eventos que concedem, mantêm, renovam, suspendem, cancelam ou encerram direitos, sem duplicação e sem tornar Hotmart o centro da arquitetura.
 
+Critério atendido.
+
+Fechamento da Etapa 2
+
+A Etapa 2 foi concluída em homologação.
+
+Resultado consolidado:
+- subetapas E2.1 e E2.2 concluídas;
+- eventos Hotmart atualmente utilizados pelo produto foram inventariados e classificados;
+- Hotmart permanece como origem de eventos e pagamentos, sem substituir o modelo de domínio do MGU;
+- estado financeiro da HotmartTransaction permanece separado do efeito do evento sobre o direito de acesso;
+- concessão e revogação de direito operam sobre VigenciaMatricula vinculada à transação de origem;
+- eventos duplicados não criam direitos ou vigências adicionais;
+- eventos recebidos fora de ordem não regridem indevidamente o estado financeiro consolidado;
+- conflitos temporais entre eventos com a mesma data de origem são tratados explicitamente;
+- eventos não mapeados permanecem seguros por padrão e não produzem efeitos implícitos sobre o direito;
+- eventos terminais continuam podendo produzir revogação do direito mesmo quando não podem alterar o estado financeiro consolidado;
+- reembolso e chargeback afetam somente a vigência originada pela respectiva transação, preservando as demais vigências da matrícula;
+- PURCHASE_CANCELED não revoga automaticamente direito legitimamente concedido;
+- falhas de Brevo e Resend ocorrem após o commit e não desfazem alterações válidas já persistidas no banco;
+- integração pós-venda com Brevo validada em fluxo normal e em cenário de falha controlada;
+- convite de primeiro acesso via Resend validado em fluxo normal e em cenário de falha controlada;
+- criação, consumo e expiração do token de primeiro acesso permaneceram coerentes com o domínio;
+- criação de senha e login do novo aluno foram validados;
+- lint e build foram aprovados;
+- Vercel Preview da branch homologacao foi utilizado na homologação funcional da etapa.
+
+O critério de aceite geral da Etapa 2 foi atendido.
+
+A partir deste ponto, alterações relacionadas a produtos, preços, integrações de produtos, cotações e fundação administrativa pertencem à Etapa 3.
+
 ETAPA 3 — Produtos, preços, cotações e administração
 Objetivo
 Criar um catálogo interno de produtos e melhorar o dashboard administrativo.
