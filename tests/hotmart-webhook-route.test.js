@@ -30,8 +30,24 @@ const txMock = {
   },
   hotmartTransaction: {
     findUnique: transactionFindUniqueMock,
-    upsert: transactionUpsertMock,
-    update: transactionUpdateMock,
+
+    create: vi.fn(async ({ data }) =>
+      transactionUpsertMock({
+        create: data,
+      }),
+    ),
+
+    update: vi.fn(async (args) => {
+      // Atualização posterior para associar aluno/matrícula.
+      if (args?.where?.id) {
+        return transactionUpdateMock(args);
+      }
+
+      // Atualização financeira da transação existente.
+      return transactionUpsertMock({
+        update: args.data,
+      });
+    }),
   },
   vigenciaMatricula: {
     updateMany: vigenciaUpdateManyMock,
