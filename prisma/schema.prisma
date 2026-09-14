@@ -140,6 +140,15 @@ enum VisibilidadePerfil {
   ALUNOS
 }
 
+enum TipoProduto {
+  CURSO
+  EBOOK
+}
+
+enum ProvedorProduto {
+  HOTMART
+}
+
 model Aluno {
   id                String      @id @default(cuid())
   leadId            String?     @unique
@@ -304,6 +313,46 @@ model Depoimento {
   createdAt DateTime @default(now())
 }
 
+// Catálogo comercial interno do MGU.
+// Produto representa a identidade comercial interna e não o identificador de qualquer plataforma externa.
+model Produto {
+  id               String      @id @default(cuid())
+  nome             String
+  slug             String      @unique
+  descricao        String?     @db.Text
+  tipo             TipoProduto
+  ativo            Boolean     @default(true)
+  preco            Decimal?    @db.Decimal(12, 2)
+  precoPromocional Decimal?    @db.Decimal(12, 2)
+  moeda            String      @default("BRL")
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  integracoes       ProdutoIntegracao[]
+  transacoesHotmart HotmartTransaction[]
+
+  @@index([tipo])
+  @@index([ativo])
+}
+
+// Vínculos entre um Produto interno e os identificadores utilizados
+// por provedores externos.
+model ProdutoIntegracao {
+  id         String          @id @default(cuid())
+  produtoId  String
+  provedor   ProvedorProduto
+  externalId String
+  ativo      Boolean         @default(true)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  produto Produto @relation(fields: [produtoId], references: [id], onDelete: Restrict)
+
+  @@unique([provedor, externalId])
+  @@index([produtoId])
+  @@index([ativo])
+}
+
 // Auditoria e idempotência dos eventos recebidos da Hotmart.
 // Não armazena o payload completo para evitar guardar dados sensíveis desnecessários.
 model HotmartWebhookEvent {
@@ -312,6 +361,8 @@ model HotmartWebhookEvent {
   evento            String
   versao            String?
   transacaoCodigo   String?
+  // Identificador externo do produto recebido da Hotmart.
+  // Campo legado/histórico: não representa Produto.id.
   produtoId         String?
   criadoNaHotmartEm DateTime?
   recebidoEm        DateTime  @default(now())
@@ -332,7 +383,11 @@ model HotmartTransaction {
   alunoId               String?
   matriculaId           String?
   emailComprador        String?
+  // Identificador externo do produto recebido da Hotmart.
+  // Campo legado/histórico: não representa Produto.id.
   produtoId             String
+  // Referência opcional à identidade comercial interna do MGU.
+  produtoCatalogoId     String?
   produtoUcode          String?
   produtoNome           String
   status                String
@@ -349,16 +404,18 @@ model HotmartTransaction {
   criadoEm              DateTime  @default(now())
   atualizadoEm          DateTime  @updatedAt
 
-  lead           Lead?              @relation(fields: [leadId], references: [id], onDelete: SetNull)
-  aluno          Aluno?             @relation(fields: [alunoId], references: [id], onDelete: SetNull)
-  matricula      Matricula?         @relation(fields: [matriculaId], references: [id], onDelete: SetNull)
-  vigenciaOrigem VigenciaMatricula? @relation("VigenciaTransacaoOrigem")
+  lead            Lead?              @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  aluno           Aluno?             @relation(fields: [alunoId], references: [id], onDelete: SetNull)
+  matricula       Matricula?         @relation(fields: [matriculaId], references: [id], onDelete: SetNull)
+  vigenciaOrigem  VigenciaMatricula? @relation("VigenciaTransacaoOrigem")
+  produtoCatalogo Produto?           @relation(fields: [produtoCatalogoId], references: [id], onDelete: SetNull)
 
   @@index([leadId])
   @@index([alunoId])
   @@index([matriculaId])
   @@index([emailComprador])
   @@index([produtoId])
+  @@index([produtoCatalogoId])
   @@index([status])
   @@index([criadoEm])
 }
