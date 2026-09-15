@@ -18,6 +18,7 @@ const prismaTransactionMock = vi.fn();
 const provisionarAlunoHotmartMock = vi.fn();
 const moverCompradorParaPosVendaMock = vi.fn();
 const enviarConvitePrimeiroAcessoMock = vi.fn();
+const resolverProdutoIntegracaoMock = vi.fn();
 
 const txMock = {
   lead: {
@@ -75,6 +76,10 @@ vi.mock('@/lib/convite-primeiro-acesso', () => ({
   enviarConvitePrimeiroAcesso: enviarConvitePrimeiroAcessoMock,
 }));
 
+vi.mock('@/lib/produto-catalogo', () => ({
+  resolverProdutoIntegracao: resolverProdutoIntegracaoMock,
+}));
+
 const { POST } = await import(
   '../src/app/api/webhooks/hotmart/route.js'
 );
@@ -99,11 +104,25 @@ describe('POST /api/webhooks/hotmart', () => {
     process.env.HOTMART_SYNC_BREVO = 'false';
 
     webhookFindUniqueMock.mockResolvedValue(null);
+    webhookFindFirstMock.mockResolvedValue(null);
     leadFindUniqueMock.mockResolvedValue(null);
 
     prismaTransactionMock.mockImplementation(async (callback) =>
       callback(txMock),
     );
+
+    resolverProdutoIntegracaoMock.mockResolvedValue({
+      id: 'int-hotmart-123',
+      produtoId: 'prod_garimpo_mentoria',
+      provedor: 'HOTMART',
+      externalId: '123',
+      ativo: true,
+      produto: {
+        id: 'prod_garimpo_mentoria',
+        tipo: 'CURSO',
+        ativo: true,
+      },
+    });
   });
 
   it('cancela somente a vigência originada pela transação reembolsada', async () => {
@@ -935,5 +954,237 @@ describe('POST /api/webhooks/hotmart', () => {
   expect(segundaChamadaUpsert.update).not.toHaveProperty(
     'ultimoEventoHotmartId',
   );
+});
+
+it('registra produto desconhecido sem conceder direito', async () => {
+  const aprovadoEm = new Date('2026-09-14T20:00:00.000Z');
+
+  resolverProdutoIntegracaoMock.mockResolvedValueOnce(null);
+
+  leadFindUniqueMock.mockResolvedValue({
+    id: 'lead-produto-desconhecido',
+  });
+
+  transactionFindUniqueMock.mockResolvedValue(null);
+
+  transactionUpsertMock.mockResolvedValue({
+    id: 'transacao-produto-desconhecido',
+    status: 'APPROVED',
+    aprovadoEm,
+  });
+
+  const request = criarRequest({
+    id: 'evt-produto-desconhecido',
+    event: 'PURCHASE_APPROVED',
+    creation_date: aprovadoEm.getTime(),
+    data: {
+      product: {
+        id: 9999999,
+        name: 'Produto não catalogado',
+      },
+      purchase: {
+        transaction: 'HP-PRODUTO-DESCONHECIDO',
+        status: 'APPROVED',
+        approved_date: aprovadoEm.getTime(),
+        full_price: {
+          value: 100,
+          currency_value: 'BRL',
+        },
+      },
+      buyer: {
+        email: 'desconhecido@example.com',
+        name: 'Comprador Desconhecido',
+      },
+    },
+  });
+
+  const resposta = await POST(request);
+
+  expect(resposta.status).toBe(200);
+
+  expect(resolverProdutoIntegracaoMock).toHaveBeenCalledWith(
+    expect.anything(),
+    {
+      provedor: 'HOTMART',
+      externalId: '9999999',
+    },
+  );
+
+  const chamadaCreate = transactionUpsertMock.mock.calls[0][0];
+
+  expect(chamadaCreate.create).toEqual(
+    expect.objectContaining({
+      produtoId: '9999999',
+      produtoCatalogoId: null,
+    }),
+  );
+
+  expect(provisionarAlunoHotmartMock).not.toHaveBeenCalled();
+  expect(leadUpdateMock).not.toHaveBeenCalled();
+});
+
+it('registra ebook catalogado sem criar matrícula', async () => {
+  const aprovadoEm = new Date('2026-09-14T20:30:00.000Z');
+
+  resolverProdutoIntegracaoMock.mockResolvedValueOnce({
+    id: 'int-hotmart-3019817',
+    produtoId: 'prod_tesouros_escondidos',
+    provedor: 'HOTMART',
+    externalId: '3019817',
+    ativo: true,
+    produto: {
+      id: 'prod_tesouros_escondidos',
+      tipo: 'EBOOK',
+      ativo: true,
+    },
+  });
+
+  leadFindUniqueMock.mockResolvedValue({
+    id: 'lead-ebook',
+  });
+
+  transactionFindUniqueMock.mockResolvedValue(null);
+
+  transactionUpsertMock.mockResolvedValue({
+    id: 'transacao-ebook',
+    status: 'APPROVED',
+    aprovadoEm,
+  });
+
+  const request = criarRequest({
+    id: 'evt-ebook-approved',
+    event: 'PURCHASE_APPROVED',
+    creation_date: aprovadoEm.getTime(),
+    data: {
+      product: {
+        id: 3019817,
+        name: 'TESOUROS ESCONDIDOS',
+      },
+      purchase: {
+        transaction: 'HP-EBOOK-1',
+        status: 'APPROVED',
+        approved_date: aprovadoEm.getTime(),
+        full_price: {
+          value: 49.7,
+          currency_value: 'BRL',
+        },
+      },
+      buyer: {
+        email: 'ebook@example.com',
+        name: 'Comprador Ebook',
+      },
+    },
+  });
+
+  const resposta = await POST(request);
+
+  expect(resposta.status).toBe(200);
+
+  expect(resolverProdutoIntegracaoMock).toHaveBeenCalledWith(
+    expect.anything(),
+    {
+      provedor: 'HOTMART',
+      externalId: '3019817',
+    },
+  );
+
+  const chamadaCreate = transactionUpsertMock.mock.calls[0][0];
+
+  expect(chamadaCreate.create).toEqual(
+    expect.objectContaining({
+      produtoId: '3019817',
+      produtoCatalogoId: 'prod_tesouros_escondidos',
+    }),
+  );
+
+  expect(provisionarAlunoHotmartMock).not.toHaveBeenCalled();
+  expect(leadUpdateMock).not.toHaveBeenCalled();
+});
+
+it('provisiona curso catalogado sem marcar compra de mentoria', async () => {
+  const aprovadoEm = new Date('2026-09-14T21:00:00.000Z');
+
+  resolverProdutoIntegracaoMock.mockResolvedValueOnce({
+    id: 'int-hotmart-8343505',
+    produtoId: 'prod_garimpo_sem_mentoria',
+    provedor: 'HOTMART',
+    externalId: '8343505',
+    ativo: true,
+    produto: {
+      id: 'prod_garimpo_sem_mentoria',
+      tipo: 'CURSO',
+      ativo: true,
+    },
+  });
+
+  leadFindUniqueMock.mockResolvedValue({
+    id: 'lead-curso-sem-mentoria',
+  });
+
+  transactionFindUniqueMock.mockResolvedValue(null);
+
+  transactionUpsertMock.mockResolvedValue({
+    id: 'transacao-curso-sem-mentoria',
+    status: 'APPROVED',
+    aprovadoEm,
+  });
+
+  provisionarAlunoHotmartMock.mockResolvedValue({
+    alunoId: 'aluno-sem-mentoria',
+    matriculaId: 'matricula-sem-mentoria',
+    vigenciaId: 'vigencia-sem-mentoria',
+    conviteNovo: false,
+    conviteToken: null,
+  });
+
+  const request = criarRequest({
+    id: 'evt-curso-sem-mentoria',
+    event: 'PURCHASE_APPROVED',
+    creation_date: aprovadoEm.getTime(),
+    data: {
+      product: {
+        id: 8343505,
+        name: 'Curso Garimpo Urbano (Sem Mentoria)',
+      },
+      purchase: {
+        transaction: 'HP-CURSO-SEM-MENTORIA',
+        status: 'APPROVED',
+        approved_date: aprovadoEm.getTime(),
+        full_price: {
+          value: 997,
+          currency_value: 'BRL',
+        },
+      },
+      buyer: {
+        email: 'curso@example.com',
+        name: 'Comprador Curso',
+      },
+    },
+  });
+
+  const resposta = await POST(request);
+
+  expect(resposta.status).toBe(200);
+
+  const chamadaCreate = transactionUpsertMock.mock.calls[0][0];
+
+  expect(chamadaCreate.create).toEqual(
+    expect.objectContaining({
+      produtoId: '8343505',
+      produtoCatalogoId: 'prod_garimpo_sem_mentoria',
+    }),
+  );
+
+  expect(provisionarAlunoHotmartMock).toHaveBeenCalledTimes(1);
+
+  expect(provisionarAlunoHotmartMock).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.objectContaining({
+      produtoId: '8343505',
+      transacaoOrigemId: 'transacao-curso-sem-mentoria',
+    }),
+  );
+
+  expect(leadUpdateMock).not.toHaveBeenCalled();
 });
 });

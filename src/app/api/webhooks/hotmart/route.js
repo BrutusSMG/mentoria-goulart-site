@@ -12,6 +12,7 @@ import {
   EVENTOS_TERMINAIS_DIREITO_HOTMART,
   traduzirEventoHotmart,
 } from '@/lib/hotmart-traducao';
+import { resolverProdutoIntegracao } from '@/lib/produto-catalogo';
 
 export const runtime = "nodejs";
 
@@ -183,6 +184,23 @@ export async function POST(req) {
   let podeGarantirDireito = compraConfirmada;
   try {
     await prisma.$transaction(async (tx) => {
+      const integracaoProduto = await resolverProdutoIntegracao(tx, {
+        provedor: 'HOTMART',
+        externalId: produtoId,
+      });
+
+      const produtoCatalogoId = integracaoProduto?.produtoId || null;
+
+      if (!integracaoProduto) {
+        podeGarantirDireito = false;
+      }
+
+      const produtoGeraMatricula =
+        integracaoProduto?.produto?.tipo === 'CURSO';
+
+      const produtoEhMentoria =
+        integracaoProduto?.produto?.id === 'prod_garimpo_mentoria';
+
       const lead = emailComprador
         ? await tx.lead.findUnique({
           where: { email: emailComprador },
@@ -249,6 +267,9 @@ export async function POST(req) {
             leadId: lead?.id || null,
             emailComprador,
             produtoId,
+            ...(produtoCatalogoId
+              ? { produtoCatalogoId }
+              : {}),
             produtoUcode: produto.ucode ? String(produto.ucode) : null,
             produtoNome,
             valorBruto,
@@ -289,6 +310,7 @@ export async function POST(req) {
             leadId: lead?.id || null,
             emailComprador,
             produtoId,
+            produtoCatalogoId,
             produtoUcode: produto.ucode ? String(produto.ucode) : null,
             produtoNome,
             status: consolidacaoFinanceira.status,
@@ -334,7 +356,7 @@ export async function POST(req) {
         });
       }
 
-      if (lead && podeGarantirDireito) {
+      if (lead && podeGarantirDireito && produtoEhMentoria) {
         await tx.lead.update({
           where: { id: lead.id },
           data: {
@@ -344,7 +366,11 @@ export async function POST(req) {
         });
       }
 
-      if (podeGarantirDireito && emailComprador) {
+      if (
+        podeGarantirDireito
+        && produtoGeraMatricula
+        && emailComprador
+      ) {
         if (!transacao.aprovadoEm) {
           throw new Error(
             'Compra confirmada sem data de aprovação da Hotmart.',
