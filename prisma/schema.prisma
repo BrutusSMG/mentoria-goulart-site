@@ -149,6 +149,33 @@ enum ProvedorProduto {
   HOTMART
 }
 
+enum TipoDireitoProduto {
+  AREA_ALUNO
+  COMUNIDADE
+  MENTORIA
+  CONTEUDO_PRODUTO
+  ECOSSISTEMA
+}
+
+enum NivelEcossistema {
+  NENHUM
+  BASICO
+  COMPLETO
+  PREMIUM
+}
+
+enum OrigemDireitoConcedido {
+  HOTMART
+  LEGADO
+  MANUAL
+}
+
+enum StatusDireitoConcedido {
+  ATIVO
+  REVOGADO
+  EXPIRADO
+}
+
 model Aluno {
   id                String      @id @default(cuid())
   leadId            String?     @unique
@@ -163,11 +190,12 @@ model Aluno {
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
-  lead              Lead?                @relation(fields: [leadId], references: [id], onDelete: SetNull)
-  matriculas        Matricula[]
-  transacoesHotmart HotmartTransaction[]
-  perfil            PerfilAluno?
-  tokensAcesso      AlunoAccessToken[]
+  lead               Lead?                @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  matriculas         Matricula[]
+  transacoesHotmart  HotmartTransaction[]
+  perfil             PerfilAluno?
+  tokensAcesso       AlunoAccessToken[]
+  direitosConcedidos DireitoConcedido[]
 
   @@index([status])
   @@index([origem])
@@ -330,6 +358,7 @@ model Produto {
 
   integracoes       ProdutoIntegracao[]
   transacoesHotmart HotmartTransaction[]
+  direitos          ProdutoDireito[]
 
   @@index([tipo])
   @@index([ativo])
@@ -351,6 +380,54 @@ model ProdutoIntegracao {
   @@unique([provedor, externalId])
   @@index([produtoId])
   @@index([ativo])
+}
+
+// Politica comercial de direitos configurados para um Produto.
+model ProdutoDireito {
+  id           String             @id @default(cuid())
+  produtoId    String
+  tipo         TipoDireitoProduto
+  nivel        NivelEcossistema?
+  configuracao Json?
+  ativo        Boolean            @default(true)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  produto    Produto            @relation(fields: [produtoId], references: [id], onDelete: Restrict)
+  concessoes DireitoConcedido[]
+
+  @@unique([produtoId, tipo])
+  @@index([tipo])
+  @@index([ativo])
+}
+
+// Concessao concreta produzida por uma origem comercial.
+// Aluno representa temporariamente a conta/credencial; Matricula permanece educacional.
+model DireitoConcedido {
+  id                String                 @id @default(cuid())
+  alunoId           String
+  produtoDireitoId  String
+  transacaoOrigemId String?
+  origem            OrigemDireitoConcedido
+  status            StatusDireitoConcedido @default(ATIVO)
+  concedidoEm       DateTime
+  iniciaEm          DateTime
+  expiraEm          DateTime?
+  revogadoEm        DateTime?
+  statusAlteradoEm  DateTime               @default(now())
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  aluno           Aluno               @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+  produtoDireito  ProdutoDireito      @relation(fields: [produtoDireitoId], references: [id], onDelete: Restrict)
+  transacaoOrigem HotmartTransaction? @relation(fields: [transacaoOrigemId], references: [id], onDelete: Restrict)
+
+  @@unique([produtoDireitoId, transacaoOrigemId])
+  @@index([alunoId])
+  @@index([produtoDireitoId])
+  @@index([transacaoOrigemId])
+  @@index([status])
+  @@index([alunoId, status])
 }
 
 // Auditoria e idempotência dos eventos recebidos da Hotmart.
@@ -404,11 +481,12 @@ model HotmartTransaction {
   criadoEm              DateTime  @default(now())
   atualizadoEm          DateTime  @updatedAt
 
-  lead            Lead?              @relation(fields: [leadId], references: [id], onDelete: SetNull)
-  aluno           Aluno?             @relation(fields: [alunoId], references: [id], onDelete: SetNull)
-  matricula       Matricula?         @relation(fields: [matriculaId], references: [id], onDelete: SetNull)
-  vigenciaOrigem  VigenciaMatricula? @relation("VigenciaTransacaoOrigem")
-  produtoCatalogo Produto?           @relation(fields: [produtoCatalogoId], references: [id], onDelete: SetNull)
+  lead               Lead?              @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  aluno              Aluno?             @relation(fields: [alunoId], references: [id], onDelete: SetNull)
+  matricula          Matricula?         @relation(fields: [matriculaId], references: [id], onDelete: SetNull)
+  vigenciaOrigem     VigenciaMatricula? @relation("VigenciaTransacaoOrigem")
+  produtoCatalogo    Produto?           @relation(fields: [produtoCatalogoId], references: [id], onDelete: SetNull)
+  direitosConcedidos DireitoConcedido[]
 
   @@index([leadId])
   @@index([alunoId])
