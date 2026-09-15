@@ -55,20 +55,49 @@ Essa etapa tornou o processo de entrada do aluno mais consistente e preparou a p
 
 ---
 
-## Etapa 3 — Produtos, preços, cotações e administração
+## Etapa 3 — Produtos, acessos, preços, cotações e administração
 
 **Status: em desenvolvimento.**
 
-A terceira etapa tem como objetivo ampliar a capacidade administrativa e comercial do MGU.
+A terceira etapa amplia a capacidade comercial e administrativa do MGU e
+prepara a plataforma para diferentes tipos de produtos e formas de acesso.
 
-Entre os principais focos estão:
+### Catálogo interno de produtos — concluído em homologação
 
-- criação de um catálogo interno de produtos;
-- centralização das informações comerciais exibidas pela plataforma;
+A primeira entrega da Etapa 3 estruturou um catálogo interno de produtos,
+separando a identidade dos produtos do MGU das integrações utilizadas pelas
+plataformas externas de venda.
+
+Essa evolução permite:
+
+- organizar os produtos em uma estrutura única;
+- relacionar um produto a uma ou mais integrações externas;
+- reconhecer com segurança qual produto foi adquirido;
+- preservar o histórico das transações já existentes;
+- tratar cursos e outros tipos de produtos de forma independente;
+- preparar a plataforma para novas regras de acesso sem depender
+  diretamente da matrícula do aluno.
+
+A implementação foi homologada antes da continuidade da etapa.
+
+### Próximo foco — direitos e acessos
+
+A próxima evolução será a separação entre produto adquirido, matrícula
+educacional e direitos de utilização dos diferentes recursos do MGU.
+
+Isso permitirá que produtos distintos ofereçam combinações diferentes de:
+
+- acesso à Área do Aluno;
+- participação na Comunidade;
+- níveis de utilização do Ecossistema MGU;
+- serviços e benefícios específicos.
+
+Também permanecem como focos da Etapa 3:
+
 - evolução do gerenciamento de preços;
 - melhoria das ferramentas administrativas;
 - consolidação das informações de cotações utilizadas pelo projeto;
-- preparação da plataforma para diferentes tipos de produtos e formas de acesso.
+- integração visual e homologação final da etapa.
 
 Essa estrutura permitirá que o MGU cresça sem depender de regras comerciais espalhadas por diferentes partes da aplicação.
 
