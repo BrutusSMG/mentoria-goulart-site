@@ -7,6 +7,7 @@ import { timingSafeEqual } from "crypto";
 import { moverCompradorParaPosVenda } from '@/lib/brevo';
 import {
   garantirContaHotmart,
+  garantirConvitePrimeiroAcesso,
   provisionarAlunoHotmart,
 } from '@/lib/provisionar-aluno';
 import {
@@ -429,6 +430,24 @@ export async function POST(req) {
           });
 
           alunoId = conta?.id || null;
+
+          if (conta) {
+            const convite = await garantirConvitePrimeiroAcesso(
+              tx,
+              conta,
+            );
+
+            if (
+              convite.conviteNovo
+              && convite.conviteToken
+            ) {
+              conviteParaEnviar = {
+                email: emailComprador,
+                nome: nomeDoAluno,
+                token: convite.conviteToken,
+              };
+            }
+          }
         }
 
         if (alunoId) {

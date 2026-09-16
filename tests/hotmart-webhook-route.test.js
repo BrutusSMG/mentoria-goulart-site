@@ -16,6 +16,7 @@ const vigenciaUpdateManyMock = vi.fn();
 const prismaTransactionMock = vi.fn();
 
 const garantirContaHotmartMock = vi.fn();
+const garantirConvitePrimeiroAcessoMock = vi.fn();
 const provisionarAlunoHotmartMock = vi.fn();
 const concederDireitosProdutoHotmartMock = vi.fn();
 const revogarDireitosPorTransacaoMock = vi.fn();
@@ -69,6 +70,8 @@ vi.mock('@/lib/prisma', () => ({
 
 vi.mock('@/lib/provisionar-aluno', () => ({
   garantirContaHotmart: garantirContaHotmartMock,
+  garantirConvitePrimeiroAcesso:
+    garantirConvitePrimeiroAcessoMock,
   provisionarAlunoHotmart: provisionarAlunoHotmartMock,
 }));
 
@@ -112,6 +115,11 @@ describe('POST /api/webhooks/hotmart', () => {
 
     garantirContaHotmartMock.mockResolvedValue({
       id: 'aluno-conta-hotmart',
+    });
+
+    garantirConvitePrimeiroAcessoMock.mockResolvedValue({
+      conviteToken: null,
+      conviteNovo: false,
     });
     concederDireitosProdutoHotmartMock.mockResolvedValue([]);
     revogarDireitosPorTransacaoMock.mockResolvedValue({
@@ -1103,6 +1111,11 @@ it('registra ebook catalogado sem criar matrícula', async () => {
     aprovadoEm,
   });
 
+  garantirConvitePrimeiroAcessoMock.mockResolvedValueOnce({
+    conviteToken: 'token-portal-ebook',
+    conviteNovo: true,
+  });
+
   const request = criarRequest({
     id: 'evt-ebook-approved',
     event: 'PURCHASE_APPROVED',
@@ -1180,7 +1193,31 @@ it('registra ebook catalogado sem criar matrícula', async () => {
     },
   );
 
-  expect(enviarConvitePrimeiroAcessoMock).not.toHaveBeenCalled();
+  expect(
+    garantirConvitePrimeiroAcessoMock,
+  ).toHaveBeenCalledTimes(1);
+
+  expect(
+    garantirConvitePrimeiroAcessoMock,
+  ).toHaveBeenCalledWith(
+    txMock,
+    {
+      id: 'aluno-conta-hotmart',
+    },
+  );
+
+  expect(
+    enviarConvitePrimeiroAcessoMock,
+  ).toHaveBeenCalledTimes(1);
+
+  expect(
+    enviarConvitePrimeiroAcessoMock,
+  ).toHaveBeenCalledWith({
+    email: 'ebook@example.com',
+    nome: 'Comprador Ebook',
+    token: 'token-portal-ebook',
+  });
+
   expect(leadUpdateMock).not.toHaveBeenCalled();
 });
 
