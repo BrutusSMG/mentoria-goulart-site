@@ -80,26 +80,46 @@ Essa evolução permite:
 
 A implementação foi homologada antes da continuidade da etapa.
 
-### Próximo foco — direitos e acessos
+### E3.2 — Direitos e acessos concluída em homologação
 
-A próxima evolução será a separação entre produto adquirido, matrícula
-educacional e direitos de utilização dos diferentes recursos do MGU.
+A separação entre produto adquirido, matrícula educacional e direitos de uso
+foi implementada e homologada.
 
-Isso permitirá que produtos distintos ofereçam combinações diferentes de:
+A plataforma agora possui políticas de direitos por produto, concessões
+vinculadas à transação de origem, direitos binários independentes e níveis
+cumulativos do Ecossistema MGU.
 
-- acesso à Área do Aluno;
-- participação na Comunidade;
-- níveis de utilização do Ecossistema MGU;
-- serviços e benefícios específicos.
+Direitos oriundos de várias compras podem coexistir. Quando uma compra é
+reembolsada ou sofre chargeback, somente os direitos daquela origem são
+revogados, preservando direitos válidos provenientes de outros produtos.
+
+A Área do Aluno continua vinculada à matrícula e à vigência educacional.
+Produtos como e-books pagos podem criar uma conta no Portal MGU e conceder
+acesso à Comunidade e ao Ecossistema sem criar matrícula.
+
+Também foi criada a base de autorização para módulos e recursos do
+Ecossistema de acordo com o nível mínimo exigido.
+
+Durante a homologação foi corrigida uma regressão de estado financeiro:
+uma aprovação recebida depois de REFUNDED ou CHARGEBACK continua auditada,
+mas não reabre o estado terminal nem recria direitos ou vigências.
+
+A E3.2 foi encerrada em homologação com 188 testes automatizados aprovados,
+schema Prisma válido e build de produção concluído com 58/58 páginas.
+O fechamento técnico está registrado no commit `cc3d00a`.
+
+### Próximo foco — administração e preços
+
+A próxima evolução será a E3.3, com foco em utilizar o catálogo interno como
+fonte administrativa, centralizar preços exibidos pelo MGU e reduzir regras
+comerciais espalhadas pela aplicação, preservando os valores históricos das
+transações.
 
 Também permanecem como focos da Etapa 3:
 
-- evolução do gerenciamento de preços;
-- melhoria das ferramentas administrativas;
 - consolidação das informações de cotações utilizadas pelo projeto;
-- integração visual e homologação final da etapa.
-
-Essa estrutura permitirá que o MGU cresça sem depender de regras comerciais espalhadas por diferentes partes da aplicação.
+- integração visual;
+- regressão e homologação final da etapa.
 
 ---
 
