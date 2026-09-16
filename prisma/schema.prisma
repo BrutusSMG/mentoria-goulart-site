@@ -430,6 +430,42 @@ model DireitoConcedido {
   @@index([alunoId, status])
 }
 
+// Modulos internos do Ecossistema MGU.
+// nivelMinimo define o menor nivel efetivo necessario para acesso.
+model EcoModulo {
+  id          String           @id @default(cuid())
+  nome        String
+  slug        String           @unique
+  ativo       Boolean          @default(true)
+  nivelMinimo NivelEcossistema
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  recursos EcoModuloRecurso[]
+
+  @@index([ativo])
+  @@index([nivelMinimo])
+}
+
+// Recursos pertencentes a um modulo do Ecossistema.
+// O codigo identifica o recurso dentro do respectivo modulo.
+model EcoModuloRecurso {
+  id          String           @id @default(cuid())
+  moduloId    String
+  codigo      String
+  nivelMinimo NivelEcossistema
+  ativo       Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  modulo EcoModulo @relation(fields: [moduloId], references: [id], onDelete: Restrict)
+
+  @@unique([moduloId, codigo])
+  @@index([moduloId])
+  @@index([ativo])
+  @@index([nivelMinimo])
+}
+
 // Auditoria e idempotência dos eventos recebidos da Hotmart.
 // Não armazena o payload completo para evitar guardar dados sensíveis desnecessários.
 model HotmartWebhookEvent {
