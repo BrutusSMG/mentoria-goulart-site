@@ -191,7 +191,8 @@ export async function POST(req) {
   let conviteParaEnviar = null;
   let podeGarantirDireito = compraConfirmada;
   try {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(
+      async (tx) => {
       const integracaoProduto = await resolverProdutoIntegracao(tx, {
         provedor: 'HOTMART',
         externalId: produtoId,
@@ -468,7 +469,12 @@ export async function POST(req) {
         }
       }
 
-    });
+      },
+      {
+        maxWait: 5000,
+        timeout: 30000,
+      },
+    );
 
     if (
       podeGarantirDireito

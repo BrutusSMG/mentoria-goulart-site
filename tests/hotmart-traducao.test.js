@@ -226,4 +226,57 @@ describe('decidirConsolidacaoFinanceiraHotmart', () => {
       deveAtualizar: false,
     });
   });
+
+  it('nao reabre estado financeiro terminal com aprovacao posterior', () => {
+    const refundEm = new Date('2026-09-11T13:00:00.000Z');
+    const aprovacaoTardiaEm = new Date(
+      '2026-09-11T14:00:00.000Z',
+    );
+
+    expect(
+      decidirConsolidacaoFinanceiraHotmart({
+        traducaoEvento: traduzirEventoHotmart(
+          'PURCHASE_APPROVED',
+        ),
+        hotmartEventId: 'evt-approved-tardio',
+        criadoNaHotmartEm: aprovacaoTardiaEm,
+        transacaoAtual: {
+          status: 'REFUNDED',
+          ultimoEventoHotmartEm: refundEm,
+          ultimoEventoHotmartId: 'evt-refunded',
+        },
+      }),
+    ).toEqual({
+      deveAtualizar: false,
+    });
+  });
+
+
+  it('permite consolidar evento terminal posterior sobre outro terminal', () => {
+    const refundEm = new Date('2026-09-11T13:00:00.000Z');
+    const chargebackEm = new Date(
+      '2026-09-11T14:00:00.000Z',
+    );
+
+    expect(
+      decidirConsolidacaoFinanceiraHotmart({
+        traducaoEvento: traduzirEventoHotmart(
+          'PURCHASE_CHARGEBACK',
+        ),
+        hotmartEventId: 'evt-chargeback',
+        criadoNaHotmartEm: chargebackEm,
+        transacaoAtual: {
+          status: 'REFUNDED',
+          ultimoEventoHotmartEm: refundEm,
+          ultimoEventoHotmartId: 'evt-refunded',
+        },
+      }),
+    ).toEqual({
+      deveAtualizar: true,
+      status: 'CHARGEBACK',
+      ultimoEventoHotmartEm: chargebackEm,
+      ultimoEventoHotmartId: 'evt-chargeback',
+    });
+  });
+
 });

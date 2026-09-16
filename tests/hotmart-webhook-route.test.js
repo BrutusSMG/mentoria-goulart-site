@@ -134,8 +134,15 @@ describe('POST /api/webhooks/hotmart', () => {
     webhookFindFirstMock.mockResolvedValue(null);
     leadFindUniqueMock.mockResolvedValue(null);
 
-    prismaTransactionMock.mockImplementation(async (callback) =>
-      callback(txMock),
+    prismaTransactionMock.mockImplementation(
+      async (callback, options) => {
+        expect(options).toEqual({
+          maxWait: 5000,
+          timeout: 30000,
+        });
+
+        return callback(txMock);
+      },
     );
 
     resolverProdutoIntegracaoMock.mockResolvedValue({
@@ -233,7 +240,7 @@ describe('POST /api/webhooks/hotmart', () => {
 
   it('bloqueia aprovação tardia quando já existe evento terminal da mesma transação', async () => {
     const aprovadoEm = new Date('2026-09-12T00:00:00.000Z');
-    const momentoAprovacao = new Date('2026-09-12T00:05:00.000Z');
+    const momentoAprovacao = new Date('2026-09-12T02:00:00.000Z');
 
     process.env.HOTMART_SYNC_BREVO = 'true';
 
