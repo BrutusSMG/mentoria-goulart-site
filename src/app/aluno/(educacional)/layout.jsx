@@ -1,4 +1,4 @@
-// src/app/aluno/(protegido)/layout.jsx
+// src/app/aluno/(educacional)/layout.jsx
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 
