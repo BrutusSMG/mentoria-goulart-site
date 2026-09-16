@@ -12,6 +12,57 @@ function normalizarEmail(email) {
   return valor || null;
 }
 
+export async function garantirContaHotmart(tx, {
+  leadId = null,
+  email,
+  nome,
+  whatsapp = null,
+}) {
+  const emailNormalizado = normalizarEmail(email);
+
+  if (!emailNormalizado) {
+    return null;
+  }
+
+  const alunoExistente = await tx.aluno.findUnique({
+    where: { email: emailNormalizado },
+    select: {
+      id: true,
+      nome: true,
+      leadId: true,
+      senhaHash: true,
+      status: true,
+    },
+  });
+
+  const statusAluno =
+    alunoExistente &&
+    ['SUSPENSO', 'INATIVO'].includes(alunoExistente.status)
+      ? alunoExistente.status
+      : 'ATIVO';
+
+  return tx.aluno.upsert({
+    where: { email: emailNormalizado },
+    update: {
+      nome: nome || alunoExistente?.nome || 'Aluno',
+      ...(whatsapp ? { whatsapp } : {}),
+      ...(alunoExistente?.leadId || leadId
+        ? { leadId: alunoExistente?.leadId || leadId }
+        : {}),
+      status: statusAluno,
+      origem: 'HOTMART',
+    },
+    create: {
+      leadId: leadId || null,
+      nome: nome || 'Aluno',
+      email: emailNormalizado,
+      whatsapp: whatsapp || null,
+      status: 'ATIVO',
+      origem: 'HOTMART',
+    },
+  });
+}
+
 export async function provisionarAlunoHotmart(tx, {
   leadId = null,
   email,
@@ -70,40 +121,11 @@ export async function provisionarAlunoHotmart(tx, {
     };
   }
 
-  const alunoExistente = await tx.aluno.findUnique({
-    where: { email: emailNormalizado },
-    select: {
-      id: true,
-      nome: true,
-      leadId: true,
-      senhaHash: true,
-      status: true,
-    },
-  });
-
-  const statusAluno =
-    alunoExistente &&
-    ['SUSPENSO', 'INATIVO'].includes(alunoExistente.status)
-      ? alunoExistente.status
-      : 'ATIVO';
-
-  const aluno = await tx.aluno.upsert({
-    where: { email: emailNormalizado },
-    update: {
-      nome: nome || alunoExistente?.nome || 'Aluno',
-      ...(whatsapp ? { whatsapp } : {}),
-      ...(alunoExistente?.leadId || leadId ? { leadId: alunoExistente?.leadId || leadId } : {}),
-      status: statusAluno,
-      origem: 'HOTMART',
-    },
-    create: {
-      leadId: leadId || null,
-      nome: nome || 'Aluno',
-      email: emailNormalizado,
-      whatsapp: whatsapp || null,
-      status: 'ATIVO',
-      origem: 'HOTMART',
-    },
+  const aluno = await garantirContaHotmart(tx, {
+    leadId,
+    email: emailNormalizado,
+    nome,
+    whatsapp,
   });
 
   const matricula = await tx.matricula.upsert({
