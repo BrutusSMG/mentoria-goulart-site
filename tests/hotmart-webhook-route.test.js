@@ -15,7 +15,10 @@ const vigenciaUpdateManyMock = vi.fn();
 
 const prismaTransactionMock = vi.fn();
 
+const garantirContaHotmartMock = vi.fn();
 const provisionarAlunoHotmartMock = vi.fn();
+const concederDireitosProdutoHotmartMock = vi.fn();
+const revogarDireitosPorTransacaoMock = vi.fn();
 const moverCompradorParaPosVendaMock = vi.fn();
 const enviarConvitePrimeiroAcessoMock = vi.fn();
 const resolverProdutoIntegracaoMock = vi.fn();
@@ -65,7 +68,15 @@ vi.mock('@/lib/prisma', () => ({
 }));
 
 vi.mock('@/lib/provisionar-aluno', () => ({
+  garantirContaHotmart: garantirContaHotmartMock,
   provisionarAlunoHotmart: provisionarAlunoHotmartMock,
+}));
+
+vi.mock('@/lib/direitos-produto', () => ({
+  concederDireitosProdutoHotmart:
+    concederDireitosProdutoHotmartMock,
+  revogarDireitosPorTransacao:
+    revogarDireitosPorTransacaoMock,
 }));
 
 vi.mock('@/lib/brevo', () => ({
@@ -98,6 +109,14 @@ function criarRequest(payload) {
 describe('POST /api/webhooks/hotmart', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    garantirContaHotmartMock.mockResolvedValue({
+      id: 'aluno-conta-hotmart',
+    });
+    concederDireitosProdutoHotmartMock.mockResolvedValue([]);
+    revogarDireitosPorTransacaoMock.mockResolvedValue({
+      count: 0,
+    });
 
     process.env.HOTMART_HOTTOK = 'segredo-teste';
     process.env.HOTMART_ALLOWED_PRODUCT_IDS = '';
@@ -189,6 +208,14 @@ describe('POST /api/webhooks/hotmart', () => {
         statusAlteradoEm: momentoEvento,
       },
     });
+
+    expect(revogarDireitosPorTransacaoMock).toHaveBeenCalledWith(
+      txMock,
+      {
+        transacaoOrigemId: 'transacao-1',
+        revogadoEm: momentoEvento,
+      },
+    );
 
     expect(provisionarAlunoHotmartMock).not.toHaveBeenCalled();
     expect(leadUpdateMock).not.toHaveBeenCalled();
@@ -513,6 +540,14 @@ describe('POST /api/webhooks/hotmart', () => {
       },
     });
 
+    expect(revogarDireitosPorTransacaoMock).toHaveBeenCalledWith(
+      txMock,
+      {
+        transacaoOrigemId: 'transacao-chargeback',
+        revogadoEm: momentoEvento,
+      },
+    );
+
     expect(provisionarAlunoHotmartMock).not.toHaveBeenCalled();
     expect(leadUpdateMock).not.toHaveBeenCalled();
     expect(moverCompradorParaPosVendaMock).not.toHaveBeenCalled();
@@ -583,6 +618,7 @@ describe('POST /api/webhooks/hotmart', () => {
     expect(provisionarAlunoHotmartMock).not.toHaveBeenCalled();
     expect(leadUpdateMock).not.toHaveBeenCalled();
     expect(vigenciaUpdateManyMock).not.toHaveBeenCalled();
+    expect(revogarDireitosPorTransacaoMock).not.toHaveBeenCalled();
     expect(moverCompradorParaPosVendaMock).not.toHaveBeenCalled();
     expect(enviarConvitePrimeiroAcessoMock).not.toHaveBeenCalled();
   });
@@ -669,6 +705,16 @@ describe('POST /api/webhooks/hotmart', () => {
       },
     });
 
+    expect(concederDireitosProdutoHotmartMock).toHaveBeenCalledWith(
+      txMock,
+      {
+        alunoId: 'aluno-1',
+        produtoId: 'prod_garimpo_mentoria',
+        transacaoOrigemId: 'transacao-complete',
+        concedidoEm: aprovadoEm,
+      },
+    );
+
     expect(vigenciaUpdateManyMock).not.toHaveBeenCalled();
     expect(enviarConvitePrimeiroAcessoMock).not.toHaveBeenCalled();
   });
@@ -726,6 +772,8 @@ describe('POST /api/webhooks/hotmart', () => {
 
     expect(webhookFindFirstMock).not.toHaveBeenCalled();
     expect(provisionarAlunoHotmartMock).not.toHaveBeenCalled();
+    expect(garantirContaHotmartMock).not.toHaveBeenCalled();
+    expect(concederDireitosProdutoHotmartMock).not.toHaveBeenCalled();
     expect(leadUpdateMock).not.toHaveBeenCalled();
     expect(vigenciaUpdateManyMock).not.toHaveBeenCalled();
     expect(moverCompradorParaPosVendaMock).not.toHaveBeenCalled();
@@ -939,6 +987,8 @@ describe('POST /api/webhooks/hotmart', () => {
   });
 
   expect(provisionarAlunoHotmartMock).not.toHaveBeenCalled();
+  expect(garantirContaHotmartMock).not.toHaveBeenCalled();
+  expect(concederDireitosProdutoHotmartMock).not.toHaveBeenCalled();
   expect(leadUpdateMock).not.toHaveBeenCalled();
   expect(enviarConvitePrimeiroAcessoMock).not.toHaveBeenCalled();
 
@@ -1020,6 +1070,8 @@ it('registra produto desconhecido sem conceder direito', async () => {
   );
 
   expect(provisionarAlunoHotmartMock).not.toHaveBeenCalled();
+  expect(garantirContaHotmartMock).not.toHaveBeenCalled();
+  expect(concederDireitosProdutoHotmartMock).not.toHaveBeenCalled();
   expect(leadUpdateMock).not.toHaveBeenCalled();
 });
 
@@ -1098,6 +1150,37 @@ it('registra ebook catalogado sem criar matrícula', async () => {
   );
 
   expect(provisionarAlunoHotmartMock).not.toHaveBeenCalled();
+
+  expect(garantirContaHotmartMock).toHaveBeenCalledTimes(1);
+  expect(garantirContaHotmartMock).toHaveBeenCalledWith(
+    txMock,
+    expect.objectContaining({
+      leadId: 'lead-ebook',
+      email: 'ebook@example.com',
+      nome: 'Comprador Ebook',
+    }),
+  );
+
+  expect(transactionUpdateMock).toHaveBeenCalledWith({
+    where: {
+      id: 'transacao-ebook',
+    },
+    data: {
+      alunoId: 'aluno-conta-hotmart',
+    },
+  });
+
+  expect(concederDireitosProdutoHotmartMock).toHaveBeenCalledWith(
+    txMock,
+    {
+      alunoId: 'aluno-conta-hotmart',
+      produtoId: 'prod_tesouros_escondidos',
+      transacaoOrigemId: 'transacao-ebook',
+      concedidoEm: aprovadoEm,
+    },
+  );
+
+  expect(enviarConvitePrimeiroAcessoMock).not.toHaveBeenCalled();
   expect(leadUpdateMock).not.toHaveBeenCalled();
 });
 
@@ -1184,6 +1267,28 @@ it('provisiona curso catalogado sem marcar compra de mentoria', async () => {
       transacaoOrigemId: 'transacao-curso-sem-mentoria',
     }),
   );
+
+  expect(garantirContaHotmartMock).not.toHaveBeenCalled();
+
+  expect(concederDireitosProdutoHotmartMock).toHaveBeenCalledWith(
+    txMock,
+    {
+      alunoId: 'aluno-sem-mentoria',
+      produtoId: 'prod_garimpo_sem_mentoria',
+      transacaoOrigemId: 'transacao-curso-sem-mentoria',
+      concedidoEm: aprovadoEm,
+    },
+  );
+
+  expect(transactionUpdateMock).toHaveBeenCalledWith({
+    where: {
+      id: 'transacao-curso-sem-mentoria',
+    },
+    data: {
+      alunoId: 'aluno-sem-mentoria',
+      matriculaId: 'matricula-sem-mentoria',
+    },
+  });
 
   expect(leadUpdateMock).not.toHaveBeenCalled();
 });

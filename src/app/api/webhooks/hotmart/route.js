@@ -5,7 +5,14 @@ import { prisma } from "@/lib/prisma";
 import { enviarConvitePrimeiroAcesso } from '@/lib/convite-primeiro-acesso';
 import { timingSafeEqual } from "crypto";
 import { moverCompradorParaPosVenda } from '@/lib/brevo';
-import { provisionarAlunoHotmart } from '@/lib/provisionar-aluno';
+import {
+  garantirContaHotmart,
+  provisionarAlunoHotmart,
+} from '@/lib/provisionar-aluno';
+import {
+  concederDireitosProdutoHotmart,
+  revogarDireitosPorTransacao,
+} from '@/lib/direitos-produto';
 import {
   decidirConsolidacaoFinanceiraHotmart,
   EFEITO_DIREITO_HOTMART,
@@ -354,6 +361,11 @@ export async function POST(req) {
             statusAlteradoEm: momentoRevogacao,
           },
         });
+
+        await revogarDireitosPorTransacao(tx, {
+          transacaoOrigemId: transacao.id,
+          revogadoEm: momentoRevogacao,
+        });
       }
 
       if (lead && podeGarantirDireito && produtoEhMentoria) {
@@ -368,7 +380,7 @@ export async function POST(req) {
 
       if (
         podeGarantirDireito
-        && produtoGeraMatricula
+        && integracaoProduto
         && emailComprador
       ) {
         if (!transacao.aprovadoEm) {
@@ -377,34 +389,63 @@ export async function POST(req) {
           );
         }
 
-        const provisionamento = await provisionarAlunoHotmart(tx, {
-          leadId: lead?.id || null,
-          email: emailComprador,
-          nome: nomeDoAluno,
-          whatsapp: whatsappDoAluno,
-          produtoId,
-          produtoUcode: produto.ucode ? String(produto.ucode) : null,
-          produtoNome,
-          transacaoOrigemId: transacao.id,
-          aprovadoEm: transacao.aprovadoEm,
-        });
+        let alunoId = null;
+        let matriculaId = null;
 
-        if (provisionamento) {
+        if (produtoGeraMatricula) {
+          const provisionamento = await provisionarAlunoHotmart(tx, {
+            leadId: lead?.id || null,
+            email: emailComprador,
+            nome: nomeDoAluno,
+            whatsapp: whatsappDoAluno,
+            produtoId,
+            produtoUcode: produto.ucode ? String(produto.ucode) : null,
+            produtoNome,
+            transacaoOrigemId: transacao.id,
+            aprovadoEm: transacao.aprovadoEm,
+          });
+
+          if (provisionamento) {
+            alunoId = provisionamento.alunoId;
+            matriculaId = provisionamento.matriculaId;
+
+            if (
+              provisionamento.conviteNovo
+              && provisionamento.conviteToken
+            ) {
+              conviteParaEnviar = {
+                email: emailComprador,
+                nome: nomeDoAluno,
+                token: provisionamento.conviteToken,
+              };
+            }
+          }
+        } else {
+          const conta = await garantirContaHotmart(tx, {
+            leadId: lead?.id || null,
+            email: emailComprador,
+            nome: nomeDoAluno,
+            whatsapp: whatsappDoAluno,
+          });
+
+          alunoId = conta?.id || null;
+        }
+
+        if (alunoId) {
           await tx.hotmartTransaction.update({
             where: { id: transacao.id },
             data: {
-              alunoId: provisionamento.alunoId,
-              matriculaId: provisionamento.matriculaId,
+              alunoId,
+              ...(matriculaId ? { matriculaId } : {}),
             },
           });
 
-          if (provisionamento.conviteNovo && provisionamento.conviteToken) {
-            conviteParaEnviar = {
-              email: emailComprador,
-              nome: nomeDoAluno,
-              token: provisionamento.conviteToken,
-            };
-          }
+          await concederDireitosProdutoHotmart(tx, {
+            alunoId,
+            produtoId: produtoCatalogoId,
+            transacaoOrigemId: transacao.id,
+            concedidoEm: transacao.aprovadoEm,
+          });
         }
       }
 
