@@ -75,7 +75,7 @@ export default function PrimeiroAcessoAlunoPage() {
           Primeiro acesso
         </h1>
         <p className="mt-3 text-center text-sm leading-relaxed text-zinc-400">
-          Crie a senha que você usará para entrar na área do aluno.
+          Crie a senha que você usará para entrar no Portal Garimpo Urbano.
         </p>
 
         <form onSubmit={concluirPrimeiroAcesso} className="mt-7 flex flex-col gap-5">

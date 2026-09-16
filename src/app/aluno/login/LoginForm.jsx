@@ -39,7 +39,7 @@ export default function LoginAlunoPage() {
 
     if (sessao?.user?.tipoConta !== 'ALUNO') {
       setStatus('error');
-      setErro('Esta conta não possui acesso à área do aluno.');
+      setErro('Esta conta não possui acesso ao Portal Garimpo Urbano.');
       return;
     }
 
@@ -57,10 +57,10 @@ export default function LoginAlunoPage() {
           Garimpo Urbano
         </p>
         <h1 className="mt-2 text-center text-3xl font-black">
-          Área do aluno
+          Portal Garimpo Urbano
         </h1>
         <p className="mt-3 text-center text-sm leading-relaxed text-zinc-400">
-          Entre para acessar seus materiais, comunidade e atalhos do curso.
+          Entre para acessar os recursos liberados para a sua conta.
         </p>
 
         {primeiroAcessoConcluido ? (
@@ -72,7 +72,7 @@ export default function LoginAlunoPage() {
         <form onSubmit={handleLogin} className="mt-7 flex flex-col gap-5">
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-zinc-300">
-              E-mail da compra
+              E-mail da conta
             </span>
             <span className="relative block">
               <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" aria-hidden="true" />
@@ -122,7 +122,7 @@ export default function LoginAlunoPage() {
             className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#d89900] to-[#F7FA83] px-4 py-3 text-base font-black text-black transition-all hover:shadow-[0_0_30px_rgba(216,153,0,0.5)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {status === 'loading' ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : null}
-            {status === 'loading' ? 'ENTRANDO...' : 'ENTRAR NA ÁREA DO ALUNO'}
+            {status === 'loading' ? 'ENTRANDO...' : 'ENTRAR NO PORTAL'}
           </button>
           <div className="mt-4 space-y-2 text-center">
             <a
@@ -141,18 +141,6 @@ export default function LoginAlunoPage() {
           </div>
 
         </form>
-
-        <div className="mt-6 space-y-2 text-center text-sm text-zinc-400">
-          <p>O acesso às aulas continua sendo feito na Hotmart.</p>
-          <a
-            href="https://consumer.hotmart.com"
-            target="_blank"
-            rel="noreferrer"
-            className="font-semibold text-[#F7FA83] underline-offset-4 hover:underline"
-          >
-            Acessar aulas na Hotmart
-          </a>
-        </div>
 
         <Link
           href="/login"

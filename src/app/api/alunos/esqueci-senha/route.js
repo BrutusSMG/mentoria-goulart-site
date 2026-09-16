@@ -94,18 +94,20 @@ export async function POST(request) {
         ? `${baseAlunoConfigurado}/redefinir-senha?token=${encodeURIComponent(token )}`
         : `${baseFallback}/aluno/redefinir-senha?token=${encodeURIComponent(token )}`;
       const resend = new Resend(apiKey);
-      const nomeSeguro = escaparHtml(aluno.nome || 'Aluno');
+      const saudacao = aluno.nome
+        ? `Olá, ${escaparHtml(aluno.nome)}.`
+        : 'Olá.';
 
       try {
         await resend.emails.send({
           from: 'Prof. Goulart <contato@mentoriagarimpourbano.com.br>',
           to: email,
-          subject: 'Recuperação de senha — Área do Aluno',
+          subject: 'Recuperação de senha — Portal Garimpo Urbano',
           html: `
             <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#fff;padding:32px;border-radius:16px">
               <p style="color:#d89900;font-weight:bold;letter-spacing:2px">GARIMPO URBANO</p>
-              <h1>Olá, ${nomeSeguro}.</h1>
-              <p>Recebemos uma solicitação para criar uma nova senha para a sua conta na Área do Aluno.</p>
+              <h1>${saudacao}</h1>
+              <p>Recebemos uma solicitação para criar uma nova senha para a sua conta no Portal Garimpo Urbano.</p>
               <p><a href="${link}" style="display:inline-block;background:#d89900;color:#000;padding:14px 20px;border-radius:8px;text-decoration:none;font-weight:bold">CRIAR NOVA SENHA</a></p>
               <p style="color:#a3a3a3;font-size:13px">Este link expira em 1 hora e pode ser usado uma única vez. Se você não fez esta solicitação, ignore este e-mail.</p>
             </div>

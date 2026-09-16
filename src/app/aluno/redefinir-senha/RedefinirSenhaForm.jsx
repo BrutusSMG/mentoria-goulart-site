@@ -69,7 +69,7 @@ export default function RedefinirSenhaForm() {
       <section className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl sm:p-8">
         <p className="text-center text-xs font-bold uppercase tracking-[0.2em] text-[#d89900]">Garimpo Urbano</p>
         <h1 className="mt-2 text-center text-3xl font-black">Criar nova senha</h1>
-        <p className="mt-3 text-center text-sm leading-relaxed text-zinc-400">Escolha uma nova senha para acessar a Área do Aluno.</p>
+        <p className="mt-3 text-center text-sm leading-relaxed text-zinc-400">Escolha uma nova senha para acessar o Portal Garimpo Urbano.</p>
 
         <form onSubmit={redefinirSenha} className="mt-7 flex flex-col gap-5">
           <label className="block">
