@@ -63,6 +63,58 @@ export async function garantirContaHotmart(tx, {
   });
 }
 
+export async function garantirConvitePrimeiroAcesso(
+  tx,
+  aluno,
+  agora = new Date(),
+) {
+  if (
+    !aluno?.id
+    || aluno.status !== 'ATIVO'
+    || aluno.senhaHash
+  ) {
+    return {
+      conviteToken: null,
+      conviteNovo: false,
+    };
+  }
+
+  const conviteExistente = await tx.alunoAccessToken.findFirst({
+    where: {
+      alunoId: aluno.id,
+      tipo: TIPO_PRIMEIRO_ACESSO,
+      usadoEm: null,
+      expiraEm: { gt: agora },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (conviteExistente) {
+    return {
+      conviteToken: null,
+      conviteNovo: false,
+    };
+  }
+
+  const conviteToken = gerarTokenPrimeiroAcesso();
+
+  await tx.alunoAccessToken.create({
+    data: {
+      alunoId: aluno.id,
+      tokenHash: hashTokenAcesso(conviteToken),
+      tipo: TIPO_PRIMEIRO_ACESSO,
+      expiraEm: calcularExpiracaoConvitePrimeiroAcesso(agora),
+    },
+  });
+
+  return {
+    conviteToken,
+    conviteNovo: true,
+  };
+}
+
 export async function provisionarAlunoHotmart(tx, {
   leadId = null,
   email,
@@ -165,37 +217,15 @@ export async function provisionarAlunoHotmart(tx, {
     create: { alunoId: aluno.id },
   });
 
-  let conviteToken = null;
-
-  if (!aluno.senhaHash && aluno.status === 'ATIVO') {
-    const conviteExistente = await tx.alunoAccessToken.findFirst({
-      where: {
-        alunoId: aluno.id,
-        tipo: TIPO_PRIMEIRO_ACESSO,
-        usadoEm: null,
-        expiraEm: { gt: new Date() },
-      },
-      select: { id: true },
-    });
-
-    if (!conviteExistente) {
-      conviteToken = gerarTokenPrimeiroAcesso();
-      await tx.alunoAccessToken.create({
-        data: {
-          alunoId: aluno.id,
-          tokenHash: hashTokenAcesso(conviteToken),
-          tipo: TIPO_PRIMEIRO_ACESSO,
-          expiraEm: calcularExpiracaoConvitePrimeiroAcesso(),
-        },
-      });
-    }
-  }
+  const convite = await garantirConvitePrimeiroAcesso(
+    tx,
+    aluno,
+  );
 
   return {
     alunoId: aluno.id,
     matriculaId: matricula.id,
     vigenciaId: vigencia?.id || null,
-    conviteToken,
-    conviteNovo: Boolean(conviteToken),
+    ...convite,
   };
 }
