@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   alunoTemAcessoAtivo,
+  alunoTemContaAtiva,
   vigenciaPermiteAcesso,
 } from '../src/lib/acesso-aluno';
 
@@ -298,5 +299,57 @@ describe('alunoTemAcessoAtivo', () => {
         id: true,
       },
     });
+  });
+});
+
+describe('alunoTemContaAtiva', () => {
+  it('nega conta sem alunoId sem consultar o banco', async () => {
+    const db = {
+      aluno: {
+        findFirst: vi.fn(),
+      },
+    };
+
+    await expect(
+      alunoTemContaAtiva('', db),
+    ).resolves.toBe(false);
+
+    expect(db.aluno.findFirst).not.toHaveBeenCalled();
+  });
+
+  it('permite conta ativa sem exigir matricula', async () => {
+    const db = {
+      aluno: {
+        findFirst: vi.fn().mockResolvedValue({
+          id: 'aluno-ebook',
+        }),
+      },
+    };
+
+    await expect(
+      alunoTemContaAtiva('aluno-ebook', db),
+    ).resolves.toBe(true);
+
+    expect(db.aluno.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 'aluno-ebook',
+        status: 'ATIVO',
+      },
+      select: {
+        id: true,
+      },
+    });
+  });
+
+  it('nega conta que nao esteja ativa', async () => {
+    const db = {
+      aluno: {
+        findFirst: vi.fn().mockResolvedValue(null),
+      },
+    };
+
+    await expect(
+      alunoTemContaAtiva('aluno-inativo', db),
+    ).resolves.toBe(false);
   });
 });
