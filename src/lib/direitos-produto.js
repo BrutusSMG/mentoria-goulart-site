@@ -19,6 +19,12 @@ const TIPOS_DIREITO_BINARIO = new Set([
   'CONTEUDO_PRODUTO',
 ]);
 
+const NIVEIS_MINIMOS_ECOSSISTEMA = new Set([
+  'BASICO',
+  'COMPLETO',
+  'PREMIUM',
+]);
+
 function normalizarId(valor) {
   return String(valor || '').trim();
 }
@@ -376,5 +382,140 @@ export async function nivelAcessoEcossistema(
     concessoes.map(
       (concessao) => concessao.produtoDireito?.nivel,
     ),
+  );
+}
+
+export function nivelEcossistemaPermite(
+  nivelAtual,
+  nivelMinimo,
+) {
+  if (!NIVEIS_MINIMOS_ECOSSISTEMA.has(nivelMinimo)) {
+    return false;
+  }
+
+  const rankAtual = RANK_NIVEL_ECOSSISTEMA.get(nivelAtual);
+  const rankMinimo =
+    RANK_NIVEL_ECOSSISTEMA.get(nivelMinimo);
+
+  if (
+    typeof rankAtual !== 'number' ||
+    typeof rankMinimo !== 'number'
+  ) {
+    return false;
+  }
+
+  return rankAtual >= rankMinimo;
+}
+
+export async function alunoPodeAcessarEcoModulo(
+  alunoId,
+  moduloSlug,
+  agora = new Date(),
+  db = prisma,
+) {
+  const id = normalizarId(alunoId);
+  const slug = normalizarId(moduloSlug);
+
+  if (!id || !slug) {
+    return false;
+  }
+
+  if (!dataValida(agora)) {
+    throw new TypeError('Data de consulta invalida.');
+  }
+
+  const modulo = await db.ecoModulo.findUnique({
+    where: {
+      slug,
+    },
+    select: {
+      ativo: true,
+      nivelMinimo: true,
+    },
+  });
+
+  if (
+    !modulo?.ativo ||
+    !NIVEIS_MINIMOS_ECOSSISTEMA.has(modulo.nivelMinimo)
+  ) {
+    return false;
+  }
+
+  const nivelAtual = await nivelAcessoEcossistema(
+    id,
+    agora,
+    db,
+  );
+
+  return nivelEcossistemaPermite(
+    nivelAtual,
+    modulo.nivelMinimo,
+  );
+}
+
+export async function alunoPodeAcessarEcoRecurso(
+  alunoId,
+  moduloSlug,
+  recursoCodigo,
+  agora = new Date(),
+  db = prisma,
+) {
+  const id = normalizarId(alunoId);
+  const slug = normalizarId(moduloSlug);
+  const codigo = normalizarId(recursoCodigo);
+
+  if (!id || !slug || !codigo) {
+    return false;
+  }
+
+  if (!dataValida(agora)) {
+    throw new TypeError('Data de consulta invalida.');
+  }
+
+  const recurso = await db.ecoModuloRecurso.findFirst({
+    where: {
+      codigo,
+      ativo: true,
+      modulo: {
+        slug,
+        ativo: true,
+      },
+    },
+    select: {
+      nivelMinimo: true,
+      modulo: {
+        select: {
+          nivelMinimo: true,
+        },
+      },
+    },
+  });
+
+  if (
+    !recurso ||
+    !NIVEIS_MINIMOS_ECOSSISTEMA.has(
+      recurso.nivelMinimo,
+    ) ||
+    !NIVEIS_MINIMOS_ECOSSISTEMA.has(
+      recurso.modulo?.nivelMinimo,
+    )
+  ) {
+    return false;
+  }
+
+  const nivelMinimoEfetivo = maiorNivelEcossistema([
+    recurso.modulo.nivelMinimo,
+    recurso.nivelMinimo,
+  ]);
+
+  const nivelAtual = await nivelAcessoEcossistema(
+    id,
+    agora,
+    db,
+  );
+
+  return nivelEcossistemaPermite(
+    nivelAtual,
+    nivelMinimoEfetivo,
   );
 }
