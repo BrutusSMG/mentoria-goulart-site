@@ -12,6 +12,7 @@ import {
   GraduationCap,
   PanelLeftClose,
   PanelLeftOpen,
+  Package,
   ReceiptText,
   Users,
 } from "lucide-react";
@@ -21,6 +22,7 @@ const ICONES = {
   dashboard: BarChart3,
   leads: Users,
   transacoes: ReceiptText,
+  produtos: Package,
   usuarios: Users,
   sucatas: Database,
   depoimentos: FileText,
