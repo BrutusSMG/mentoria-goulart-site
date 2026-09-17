@@ -7,7 +7,10 @@ import DownsellPopup from './DownsellPopup';
 
 const EXIT_INTENT_KEY = 'garimpo_urbano_exit_intent_shown';
 
-const ExitIntentHandler = () => {
+const ExitIntentHandler = ({
+  precoDownsell,
+  moedaDownsell = 'BRL',
+}) => {
   const [showPopup, setShowPopup] = useState(false);
   const pathname = usePathname();
 
@@ -52,9 +55,11 @@ const ExitIntentHandler = () => {
 
   // Passamos a função setShowPopup para o componente filho poder alterar o estado
   return (
-    <DownsellPopup 
-      show={showPopup} 
-      onClose={() => setShowPopup(false)} 
+    <DownsellPopup
+      show={showPopup}
+      onClose={() => setShowPopup(false)}
+      preco={precoDownsell}
+      moeda={moedaDownsell}
     />
   );
 };

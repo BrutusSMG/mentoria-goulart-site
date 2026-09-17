@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Check, Package } from 'lucide-react';
 import { trackInitiateCheckout } from '@/utils/tracking';
 import { captureUtms, getUtms } from '@/utils/utm';
+import { formatarPrecoProduto } from '@/lib/preco-produto';
 
 const HOTMART_CHECKOUT_URL = 'https://go.hotmart.com/J105438092D?dp=1&src=brevo-email-5';
 
@@ -19,7 +20,17 @@ function montarCheckoutComUtms( ) {
   return url.toString();
 }
 
-const Offer = () => {
+const Offer = ({ preco, moeda = 'BRL' }) => {
+  const precoFormatado =
+    formatarPrecoProduto(preco, moeda)
+    || 'Preço não informado';
+
+  const valorTracking =
+    preco === null
+    || preco === undefined
+    || String(preco).trim() === ''
+      ? null
+      : Number(preco);
 
   function handleCheckout(event) {
     event.preventDefault();
@@ -28,7 +39,13 @@ const Offer = () => {
     captureUtms();
 
     // Dispara o evento Meta antes da navegação para a Hotmart.
-    trackInitiateCheckout('Curso Garimpo Urbano com Mentoria', 2497);
+    if (Number.isFinite(valorTracking)) {
+      trackInitiateCheckout(
+        'Curso Garimpo Urbano com Mentoria',
+        valorTracking,
+        moeda,
+      );
+    }
 
     // Leva para a Hotmart com UTM + src, sem expor o e-mail do Lead.
     window.location.assign(montarCheckoutComUtms());
@@ -64,9 +81,11 @@ const Offer = () => {
           <div className="mb-8">
             <p className="mb-2 text-lg text-white">Investimento</p>
             <p className="text-5xl font-extrabold text-green-500 sm:text-7xl md:text-8xl">
-              12x de R$258,25
+              {precoFormatado}
             </p>
-            <p className="mt-2 text-lg text-white">ou R$2.497,00 à vista</p>
+            <p className="mt-2 text-lg text-white">
+              Consulte as condições de parcelamento no checkout.
+            </p>
           </div>
 
           <div className="mt-10">

@@ -15,19 +15,27 @@ export const trackLead = (origem) =>
 export const trackContact = () =>
   trackEvent('Contact', { content_name: 'WhatsApp' });
 
-export const trackViewContent = (nome, valor) =>
+export const trackViewContent = (
+  nome,
+  valor,
+  moeda = 'BRL',
+) =>
   trackEvent('ViewContent', {
     content_name: nome,
     content_category: 'pagina_vendas',
     value: valor,
-    currency: 'BRL',
+    currency: moeda,
   });
 
-export const trackInitiateCheckout = (oferta, valor) =>
+export const trackInitiateCheckout = (
+  oferta,
+  valor,
+  moeda = 'BRL',
+) =>
   trackEvent('InitiateCheckout', {
     content_name: oferta,
     value: valor,
-    currency: 'BRL',
+    currency: moeda,
   });
 
 export const trackCompleteRegistration = () =>

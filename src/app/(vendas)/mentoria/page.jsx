@@ -14,24 +14,74 @@ import Faq from '@/components/mentoria/Faq';
 import Author from '@/components/mentoria/Author';
 import Opportunity from '@/components/mentoria/Opportunity';
 import VideoTestimonials from '@/components/mentoria/VideoTestimonials';
+import ExitIntentHandler from '@/components/shared/ExitIntentHandler';
+import { prisma } from '@/lib/prisma';
 
-export default function Home() {
+export default async function Home() {
+  const produtos = await prisma.produto.findMany({
+    where: {
+      id: {
+        in: [
+          'prod_garimpo_mentoria',
+          'prod_garimpo_sem_mentoria',
+        ],
+      },
+    },
+    select: {
+      id: true,
+      preco: true,
+      moeda: true,
+    },
+  });
+
+  const produtosPorId = Object.fromEntries(
+    produtos.map((produto) => [
+      produto.id,
+      {
+        preco: produto.preco?.toString() ?? null,
+        moeda: produto.moeda,
+      },
+    ]),
+  );
+
+  const mentoria =
+    produtosPorId.prod_garimpo_mentoria ?? {
+      preco: null,
+      moeda: 'BRL',
+    };
+
+  const semMentoria =
+    produtosPorId.prod_garimpo_sem_mentoria ?? {
+      preco: null,
+      moeda: 'BRL',
+    };
+
   return (
     <main>
-      <TrackViewContent />
+      <TrackViewContent
+        preco={mentoria.preco}
+        moeda={mentoria.moeda}
+      />
       <Hero />
       <Promessa />
       <Opportunity />
       <Testimonials />
       <Author />
       <Audience />
-      <Learning />  
+      <Learning />
       <Bonus />
       <Urgency />
-      <Offer />      
+      <Offer
+        preco={mentoria.preco}
+        moeda={mentoria.moeda}
+      />
       <Guarantee />
       <VideoTestimonials />
       <Faq />
+      <ExitIntentHandler
+        precoDownsell={semMentoria.preco}
+        moedaDownsell={semMentoria.moeda}
+      />
     </main>
   );
 }

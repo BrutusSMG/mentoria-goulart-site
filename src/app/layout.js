@@ -3,7 +3,6 @@
 import { Geist } from "next/font/google";
 import { Suspense } from "react";
 import "./globals.css";
-import ExitIntentHandler from "@/components/shared/ExitIntentHandler";
 import Header from "@/components/shared/Header"; 
 import Navbar from "@/components/shared/Navbar"; 
 import Footer from "@/components/shared/Footer";
@@ -100,7 +99,6 @@ export default async function RootLayout({ children }) {
             {children}
           </main>
         </LayoutShell>
-        <ExitIntentHandler />
       </body>
     </html>
    );
