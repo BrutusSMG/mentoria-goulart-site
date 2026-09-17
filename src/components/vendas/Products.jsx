@@ -3,74 +3,82 @@
 import Link from 'next/link';
 import { BookOpen, GraduationCap, Star } from 'lucide-react';
 
+import { formatarPrecoProduto } from '@/lib/preco-produto';
+
 // Array com todos os produtos para facilitar a manutenção
 const productsList = [
   {
-    id: 1,
+    produtoId: 'prod_garimpo_mentoria',
     title: 'Curso Garimpo Urbano com Mentoria',
     type: 'Curso Premium',
-    price: 'R$ 2.497,00',
     icon: <GraduationCap className="h-8 w-8 text-yellow-400" />,
     highlight: true, // Flag para destacar este produto
     link: '/mentoria', // Link para a página de vendas que já criamos
   },
   {
-    id: 2,
+    produtoId: 'prod_garimpo_sem_mentoria',
     title: 'Curso Garimpo Urbano (Sem Mentoria)',
     type: 'Curso Online',
-    price: 'R$ 997,00',
     icon: <GraduationCap className="h-8 w-8 text-yellow-500" />,
     highlight: false,
     link: 'https://go.hotmart.com/U107226996B?dp=1',
   },
   {
-    id: 3,
+    produtoId: 'prod_curso_eletrodeposicao',
     title: 'Curso de Eletrodeposição em Joias e Semi-Joias',
     type: 'Curso Online',
-    price: 'R$ 147,00',
     icon: <GraduationCap className="h-8 w-8 text-yellow-500" />,
     highlight: false,
     link: 'https://go.hotmart.com/H106605361V?dp=1',
   },
   {
-    id: 4,
+    produtoId: 'prod_guia_definitivo',
     title: 'Guia Definitivo do Garimpo Urbano',
     type: 'E-book',
-    price: 'R$ 198,00',
     icon: <BookOpen className="h-8 w-8 text-blue-400" />,
     highlight: false,
     link: 'https://go.hotmart.com/B106605360L?dp=1',
   },
   {
-    id: 5,
+    produtoId: 'prod_recuperacao_metais',
     title: 'Recuperação de Metais Preciosos de Resíduos de Oficinas',
     type: 'E-book',
-    price: 'R$ 198,00',
     icon: <BookOpen className="h-8 w-8 text-blue-400" />,
     highlight: false,
     link: 'https://go.hotmart.com/V106605378M?dp=1',
   },
   {
-    id: 6,
+    produtoId: 'prod_tesouros_escondidos',
     title: 'TESOUROS ESCONDIDOS - Extração e Refino de Ouro e Prata',
     type: 'E-book',
-    price: 'R$ 49,70',
     icon: <BookOpen className="h-8 w-8 text-blue-400" />,
     highlight: false,
     link: 'https://go.hotmart.com/F106605366M?dp=1',
   },
   {
-    id: 7,
+    produtoId: 'prod_ebook_eletrodeposicao',
     title: 'ELETRODEPOSIÇÃO - Galvanoplastia para a Indústria de Joias',
     type: 'E-book',
-    price: 'R$ 47,00',
     icon: <BookOpen className="h-8 w-8 text-blue-400" />,
     highlight: false,
     link: 'https://go.hotmart.com/Q106605376S?dp=1',
   },
 ];
 
-const Products = () => {
+const Products = ({ precosPorProduto = {} }) => {
+  const produtosComPreco = productsList.map((produto) => {
+    const dadosPreco = precosPorProduto[produto.produtoId];
+
+    return {
+      ...produto,
+      price:
+        formatarPrecoProduto(
+          dadosPreco?.preco,
+          dadosPreco?.moeda,
+        ) || 'Pre\u00e7o n\u00e3o informado',
+    };
+  });
+
   return (
     <section className="bg-black py-20 px-4" id="produtos">
       <div className="container mx-auto max-w-6xl">
@@ -87,9 +95,9 @@ const Products = () => {
 
         {/* Grid de Produtos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {productsList.map((product) => (
+          {produtosComPreco.map((product) => (
             <div 
-              key={product.id} 
+              key={product.produtoId}
               className={`relative flex flex-col bg-gray-900 rounded-2xl p-8 transition-transform duration-300 hover:-translate-y-2 ${
                 product.highlight 
                   ? 'border-2 border-yellow-500 shadow-2xl shadow-yellow-500/20 lg:scale-105 z-10' 
