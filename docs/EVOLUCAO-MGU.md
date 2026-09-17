@@ -108,18 +108,35 @@ A E3.2 foi encerrada em homologação com 188 testes automatizados aprovados,
 schema Prisma válido e build de produção concluído com 58/58 páginas.
 O fechamento técnico está registrado no commit `cc3d00a`.
 
-### Próximo foco — administração e preços
+### E3.3 — Administração e preços concluída em homologação
 
-A próxima evolução será a E3.3, com foco em utilizar o catálogo interno como
-fonte administrativa, centralizar preços exibidos pelo MGU e reduzir regras
-comerciais espalhadas pela aplicação, preservando os valores históricos das
-transações.
+O catálogo interno passou a ser utilizado como fonte dos preços correntes
+exibidos pelo MGU nas áreas definidas para esta etapa.
 
-Também permanecem como focos da Etapa 3:
+A evolução incluiu:
 
-- consolidação das informações de cotações utilizadas pelo projeto;
-- integração visual;
-- regressão e homologação final da etapa.
+- centralização dos preços públicos dos produtos no catálogo;
+- administração controlada do preço corrente pelo painel administrativo;
+- separação entre preços atuais e valores históricos das vendas;
+- utilização do preço do catálogo na oferta da mentoria e no downsell;
+- alinhamento dos eventos de acompanhamento comercial ao valor corrente do produto;
+- remoção dos principais preços comerciais fixos dessas telas.
+
+As condições de parcelamento continuam sendo informadas pelo checkout,
+evitando que a plataforma apresente valores de parcela não modelados no catálogo.
+
+A E3.3 foi validada funcionalmente em homologação e no Preview antes da
+continuidade da etapa.
+
+### Próximo foco — consolidação das cotações
+
+A próxima evolução será a E3.4, dedicada à consolidação das
+cotações utilizadas pelo projeto, com preservação de origem e unidade dos
+dados, tratamento explícito de falhas de coleta e remoção de valores inventados
+em situações de indisponibilidade.
+
+Depois disso, a Etapa 3 seguirá para integração visual, regressão e
+homologação final.
 
 ---
 
