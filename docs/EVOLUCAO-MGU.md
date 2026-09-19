@@ -128,15 +128,30 @@ evitando que a plataforma apresente valores de parcela não modelados no catálo
 A E3.3 foi validada funcionalmente em homologação e no Preview antes da
 continuidade da etapa.
 
-### Próximo foco — consolidação das cotações
+### E3.4 — Consolidação das cotações concluída em homologação
 
-A próxima evolução será a E3.4, dedicada à consolidação das
-cotações utilizadas pelo projeto, com preservação de origem e unidade dos
-dados, tratamento explícito de falhas de coleta e remoção de valores inventados
-em situações de indisponibilidade.
+A plataforma passou a utilizar um modelo consolidado de cotações, com
+registro individual por metal e preservação da origem, unidade, moeda
+e data de referência dos valores coletados.
 
-Depois disso, a Etapa 3 seguirá para integração visual, regressão e
-homologação final.
+A evolução incluiu:
+
+- coleta independente das cotações, permitindo registrar os resultados
+  disponíveis mesmo quando um dos ativos apresenta falha;
+- tratamento explícito de cotações parciais, indisponíveis ou com erro;
+- cálculo dos valores em reais por grama no backend;
+- disponibilização dos dados consolidados pela API de cotações;
+- renovação do ticker da página inicial, com painel de detalhes
+  responsivo e informações sobre fonte e atualização;
+- remoção da apresentação de valores fixos como substitutos de
+  cotações indisponíveis.
+
+O ródio permanece indicado como indisponível até que seja integrada
+uma fonte de dados adequada.
+
+A E3.4 foi validada funcionalmente em homologação. A publicação em
+produção será realizada posteriormente, mediante preparação e
+validação da migração do banco de dados.
 
 ---
 
