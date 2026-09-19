@@ -1,200 +1,39 @@
-// src/components/homepage/HomepageHero.jsx
-"use client";
+﻿// src/components/homepage/HomepageHero.jsx
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 
-// ✅ Componente extraído para FORA do HomepageHero (resolve o erro "Cannot create components during render")
-const CotacaoItems = ({ cotacoes, formatarDolar, formatarMetal, gerarTooltip }) => (
-  <div className="flex gap-12 px-6 items-center w-max">
-    <span className="text-gray-300 font-medium text-sm">
-      Dólar:{' '}
-      <strong className="text-green-400">
-        {formatarDolar(cotacoes?.dolar)}
-      </strong>
-    </span>
+import CotacoesTicker from './CotacoesTicker';
 
-    <span
-      className="text-gray-300 font-medium text-sm cursor-help"
-      title={gerarTooltip(cotacoes?.ouro)}
-    >
-      Ouro:{' '}
-      <strong className="text-[#d89900]">
-        {formatarMetal(cotacoes?.ouro)}
-      </strong>
-    </span>
-
-    <span
-      className="text-gray-300 font-medium text-sm cursor-help"
-      title={gerarTooltip(cotacoes?.prata)}
-    >
-      Prata:{' '}
-      <strong className="text-gray-100">
-        {formatarMetal(cotacoes?.prata)}
-      </strong>
-    </span>
-
-    <span
-      className="text-gray-300 font-medium text-sm cursor-help"
-      title={gerarTooltip(cotacoes?.platina)}
-    >
-      Platina:{' '}
-      <strong className="text-blue-200">
-        {formatarMetal(cotacoes?.platina)}
-      </strong>
-    </span>
-
-    <span
-      className="text-gray-300 font-medium text-sm cursor-help"
-      title={gerarTooltip(cotacoes?.paladio)}
-    >
-      Paládio:{' '}
-      <strong className="text-purple-200">
-        {formatarMetal(cotacoes?.paladio)}
-      </strong>
-    </span>
-
-    <span
-      className="text-gray-300 font-medium text-sm cursor-help"
-      title={gerarTooltip(cotacoes?.rodio)}
-    >
-      Ródio:{' '}
-      <strong className="text-rose-200">
-        {formatarMetal(cotacoes?.rodio)}
-      </strong>
-    </span>
-  </div>
-);
-
-const HomepageHero = () => {
-  const [cotacoes, setCotacoes] = useState(null);
-
-  useEffect(() => {
-    const carregarCotacoes = async () => {
-      try {
-        const res = await fetch('/api/cotacoes');
-        const data = await res.json();
-        setCotacoes(data);
-      } catch (error) {
-        console.error("Erro ao carregar cotações no frontend", error);
-      }
-    };
-    carregarCotacoes();
-  }, []);
-
-  // Função para calcular os preços em Reais por peso
-  const calcularPrecosBRL = (precoUsdOz) => {
-    if (precoUsdOz == null || cotacoes?.dolar == null) return null;
-    const ozToGrams = 31.1034768;
-    const precoGramaUsd = precoUsdOz / ozToGrams;
-    const precoGramaBrl = precoGramaUsd * cotacoes.dolar;
-
-    return {
-      g1: (precoGramaBrl * 1).toFixed(2),
-      g10: (precoGramaBrl * 10).toFixed(2),
-      g100: (precoGramaBrl * 100).toFixed(2),
-      kg1: (precoGramaBrl * 1000).toFixed(2),
-    };
-  };
-
-  // Função que gera o texto do balãozinho (Tooltip)
-  const gerarTooltip = (precoUsdOz) => {
-    const precos = calcularPrecosBRL(precoUsdOz);
-
-    if (!precos) {
-      return "Cotação indisponível";
-    }
-
-    return `Valores em Reais (R$):\n1g: R$ ${precos.g1}\n10g: R$ ${precos.g10}\n100g: R$ ${precos.g100}\n1kg: R$ ${precos.kg1}`;
-  };
-
-  const formatarDolar = (valor) => {
-    if (valor == null) {
-      return 'Cotação indisponível';
-    }
-
-    return `R$ ${Number(valor).toFixed(2)}`;
-  };
-
-  const formatarMetal = (precoUsdOz) => {
-    const precos = calcularPrecosBRL(precoUsdOz);
-
-    if (!precos) {
-      return 'Cotação indisponível';
-    }
-
-    return `R$ ${precos.g1} /g`;
-  };
-
+export default function HomepageHero() {
   return (
-    <section className="relative bg-black text-white text-center pt-0 pb-24 md:pb-40 overflow-hidden flex flex-col">
-      
-      {/* --- TICKER COLADO NO TOPO (Z-INDEX ALTO) --- */}
-      <div className="w-full bg-zinc-900/90 border-b border-zinc-800 backdrop-blur-md z-30">
-        <div className="flex overflow-hidden py-2 relative">
-          <style jsx>{`
-            @keyframes marquee {
-              0% { transform: translateX(0%); }
-              100% { transform: translateX(-50%); }
-            }
-            .animate-marquee {
-              display: flex;
-              width: max-content;
-              animation: marquee 50s linear infinite;
-            }
-            .animate-marquee:hover {
-              animation-play-state: paused;
-            }
-          `}</style>
+    <section className="relative flex flex-col overflow-hidden bg-black pb-24 pt-0 text-center text-white md:pb-40">
+      <CotacoesTicker />
 
-          {/* O segredo do loop infinito: 2 blocos idênticos que deslizam 50% da largura total */}
-          <div className="animate-marquee">
-            <div className="flex">
-              <CotacaoItems cotacoes={cotacoes} formatarDolar={formatarDolar} formatarMetal={formatarMetal} gerarTooltip={gerarTooltip} />
-              <CotacaoItems cotacoes={cotacoes} formatarDolar={formatarDolar} formatarMetal={formatarMetal} gerarTooltip={gerarTooltip} />
-              <CotacaoItems cotacoes={cotacoes} formatarDolar={formatarDolar} formatarMetal={formatarMetal} gerarTooltip={gerarTooltip} />
-            </div>
-            <div className="flex">
-              <CotacaoItems cotacoes={cotacoes} formatarDolar={formatarDolar} formatarMetal={formatarMetal} gerarTooltip={gerarTooltip} />
-              <CotacaoItems cotacoes={cotacoes} formatarDolar={formatarDolar} formatarMetal={formatarMetal} gerarTooltip={gerarTooltip} />
-              <CotacaoItems cotacoes={cotacoes} formatarDolar={formatarDolar} formatarMetal={formatarMetal} gerarTooltip={gerarTooltip} />
-            </div>
-          </div>
-        </div>
-        
-        {/* Observação discreta atualizada */}
-        <div className="bg-black/80 py-1 px-4 flex justify-center items-center text-[10px] text-[#d89900] uppercase tracking-wider gap-4">
-          <span>Atualizado diariamente</span>
-          <span>•</span>
-          <span>Fonte: Mercado Financeiro</span>
-        </div>
-      </div>
-
-      {/* Efeito de fundo com gradiente Dourado (Abaixo do Ticker) */}
-      <div 
-        className="absolute inset-0 mt-16 bg-[radial-gradient(ellipse_at_top,rgba(216,153,0,0.2)_0%,rgba(0,0,0,0)_60%)] z-0"
+      <div
+        className="pointer-events-none absolute inset-0 z-0 mt-16 bg-[radial-gradient(ellipse_at_top,rgba(216,153,0,0.2)_0%,rgba(0,0,0,0)_60%)]"
         aria-hidden="true"
       />
-      
-      {/* --- CONTEÚDO PRINCIPAL DO HERO --- */}
-      <div className="relative z-10 container mx-auto px-4 pt-20 md:pt-32">
-        <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight">
+
+      <div className="container relative z-10 mx-auto px-4 pt-20 md:pt-32">
+        <h1 className="mb-4 text-4xl font-extrabold leading-tight md:text-6xl">
           Transforme resíduos eletrônicos em ativos valiosos.
         </h1>
-        <p className="text-xl md:text-2xl text-gray-300 mb-10 max-w-3xl mx-auto">
+
+        <p className="mx-auto mb-10 max-w-3xl text-xl text-gray-300 md:text-2xl">
           Um portal de aprendizado sobre recuperação de metais preciosos e empreendedorismo sustentável.
         </p>
 
-        <div className="flex justify-center items-center gap-4 flex-wrap">
-          <Link 
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          <Link
             href="/mentoria"
-            className="bg-[#d89900] text-black font-bold text-lg py-3 px-8 rounded-lg hover:bg-[#F7FA83] transition-colors"
+            className="rounded-lg bg-[#d89900] px-8 py-3 text-lg font-bold text-black transition-colors hover:bg-[#F7FA83]"
           >
             Conheça a Mentoria
           </Link>
-          <Link 
+
+          <Link
             href="/produtos"
-            className="bg-zinc-800 text-white font-bold text-lg py-3 px-8 rounded-lg border border-zinc-700 hover:bg-zinc-700 transition-colors"
+            className="rounded-lg border border-zinc-700 bg-zinc-800 px-8 py-3 text-lg font-bold text-white transition-colors hover:bg-zinc-700"
           >
             Ver Todos os Produtos
           </Link>
@@ -202,6 +41,4 @@ const HomepageHero = () => {
       </div>
     </section>
   );
-};
-
-export default HomepageHero;
+}
