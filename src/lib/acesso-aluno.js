@@ -19,6 +19,29 @@ export function vigenciaPermiteAcesso(vigencia, agora = new Date()) {
   return true;
 }
 
+export async function alunoTemContaAtiva(
+  alunoId,
+  db = prisma,
+) {
+  const id = String(alunoId || '').trim();
+
+  if (!id) {
+    return false;
+  }
+
+  const aluno = await db.aluno.findFirst({
+    where: {
+      id,
+      status: 'ATIVO',
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  return Boolean(aluno);
+}
+
 export async function alunoTemAcessoAtivo(
   alunoId,
   agora = new Date(),

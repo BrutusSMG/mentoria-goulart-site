@@ -1,4 +1,4 @@
-// src/app/aluno/(protegido)/page.jsx
+// src/app/aluno/(educacional)/area/page.jsx
 import Link from 'next/link';
 import MinhasVigencias from '@/components/aluno/MinhasVigencias';
 
@@ -57,8 +57,8 @@ export default function AreaAlunoPage() {
           </Link>
 
         </div>
-        <Link href="/aluno/login" className="mt-5 block text-sm text-zinc-500 hover:text-zinc-300">
-          Voltar para o login
+        <Link href="/aluno" className="mt-5 block text-sm text-zinc-500 hover:text-zinc-300">
+          Voltar para o portal
         </Link>
       </section>
     </main>

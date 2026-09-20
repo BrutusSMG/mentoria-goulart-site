@@ -33,10 +33,10 @@ export default function AcessoIndisponivelPage() {
         </div>
 
         <Link
-          href="/aluno/login"
+          href="/aluno"
           className="mt-6 inline-flex rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-900"
         >
-          Voltar para o login
+          Voltar para o portal
         </Link>
       </div>
     </main>

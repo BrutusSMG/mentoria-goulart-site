@@ -61,20 +61,22 @@ export async function enviarConvitePrimeiroAcesso({
     ? `${baseAlunoConfigurado}/primeiro-acesso?token=${encodeURIComponent(token)}`
     : `${baseFallback}/aluno/primeiro-acesso?token=${encodeURIComponent(token)}`;
 
-  const nomeSeguro = escaparHtml(nome || 'Aluno');
+  const saudacao = nome
+    ? `Olá, ${escaparHtml(nome)}.`
+    : 'Olá.';
 
   try {
     const resultado = await new Resend(apiKey).emails.send({
       from: 'Prof. Goulart <contato@mentoriagarimpourbano.com.br>',
       to: email,
-      subject: 'Seu acesso à Área do Aluno — Garimpo Urbano',
+      subject: 'Seu acesso ao Portal Garimpo Urbano',
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#fff;padding:32px;border-radius:16px">
           <p style="color:#d89900;font-weight:bold;letter-spacing:2px">GARIMPO URBANO</p>
-          <h1>Olá, ${nomeSeguro}.</h1>
-          <p>Seu acesso foi liberado. Agora você pode criar a senha da Área do Aluno.</p>
+          <h1>${saudacao}</h1>
+          <p>Seu acesso foi liberado. Agora você pode criar a senha do Portal Garimpo Urbano.</p>
           <p><a href="${link}" style="display:inline-block;background:#d89900;color:#000;padding:14px 20px;border-radius:8px;text-decoration:none;font-weight:bold">CRIAR MEU ACESSO</a></p>
-          <p style="color:#a3a3a3;font-size:13px">Este link expira em 72 horas e pode ser usado uma única vez. As aulas continuam disponíveis no ambiente da Hotmart.</p>
+          <p style="color:#a3a3a3;font-size:13px">Este link expira em 72 horas e pode ser usado uma única vez. Depois de criar sua senha, você verá os recursos liberados para sua conta.</p>
         </div>
       `,
     });

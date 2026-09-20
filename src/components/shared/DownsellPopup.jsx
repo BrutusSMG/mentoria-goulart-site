@@ -4,8 +4,37 @@
 import { trackInitiateCheckout } from '@/utils/tracking';
 import Link from 'next/link';
 import { X, AlertTriangle, Package } from 'lucide-react';
+import { formatarPrecoProduto } from '@/lib/preco-produto';
 
-const DownsellPopup = ({ show, onClose }) => {
+const DownsellPopup = ({
+  show,
+  onClose,
+  preco,
+  moeda = 'BRL',
+}) => {
+  const precoFormatado =
+    formatarPrecoProduto(preco, moeda)
+    || 'Preço não informado';
+
+  function handleCheckout() {
+    if (
+      preco === null
+      || preco === undefined
+      || String(preco).trim() === ''
+    ) {
+      return;
+    }
+
+    const valor = Number(preco);
+
+    if (Number.isFinite(valor)) {
+      trackInitiateCheckout(
+        'Curso Sem Mentoria (Downsell)',
+        valor,
+        moeda,
+      );
+    }
+  }
   if (!show) {
     return null;
   }
@@ -48,15 +77,17 @@ const DownsellPopup = ({ show, onClose }) => {
             {/* Preço da Oferta de Downsell */}
             <div className="my-4">
               <p className="text-5xl font-bold text-white">
-                R$997,00
+                {precoFormatado}
               </p>
-              <p className="text-gray-400">ou 12x de R$112,42</p>
+              <p className="text-gray-400">
+                Consulte as condições de parcelamento no checkout.
+              </p>
             </div>
 
             {/* Botão de CTA para a nova oferta */}
             <Link 
               href="https://pay.hotmart.com/Y38962738S?off=mku66p4r&ref=J105438092D" 
-              onClick={() => trackInitiateCheckout('Curso Sem Mentoria (Downsell)', 997)}
+              onClick={handleCheckout}
               className="block w-full bg-[#d89900] text-white font-bold text-xl py-4 px-6 rounded-lg hover:bg-[#c68a00] transition-colors"
             >
               QUERO O CURSO AGORA!

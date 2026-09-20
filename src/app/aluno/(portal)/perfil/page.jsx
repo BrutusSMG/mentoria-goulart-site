@@ -1,4 +1,4 @@
-// src/app/aluno/(protegido)/perfil/page.jsx
+// src/app/aluno/(portal)/perfil/page.jsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -78,7 +78,7 @@ export default function PerfilAlunoPage() {
   return (
     <main className="min-h-screen bg-black px-4 py-10 text-white sm:px-8">
       <div className="mx-auto max-w-3xl">
-        <Link href="/aluno" className="text-sm text-zinc-400 hover:text-white">← Voltar para a Área do Aluno</Link>
+        <Link href="/aluno" className="text-sm text-zinc-400 hover:text-white">← Voltar para o portal</Link>
         <p className="mt-8 text-xs font-bold uppercase tracking-[0.2em] text-[#d89900]">Meu perfil</p>
         <h1 className="mt-2 text-4xl font-black">Apresente-se à comunidade</h1>
         <p className="mt-3 text-zinc-400">Seu perfil começa privado. Você escolhe se deseja compartilhá-lo com outros alunos.</p>

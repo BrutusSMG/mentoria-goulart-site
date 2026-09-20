@@ -1,4 +1,4 @@
-// src/app/aluno/(protegido)/comunidade/page.jsx
+// src/app/aluno/(portal)/comunidade/page.jsx
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -26,7 +26,7 @@ export default function ComunidadeAlunosPage() {
   return (
     <main className="min-h-screen bg-black px-4 py-10 text-white sm:px-8">
       <div className="mx-auto max-w-6xl">
-        <Link href="/aluno" className="text-sm text-zinc-400 hover:text-white">← Voltar para a Área do Aluno</Link>
+        <Link href="/aluno" className="text-sm text-zinc-400 hover:text-white">← Voltar para o portal</Link>
         <p className="mt-8 text-xs font-bold uppercase tracking-[0.2em] text-[#d89900]">Comunidade</p>
         <h1 className="mt-2 text-4xl font-black">Conheça outros alunos</h1>
         <p className="mt-3 text-zinc-400">Aqui aparecem somente alunos que escolheram compartilhar seu perfil.</p>

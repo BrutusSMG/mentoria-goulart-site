@@ -1,80 +1,65 @@
-// src/app/api/cron/atualizar-cotacoes/route.js
+﻿// src/app/api/cron/atualizar-cotacoes/route.js
 
 import { NextResponse } from 'next/server';
+
+import { coletarCotacoesMetais } from '@/lib/cotacoes';
 import { prisma } from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
+
+function possuiCotacaoUtil(registros) {
+  return registros.some(
+    (registro) =>
+      registro.status === 'SUCESSO'
+      || registro.status === 'PARCIAL',
+  );
+}
 
 export async function GET(request) {
   const authHeader = request.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return new Response('Não autorizado', { status: 401 });
+
+  if (
+    authHeader !== `Bearer ${process.env.CRON_SECRET}`
+  ) {
+    return new Response('Não autorizado', {
+      status: 401,
+    });
   }
 
   try {
-    const headersYahoo = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36'
-    };
-
-    const fetchYahooPrice = async (ticker) => {
-      const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}`, { headers: headersYahoo, cache: 'no-store' } );
-      if (!res.ok) throw new Error(`Erro Yahoo: ${ticker}`);
-      const data = await res.json();
-      return data.chart.result[0].meta.regularMarketPrice;
-    };
-
-    // 1. Busca Dólar e 4 Metais no Yahoo (Gratuito e Ilimitado)
-    const [valorDolar, ouroUsdOz, prataUsdOz, platinaUsdOz, paladioUsdOz] = await Promise.all([
-      fetchYahooPrice('BRL=X'),
-      fetchYahooPrice('GC=F'),
-      fetchYahooPrice('SI=F'),
-      fetchYahooPrice('PL=F'),
-      fetchYahooPrice('PA=F')
-    ]);
-
-    // 2. Busca APENAS o Ródio na GoldAPI (Gasta 1 requisição das 100 mensais)
-    let rodioUsdOz = null;
-    
-    try {
-      const resRodio = await fetch(`https://www.goldapi.io/api/XRH/USD`, {
-        headers: {
-          'x-access-token': process.env.GOLD_API_KEY,
-          'Content-Type': 'application/json'
-        },
-        cache: 'no-store'
-      } );
-      if (resRodio.ok) {
-        const dataRodio = await resRodio.json();
-
-        if (dataRodio.price) {
-          rodioUsdOz = dataRodio.price;
-        }
-      } else {
-        console.error(
-          `Aviso: GoldAPI respondeu ${resRodio.status} ao buscar o ródio.`,
-        );
-      }
-    } catch (error) {
-      console.error(
-        "Aviso: Falha ao buscar ródio na GoldAPI:",
-        error?.message || error,
-      );
-    }
-
-    // 3. Salva os valores PUROS (Onça e Dólar) no Banco de Dados
-    const novaCotacao = await prisma.cotacaoHistorico.create({
-      data: {
-        dolar: valorDolar,
-        ouro: ouroUsdOz,
-        prata: prataUsdOz,
-        platina: platinaUsdOz,
-        paladio: paladioUsdOz,
-        rodio: rodioUsdOz
-      }
+    const resultado = await coletarCotacoesMetais({
+      db: prisma,
     });
 
-    return NextResponse.json({ success: true, data: novaCotacao });
+    const possuiDados =
+      possuiCotacaoUtil(resultado.registros);
 
+    return NextResponse.json(
+      {
+        success: possuiDados,
+        coletaId: resultado.coletaId,
+        coletadoEm:
+          resultado.coletadoEm.toISOString(),
+        resumo: resultado.resumo,
+      },
+      {
+        status: possuiDados ? 200 : 503,
+      },
+    );
   } catch (error) {
-    console.error("Erro no Cron:", error.message);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error(
+      'Erro no cron de cotações:',
+      error?.message || error,
+    );
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Falha ao atualizar cotações',
+      },
+      {
+        status: 500,
+      },
+    );
   }
 }

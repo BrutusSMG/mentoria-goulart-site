@@ -5,13 +5,22 @@ import { prisma } from "@/lib/prisma";
 import { enviarConvitePrimeiroAcesso } from '@/lib/convite-primeiro-acesso';
 import { timingSafeEqual } from "crypto";
 import { moverCompradorParaPosVenda } from '@/lib/brevo';
-import { provisionarAlunoHotmart } from '@/lib/provisionar-aluno';
+import {
+  garantirContaHotmart,
+  garantirConvitePrimeiroAcesso,
+  provisionarAlunoHotmart,
+} from '@/lib/provisionar-aluno';
+import {
+  concederDireitosProdutoHotmart,
+  revogarDireitosPorTransacao,
+} from '@/lib/direitos-produto';
 import {
   decidirConsolidacaoFinanceiraHotmart,
   EFEITO_DIREITO_HOTMART,
   EVENTOS_TERMINAIS_DIREITO_HOTMART,
   traduzirEventoHotmart,
 } from '@/lib/hotmart-traducao';
+import { resolverProdutoIntegracao } from '@/lib/produto-catalogo';
 
 export const runtime = "nodejs";
 
@@ -182,7 +191,25 @@ export async function POST(req) {
   let conviteParaEnviar = null;
   let podeGarantirDireito = compraConfirmada;
   try {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(
+      async (tx) => {
+      const integracaoProduto = await resolverProdutoIntegracao(tx, {
+        provedor: 'HOTMART',
+        externalId: produtoId,
+      });
+
+      const produtoCatalogoId = integracaoProduto?.produtoId || null;
+
+      if (!integracaoProduto) {
+        podeGarantirDireito = false;
+      }
+
+      const produtoGeraMatricula =
+        integracaoProduto?.produto?.tipo === 'CURSO';
+
+      const produtoEhMentoria =
+        integracaoProduto?.produto?.id === 'prod_garimpo_mentoria';
+
       const lead = emailComprador
         ? await tx.lead.findUnique({
           where: { email: emailComprador },
@@ -249,6 +276,9 @@ export async function POST(req) {
             leadId: lead?.id || null,
             emailComprador,
             produtoId,
+            ...(produtoCatalogoId
+              ? { produtoCatalogoId }
+              : {}),
             produtoUcode: produto.ucode ? String(produto.ucode) : null,
             produtoNome,
             valorBruto,
@@ -289,6 +319,7 @@ export async function POST(req) {
             leadId: lead?.id || null,
             emailComprador,
             produtoId,
+            produtoCatalogoId,
             produtoUcode: produto.ucode ? String(produto.ucode) : null,
             produtoNome,
             status: consolidacaoFinanceira.status,
@@ -332,9 +363,14 @@ export async function POST(req) {
             statusAlteradoEm: momentoRevogacao,
           },
         });
+
+        await revogarDireitosPorTransacao(tx, {
+          transacaoOrigemId: transacao.id,
+          revogadoEm: momentoRevogacao,
+        });
       }
 
-      if (lead && podeGarantirDireito) {
+      if (lead && podeGarantirDireito && produtoEhMentoria) {
         await tx.lead.update({
           where: { id: lead.id },
           data: {
@@ -344,45 +380,101 @@ export async function POST(req) {
         });
       }
 
-      if (podeGarantirDireito && emailComprador) {
+      if (
+        podeGarantirDireito
+        && integracaoProduto
+        && emailComprador
+      ) {
         if (!transacao.aprovadoEm) {
           throw new Error(
             'Compra confirmada sem data de aprovação da Hotmart.',
           );
         }
 
-        const provisionamento = await provisionarAlunoHotmart(tx, {
-          leadId: lead?.id || null,
-          email: emailComprador,
-          nome: nomeDoAluno,
-          whatsapp: whatsappDoAluno,
-          produtoId,
-          produtoUcode: produto.ucode ? String(produto.ucode) : null,
-          produtoNome,
-          transacaoOrigemId: transacao.id,
-          aprovadoEm: transacao.aprovadoEm,
-        });
+        let alunoId = null;
+        let matriculaId = null;
 
-        if (provisionamento) {
+        if (produtoGeraMatricula) {
+          const provisionamento = await provisionarAlunoHotmart(tx, {
+            leadId: lead?.id || null,
+            email: emailComprador,
+            nome: nomeDoAluno,
+            whatsapp: whatsappDoAluno,
+            produtoId,
+            produtoUcode: produto.ucode ? String(produto.ucode) : null,
+            produtoNome,
+            transacaoOrigemId: transacao.id,
+            aprovadoEm: transacao.aprovadoEm,
+          });
+
+          if (provisionamento) {
+            alunoId = provisionamento.alunoId;
+            matriculaId = provisionamento.matriculaId;
+
+            if (
+              provisionamento.conviteNovo
+              && provisionamento.conviteToken
+            ) {
+              conviteParaEnviar = {
+                email: emailComprador,
+                nome: nomeDoAluno,
+                token: provisionamento.conviteToken,
+              };
+            }
+          }
+        } else {
+          const conta = await garantirContaHotmart(tx, {
+            leadId: lead?.id || null,
+            email: emailComprador,
+            nome: nomeDoAluno,
+            whatsapp: whatsappDoAluno,
+          });
+
+          alunoId = conta?.id || null;
+
+          if (conta) {
+            const convite = await garantirConvitePrimeiroAcesso(
+              tx,
+              conta,
+            );
+
+            if (
+              convite.conviteNovo
+              && convite.conviteToken
+            ) {
+              conviteParaEnviar = {
+                email: emailComprador,
+                nome: nomeDoAluno,
+                token: convite.conviteToken,
+              };
+            }
+          }
+        }
+
+        if (alunoId) {
           await tx.hotmartTransaction.update({
             where: { id: transacao.id },
             data: {
-              alunoId: provisionamento.alunoId,
-              matriculaId: provisionamento.matriculaId,
+              alunoId,
+              ...(matriculaId ? { matriculaId } : {}),
             },
           });
 
-          if (provisionamento.conviteNovo && provisionamento.conviteToken) {
-            conviteParaEnviar = {
-              email: emailComprador,
-              nome: nomeDoAluno,
-              token: provisionamento.conviteToken,
-            };
-          }
+          await concederDireitosProdutoHotmart(tx, {
+            alunoId,
+            produtoId: produtoCatalogoId,
+            transacaoOrigemId: transacao.id,
+            concedidoEm: transacao.aprovadoEm,
+          });
         }
       }
 
-    });
+      },
+      {
+        maxWait: 5000,
+        timeout: 30000,
+      },
+    );
 
     if (
       podeGarantirDireito

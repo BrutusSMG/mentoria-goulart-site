@@ -1,6 +1,115 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { provisionarAlunoHotmart } from '../src/lib/provisionar-aluno';
+import {
+  garantirContaHotmart,
+  provisionarAlunoHotmart,
+} from '../src/lib/provisionar-aluno';
+
+describe('garantirContaHotmart', () => {
+  it('cria ou reutiliza conta sem criar matricula, vigencia ou convite', async () => {
+    const tx = {
+      aluno: {
+        findUnique: vi.fn().mockResolvedValue(null),
+        upsert: vi.fn().mockResolvedValue({
+          id: 'conta-ebook',
+          email: 'ebook@example.com',
+          status: 'ATIVO',
+        }),
+      },
+      matricula: {
+        upsert: vi.fn(),
+      },
+      vigenciaMatricula: {
+        create: vi.fn(),
+      },
+      alunoAccessToken: {
+        create: vi.fn(),
+      },
+    };
+
+    const resultado = await garantirContaHotmart(tx, {
+      leadId: 'lead-ebook',
+      email: ' EBOOK@example.com ',
+      nome: 'Comprador Ebook',
+      whatsapp: '41999999999',
+    });
+
+    expect(tx.aluno.findUnique).toHaveBeenCalledWith({
+      where: {
+        email: 'ebook@example.com',
+      },
+      select: {
+        id: true,
+        nome: true,
+        leadId: true,
+        senhaHash: true,
+        status: true,
+      },
+    });
+
+    expect(tx.aluno.upsert).toHaveBeenCalledWith({
+      where: {
+        email: 'ebook@example.com',
+      },
+      update: {
+        nome: 'Comprador Ebook',
+        whatsapp: '41999999999',
+        leadId: 'lead-ebook',
+        status: 'ATIVO',
+        origem: 'HOTMART',
+      },
+      create: {
+        leadId: 'lead-ebook',
+        nome: 'Comprador Ebook',
+        email: 'ebook@example.com',
+        whatsapp: '41999999999',
+        status: 'ATIVO',
+        origem: 'HOTMART',
+      },
+    });
+
+    expect(resultado).toEqual({
+      id: 'conta-ebook',
+      email: 'ebook@example.com',
+      status: 'ATIVO',
+    });
+
+    expect(tx.matricula.upsert).not.toHaveBeenCalled();
+    expect(tx.vigenciaMatricula.create).not.toHaveBeenCalled();
+    expect(tx.alunoAccessToken.create).not.toHaveBeenCalled();
+  });
+
+  it('preserva conta suspensa em nova compra', async () => {
+    const tx = {
+      aluno: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: 'conta-suspensa',
+          nome: 'Comprador',
+          leadId: null,
+          senhaHash: 'hash',
+          status: 'SUSPENSO',
+        }),
+        upsert: vi.fn().mockResolvedValue({
+          id: 'conta-suspensa',
+          status: 'SUSPENSO',
+        }),
+      },
+    };
+
+    await garantirContaHotmart(tx, {
+      email: 'comprador@example.com',
+      nome: 'Comprador',
+    });
+
+    expect(tx.aluno.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({
+          status: 'SUSPENSO',
+        }),
+      }),
+    );
+  });
+});
 
 describe('provisionarAlunoHotmart', () => {
   it('reutiliza a mesma matrícula do aluno e reativa seu estado em uma nova compra', async () => {

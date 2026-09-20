@@ -55,22 +55,103 @@ Essa etapa tornou o processo de entrada do aluno mais consistente e preparou a p
 
 ---
 
-## Etapa 3 — Produtos, preços, cotações e administração
+## Etapa 3 — Produtos, acessos, preços, cotações e administração
 
 **Status: em desenvolvimento.**
 
-A terceira etapa tem como objetivo ampliar a capacidade administrativa e comercial do MGU.
+A terceira etapa amplia a capacidade comercial e administrativa do MGU e
+prepara a plataforma para diferentes tipos de produtos e formas de acesso.
 
-Entre os principais focos estão:
+### Catálogo interno de produtos — concluído em homologação
 
-- criação de um catálogo interno de produtos;
-- centralização das informações comerciais exibidas pela plataforma;
-- evolução do gerenciamento de preços;
-- melhoria das ferramentas administrativas;
-- consolidação das informações de cotações utilizadas pelo projeto;
-- preparação da plataforma para diferentes tipos de produtos e formas de acesso.
+A primeira entrega da Etapa 3 estruturou um catálogo interno de produtos,
+separando a identidade dos produtos do MGU das integrações utilizadas pelas
+plataformas externas de venda.
 
-Essa estrutura permitirá que o MGU cresça sem depender de regras comerciais espalhadas por diferentes partes da aplicação.
+Essa evolução permite:
+
+- organizar os produtos em uma estrutura única;
+- relacionar um produto a uma ou mais integrações externas;
+- reconhecer com segurança qual produto foi adquirido;
+- preservar o histórico das transações já existentes;
+- tratar cursos e outros tipos de produtos de forma independente;
+- preparar a plataforma para novas regras de acesso sem depender
+  diretamente da matrícula do aluno.
+
+A implementação foi homologada antes da continuidade da etapa.
+
+### E3.2 — Direitos e acessos concluída em homologação
+
+A separação entre produto adquirido, matrícula educacional e direitos de uso
+foi implementada e homologada.
+
+A plataforma agora possui políticas de direitos por produto, concessões
+vinculadas à transação de origem, direitos binários independentes e níveis
+cumulativos do Ecossistema MGU.
+
+Direitos oriundos de várias compras podem coexistir. Quando uma compra é
+reembolsada ou sofre chargeback, somente os direitos daquela origem são
+revogados, preservando direitos válidos provenientes de outros produtos.
+
+A Área do Aluno continua vinculada à matrícula e à vigência educacional.
+Produtos como e-books pagos podem criar uma conta no Portal MGU e conceder
+acesso à Comunidade e ao Ecossistema sem criar matrícula.
+
+Também foi criada a base de autorização para módulos e recursos do
+Ecossistema de acordo com o nível mínimo exigido.
+
+Durante a homologação foi corrigida uma regressão de estado financeiro:
+uma aprovação recebida depois de REFUNDED ou CHARGEBACK continua auditada,
+mas não reabre o estado terminal nem recria direitos ou vigências.
+
+A E3.2 foi encerrada em homologação com 188 testes automatizados aprovados,
+schema Prisma válido e build de produção concluído com 58/58 páginas.
+O fechamento técnico está registrado no commit `cc3d00a`.
+
+### E3.3 — Administração e preços concluída em homologação
+
+O catálogo interno passou a ser utilizado como fonte dos preços correntes
+exibidos pelo MGU nas áreas definidas para esta etapa.
+
+A evolução incluiu:
+
+- centralização dos preços públicos dos produtos no catálogo;
+- administração controlada do preço corrente pelo painel administrativo;
+- separação entre preços atuais e valores históricos das vendas;
+- utilização do preço do catálogo na oferta da mentoria e no downsell;
+- alinhamento dos eventos de acompanhamento comercial ao valor corrente do produto;
+- remoção dos principais preços comerciais fixos dessas telas.
+
+As condições de parcelamento continuam sendo informadas pelo checkout,
+evitando que a plataforma apresente valores de parcela não modelados no catálogo.
+
+A E3.3 foi validada funcionalmente em homologação e no Preview antes da
+continuidade da etapa.
+
+### E3.4 — Consolidação das cotações concluída em homologação
+
+A plataforma passou a utilizar um modelo consolidado de cotações, com
+registro individual por metal e preservação da origem, unidade, moeda
+e data de referência dos valores coletados.
+
+A evolução incluiu:
+
+- coleta independente das cotações, permitindo registrar os resultados
+  disponíveis mesmo quando um dos ativos apresenta falha;
+- tratamento explícito de cotações parciais, indisponíveis ou com erro;
+- cálculo dos valores em reais por grama no backend;
+- disponibilização dos dados consolidados pela API de cotações;
+- renovação do ticker da página inicial, com painel de detalhes
+  responsivo e informações sobre fonte e atualização;
+- remoção da apresentação de valores fixos como substitutos de
+  cotações indisponíveis.
+
+O ródio permanece indicado como indisponível até que seja integrada
+uma fonte de dados adequada.
+
+A E3.4 foi validada funcionalmente em homologação. A publicação em
+produção será realizada posteriormente, mediante preparação e
+validação da migração do banco de dados.
 
 ---
 

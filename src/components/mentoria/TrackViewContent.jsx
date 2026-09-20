@@ -3,10 +3,27 @@
 import { useEffect } from 'react';
 import { trackViewContent } from '@/utils/tracking';
 
-const TrackViewContent = () => {
+const TrackViewContent = ({ preco, moeda = 'BRL' }) => {
   useEffect(() => {
-    trackViewContent('Mentoria Garimpo Urbano', 2497);
-  }, []);
+    if (
+      preco === null
+      || preco === undefined
+      || String(preco).trim() === ''
+    ) {
+      return;
+    }
+
+    const valor = Number(preco);
+
+    if (Number.isFinite(valor)) {
+      trackViewContent(
+        'Mentoria Garimpo Urbano',
+        valor,
+        moeda,
+      );
+    }
+  }, [preco, moeda]);
+
   return null;
 };
 

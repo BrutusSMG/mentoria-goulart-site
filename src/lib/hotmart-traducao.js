@@ -69,6 +69,11 @@ export function traduzirEventoHotmart(evento) {
 
 export const STATUS_HOTMART_CONFLITO_TEMPORAL = 'CONFLITO_TEMPORAL';
 
+const STATUS_TERMINAIS_FINANCEIROS_HOTMART = new Set([
+  'REFUNDED',
+  'CHARGEBACK',
+]);
+
 export function decidirConsolidacaoFinanceiraHotmart({
   traducaoEvento,
   hotmartEventId,
@@ -90,6 +95,20 @@ export function decidirConsolidacaoFinanceiraHotmart({
       status: novoStatus,
       ultimoEventoHotmartEm: novaData,
       ultimoEventoHotmartId: hotmartEventId,
+    };
+  }
+
+  const estadoAtualTerminal =
+    STATUS_TERMINAIS_FINANCEIROS_HOTMART.has(
+      transacaoAtual.status,
+    );
+
+  if (
+    estadoAtualTerminal
+    && !traducaoEvento.terminalDireito
+  ) {
+    return {
+      deveAtualizar: false,
     };
   }
 

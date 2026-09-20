@@ -7,6 +7,7 @@ import AdminMobileNavigation from "@/components/admin/AdminMobileNavigation";
 
 const LINKS_DESKTOP = {
   dashboard: "Dashboard",
+  produtos: "Produtos",
   leads: "Leads",
   transacoes: "Transações",
   usuarios: "Usuários",
@@ -50,6 +51,11 @@ export default async function AdminLayout({ children }) {
         href: "/admin/transacoes",
         rotulo: LINKS_DESKTOP.transacoes,
         icone: "transacoes",
+      },
+      {
+        href: "/admin/produtos",
+        rotulo: LINKS_DESKTOP.produtos,
+        icone: "produtos",
       },
       {
         href: "/admin/usuarios",

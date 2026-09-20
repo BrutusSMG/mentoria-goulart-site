@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
-import { alunoTemAcessoAtivo } from '@/lib/acesso-aluno';
+import { alunoTemAcessoComunidade } from '@/lib/direitos-produto';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -17,9 +17,11 @@ export async function GET() {
   }
 
   if (tipoConta === 'ALUNO') {
-    const acessoAtivo = await alunoTemAcessoAtivo(session?.user?.alunoId);
+    const acessoComunidade = await alunoTemAcessoComunidade(
+      session?.user?.alunoId,
+    );
 
-    if (!acessoAtivo) {
+    if (!acessoComunidade) {
       return NextResponse.json(
         { ok: false, erro: 'Acesso indisponível.' },
         { status: 403 },

@@ -21,6 +21,47 @@ model CotacaoHistorico {
   criadoEm DateTime @default(now())
 }
 
+// Domínio consolidado de cotações da E3.4.
+// Cada execução de coleta utiliza o mesmo coletaId para todos os metais.
+enum MetalCotacao {
+  OURO
+  PRATA
+  PLATINA
+  PALADIO
+  RODIO
+}
+
+enum StatusCotacaoMetal {
+  SUCESSO
+  PARCIAL
+  INDISPONIVEL
+  ERRO
+}
+
+model CotacaoMetal {
+  id              String             @id @default(cuid())
+  coletaId        String
+  metal           MetalCotacao
+  valorOriginal   Decimal?           @db.Decimal(18, 6)
+  unidadeOriginal String?
+  moedaOriginal   String?
+  dolarBrl        Decimal?           @db.Decimal(12, 6)
+  valorBrlGrama   Decimal?           @db.Decimal(18, 6)
+  fonte           String
+  fonteDolar      String?
+  referenciaEm    DateTime?
+  coletadoEm      DateTime           @default(now())
+  status          StatusCotacaoMetal
+  erro            String?            @db.Text
+  createdAt       DateTime           @default(now())
+
+  @@unique([coletaId, metal])
+  @@index([coletaId])
+  @@index([metal, coletadoEm])
+  @@index([status])
+  @@index([coletadoEm])
+}
+
 // Tabela para guardar os leads do site
 model Lead {
   id                   String                @id @default(cuid())
@@ -140,6 +181,42 @@ enum VisibilidadePerfil {
   ALUNOS
 }
 
+enum TipoProduto {
+  CURSO
+  EBOOK
+}
+
+enum ProvedorProduto {
+  HOTMART
+}
+
+enum TipoDireitoProduto {
+  AREA_ALUNO
+  COMUNIDADE
+  MENTORIA
+  CONTEUDO_PRODUTO
+  ECOSSISTEMA
+}
+
+enum NivelEcossistema {
+  NENHUM
+  BASICO
+  COMPLETO
+  PREMIUM
+}
+
+enum OrigemDireitoConcedido {
+  HOTMART
+  LEGADO
+  MANUAL
+}
+
+enum StatusDireitoConcedido {
+  ATIVO
+  REVOGADO
+  EXPIRADO
+}
+
 model Aluno {
   id                String      @id @default(cuid())
   leadId            String?     @unique
@@ -154,11 +231,12 @@ model Aluno {
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
-  lead              Lead?                @relation(fields: [leadId], references: [id], onDelete: SetNull)
-  matriculas        Matricula[]
-  transacoesHotmart HotmartTransaction[]
-  perfil            PerfilAluno?
-  tokensAcesso      AlunoAccessToken[]
+  lead               Lead?                @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  matriculas         Matricula[]
+  transacoesHotmart  HotmartTransaction[]
+  perfil             PerfilAluno?
+  tokensAcesso       AlunoAccessToken[]
+  direitosConcedidos DireitoConcedido[]
 
   @@index([status])
   @@index([origem])
@@ -304,6 +382,131 @@ model Depoimento {
   createdAt DateTime @default(now())
 }
 
+// Catálogo comercial interno do MGU.
+// Produto representa a identidade comercial interna e não o identificador de qualquer plataforma externa.
+model Produto {
+  id               String      @id @default(cuid())
+  nome             String
+  slug             String      @unique
+  descricao        String?     @db.Text
+  tipo             TipoProduto
+  ativo            Boolean     @default(true)
+  preco            Decimal?    @db.Decimal(12, 2)
+  precoPromocional Decimal?    @db.Decimal(12, 2)
+  moeda            String      @default("BRL")
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  integracoes       ProdutoIntegracao[]
+  transacoesHotmart HotmartTransaction[]
+  direitos          ProdutoDireito[]
+
+  @@index([tipo])
+  @@index([ativo])
+}
+
+// Vínculos entre um Produto interno e os identificadores utilizados
+// por provedores externos.
+model ProdutoIntegracao {
+  id         String          @id @default(cuid())
+  produtoId  String
+  provedor   ProvedorProduto
+  externalId String
+  ativo      Boolean         @default(true)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  produto Produto @relation(fields: [produtoId], references: [id], onDelete: Restrict)
+
+  @@unique([provedor, externalId])
+  @@index([produtoId])
+  @@index([ativo])
+}
+
+// Politica comercial de direitos configurados para um Produto.
+model ProdutoDireito {
+  id           String             @id @default(cuid())
+  produtoId    String
+  tipo         TipoDireitoProduto
+  nivel        NivelEcossistema?
+  configuracao Json?
+  ativo        Boolean            @default(true)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  produto    Produto            @relation(fields: [produtoId], references: [id], onDelete: Restrict)
+  concessoes DireitoConcedido[]
+
+  @@unique([produtoId, tipo])
+  @@index([tipo])
+  @@index([ativo])
+}
+
+// Concessao concreta produzida por uma origem comercial.
+// Aluno representa temporariamente a conta/credencial; Matricula permanece educacional.
+model DireitoConcedido {
+  id                String                 @id @default(cuid())
+  alunoId           String
+  produtoDireitoId  String
+  transacaoOrigemId String?
+  origem            OrigemDireitoConcedido
+  status            StatusDireitoConcedido @default(ATIVO)
+  concedidoEm       DateTime
+  iniciaEm          DateTime
+  expiraEm          DateTime?
+  revogadoEm        DateTime?
+  statusAlteradoEm  DateTime               @default(now())
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  aluno           Aluno               @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+  produtoDireito  ProdutoDireito      @relation(fields: [produtoDireitoId], references: [id], onDelete: Restrict)
+  transacaoOrigem HotmartTransaction? @relation(fields: [transacaoOrigemId], references: [id], onDelete: Restrict)
+
+  @@unique([produtoDireitoId, transacaoOrigemId])
+  @@index([alunoId])
+  @@index([produtoDireitoId])
+  @@index([transacaoOrigemId])
+  @@index([status])
+  @@index([alunoId, status])
+}
+
+// Modulos internos do Ecossistema MGU.
+// nivelMinimo define o menor nivel efetivo necessario para acesso.
+model EcoModulo {
+  id          String           @id @default(cuid())
+  nome        String
+  slug        String           @unique
+  ativo       Boolean          @default(true)
+  nivelMinimo NivelEcossistema
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  recursos EcoModuloRecurso[]
+
+  @@index([ativo])
+  @@index([nivelMinimo])
+}
+
+// Recursos pertencentes a um modulo do Ecossistema.
+// O codigo identifica o recurso dentro do respectivo modulo.
+model EcoModuloRecurso {
+  id          String           @id @default(cuid())
+  moduloId    String
+  codigo      String
+  nivelMinimo NivelEcossistema
+  ativo       Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  modulo EcoModulo @relation(fields: [moduloId], references: [id], onDelete: Restrict)
+
+  @@unique([moduloId, codigo])
+  @@index([moduloId])
+  @@index([ativo])
+  @@index([nivelMinimo])
+}
+
 // Auditoria e idempotência dos eventos recebidos da Hotmart.
 // Não armazena o payload completo para evitar guardar dados sensíveis desnecessários.
 model HotmartWebhookEvent {
@@ -312,6 +515,8 @@ model HotmartWebhookEvent {
   evento            String
   versao            String?
   transacaoCodigo   String?
+  // Identificador externo do produto recebido da Hotmart.
+  // Campo legado/histórico: não representa Produto.id.
   produtoId         String?
   criadoNaHotmartEm DateTime?
   recebidoEm        DateTime  @default(now())
@@ -332,7 +537,11 @@ model HotmartTransaction {
   alunoId               String?
   matriculaId           String?
   emailComprador        String?
+  // Identificador externo do produto recebido da Hotmart.
+  // Campo legado/histórico: não representa Produto.id.
   produtoId             String
+  // Referência opcional à identidade comercial interna do MGU.
+  produtoCatalogoId     String?
   produtoUcode          String?
   produtoNome           String
   status                String
@@ -349,16 +558,19 @@ model HotmartTransaction {
   criadoEm              DateTime  @default(now())
   atualizadoEm          DateTime  @updatedAt
 
-  lead           Lead?              @relation(fields: [leadId], references: [id], onDelete: SetNull)
-  aluno          Aluno?             @relation(fields: [alunoId], references: [id], onDelete: SetNull)
-  matricula      Matricula?         @relation(fields: [matriculaId], references: [id], onDelete: SetNull)
-  vigenciaOrigem VigenciaMatricula? @relation("VigenciaTransacaoOrigem")
+  lead               Lead?              @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  aluno              Aluno?             @relation(fields: [alunoId], references: [id], onDelete: SetNull)
+  matricula          Matricula?         @relation(fields: [matriculaId], references: [id], onDelete: SetNull)
+  vigenciaOrigem     VigenciaMatricula? @relation("VigenciaTransacaoOrigem")
+  produtoCatalogo    Produto?           @relation(fields: [produtoCatalogoId], references: [id], onDelete: SetNull)
+  direitosConcedidos DireitoConcedido[]
 
   @@index([leadId])
   @@index([alunoId])
   @@index([matriculaId])
   @@index([emailComprador])
   @@index([produtoId])
+  @@index([produtoCatalogoId])
   @@index([status])
   @@index([criadoEm])
 }
