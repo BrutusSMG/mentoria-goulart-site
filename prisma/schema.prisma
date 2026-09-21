@@ -81,6 +81,8 @@ model Lead {
   updatedAt            DateTime              @updatedAt
   transacoesHotmart    HotmartTransaction[]
   aluno                Aluno?
+  pessoaId String? @unique
+  pessoa   Pessoa? @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
 }
 
 model JornadaContribuicao {
@@ -237,6 +239,8 @@ model Aluno {
   perfil             PerfilAluno?
   tokensAcesso       AlunoAccessToken[]
   direitosConcedidos DireitoConcedido[]
+  pessoaId String? @unique
+  pessoa   Pessoa? @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
 
   @@index([status])
   @@index([origem])
@@ -355,6 +359,8 @@ model AdminUser {
   passwordChangedAt        DateTime?
   createdAt                DateTime  @default(now())
   updatedAt                DateTime  @updatedAt
+  pessoaId String? @unique
+  pessoa   Pessoa? @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
 }
 
 // Tabela para gerenciar os valores das sucatas
@@ -573,4 +579,18 @@ model HotmartTransaction {
   @@index([produtoCatalogoId])
   @@index([status])
   @@index([criadoEm])
+}
+
+model Pessoa {
+  id                String   @id @default(cuid())
+  nome              String
+  emailPrincipal    String   @unique
+  telefonePrincipal String?
+  ativo             Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  lead              Lead?
+  aluno             Aluno?
+  adminUser         AdminUser?
 }
