@@ -1,5 +1,5 @@
 // src/app/api/leads/route.js
-import { emailValido } from '@/lib/validacoes';
+import { emailValido, normalizarEmail } from '@/lib/validacoes';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +28,7 @@ export async function POST(request) {
   try {
     const body = await request.json();
     const { nome, email, whatsapp, utms={}, telefone_secundario, origem } = body;
+    const emailNormalizado = normalizarEmail(email);
 
     const origemParaPainel =
       utms.utm_source || origem || 'Isca Digital - Ebook';
@@ -51,7 +52,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
     }
 
-    if (!emailValido(email)) {
+    if (!emailValido(emailNormalizado)) {
       return NextResponse.json({ error: 'E-mail inválido' }, { status: 400 });
     }
 
@@ -59,7 +60,7 @@ export async function POST(request) {
 
     // 1. Salva ou Atualiza o Lead no Banco de Dados
     const lead = await prisma.lead.upsert({
-      where: { email: email },
+      where: { email: emailNormalizado },
       update: {
         nome: nome,
         // Só sobrescreve o WhatsApp se um novo valor foi informado
@@ -74,7 +75,7 @@ export async function POST(request) {
       },
       create: {
         nome,
-        email,
+        email: emailNormalizado,
         whatsapp: whatsapp || '',   // campo é obrigatório no schema; vazio quando não informado
         baixouEbook: false,
         utmSource: origemParaPainel,
@@ -96,7 +97,7 @@ export async function POST(request) {
     if (resend) {
       const data = await resend.emails.send({
         from: 'Prof. Goulart <contato@mentoriagarimpourbano.com.br>',
-        to: email,
+        to: emailNormalizado,
         subject: 'Seu E-book Chegou: Como transformar lixo eletrônico em OURO',
         html: `
           <!DOCTYPE html>
@@ -210,7 +211,7 @@ export async function POST(request) {
           'api-key': process.env.BREVO_API_KEY,
         },
         body: JSON.stringify({
-          email: email,
+          email: emailNormalizado,
           listIds: [listIdEbook],
           updateEnabled: true,
           attributes: {
