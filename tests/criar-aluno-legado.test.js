@@ -200,4 +200,67 @@ describe('criarAlunoLegado', () => {
     expect(tx.pessoa.create).not.toHaveBeenCalled();
     expect(tx.aluno.create).not.toHaveBeenCalled();
   });
+
+  it('concede acesso ao eBook legado sem criar matrícula', async () => {
+    const tx = criarTx();
+
+    tx.produto.findMany.mockResolvedValue([
+      {
+        id: 'ebook-1',
+        nome: 'eBook legado',
+        tipo: 'EBOOK',
+        ativo: true,
+        direitos: [
+          {
+            id: 'direito-ebook-1',
+            tipo: 'CONTEUDO_PRODUTO',
+            nivel: null,
+          },
+        ],
+      },
+    ]);
+
+    const resultado = await criarAlunoLegado(
+      tx,
+      {
+        nome: 'Aluno Fictício',
+        email: 'ebook-legado@example.test',
+        produtoIds: ['ebook-1'],
+        vigencias: [
+          {
+            produtoId: 'ebook-1',
+            tipoDuracao: 'VITALICIA',
+          },
+        ],
+      },
+      AGORA,
+    );
+
+    expect(tx.matricula.create).not.toHaveBeenCalled();
+
+    expect(
+      tx.vigenciaMatricula.create,
+    ).not.toHaveBeenCalled();
+
+    expect(
+      tx.direitoConcedido.create,
+    ).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        alunoId: 'aluno-1',
+        produtoDireitoId: 'direito-ebook-1',
+        origem: 'LEGADO',
+        status: 'ATIVO',
+        expiraEm: null,
+      }),
+    });
+
+    expect(resultado.produtos).toEqual([
+      expect.objectContaining({
+        produtoId: 'ebook-1',
+        matriculaId: null,
+        tipoDuracao: 'VITALICIA',
+        status: 'ATIVA',
+      }),
+    ]);
+  });
 });

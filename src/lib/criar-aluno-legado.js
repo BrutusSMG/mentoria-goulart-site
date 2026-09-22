@@ -136,37 +136,39 @@ export async function criarAlunoLegado(tx, dados, agora = new Date()) {
 
     const status = expirado ? 'ENCERRADA' : 'ATIVA';
 
-    const matricula = await tx.matricula.create({
-      data: {
-        alunoId: aluno.id,
-        produtoId: produto.id,
-        produtoNome: produto.nome,
-        origem: 'LEGADO',
-        status,
-        concedidaEm: agora,
-        ...(expirado ? { encerradaEm: agora } : {}),
-      },
-    });
+    let matriculaId = null;
 
-    /*
-     * Se o prazo original já acabou, preservamos a data
-     * de término em um registro encerrado. Como a data
-     * original de início não foi informada, não inventamos
-     * um período histórico de acesso.
-     */
-    await tx.vigenciaMatricula.create({
-      data: {
-        matriculaId: matricula.id,
-        origem: 'LEGADO',
-        tipoDuracao: configuracao.tipoDuracao,
-        status: expirado ? 'ENCERRADA' : 'ATIVA',
-        concedidaEm: agora,
-        iniciaEm: expirado ? expiraEm : agora,
-        expiraEm,
-        statusAlteradoEm: agora,
-        ...(expirado ? { encerradaEm: agora } : {}),
-      },
-    });
+    // Cursos geram matrícula e vigência educacional.
+    // eBooks recebem direitos diretamente, sem matrícula.
+    if (produto.tipo === 'CURSO') {
+      const matricula = await tx.matricula.create({
+        data: {
+          alunoId: aluno.id,
+          produtoId: produto.id,
+          produtoNome: produto.nome,
+          origem: 'LEGADO',
+          status,
+          concedidaEm: agora,
+          ...(expirado ? { encerradaEm: agora } : {}),
+        },
+      });
+
+      matriculaId = matricula.id;
+
+      await tx.vigenciaMatricula.create({
+        data: {
+          matriculaId,
+          origem: 'LEGADO',
+          tipoDuracao: configuracao.tipoDuracao,
+          status: expirado ? 'ENCERRADA' : 'ATIVA',
+          concedidaEm: agora,
+          iniciaEm: expirado ? expiraEm : agora,
+          expiraEm,
+          statusAlteradoEm: agora,
+          ...(expirado ? { encerradaEm: agora } : {}),
+        },
+      });
+    }
 
     /*
      * Produto com prazo original encerrado não recebe
@@ -191,7 +193,7 @@ export async function criarAlunoLegado(tx, dados, agora = new Date()) {
 
     resultadoProdutos.push({
       produtoId: produto.id,
-      matriculaId: matricula.id,
+      matriculaId,
       tipoDuracao: configuracao.tipoDuracao,
       expiraEm,
       status,
