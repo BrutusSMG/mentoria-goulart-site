@@ -81,8 +81,8 @@ model Lead {
   updatedAt            DateTime              @updatedAt
   transacoesHotmart    HotmartTransaction[]
   aluno                Aluno?
-  pessoaId String? @unique
-  pessoa   Pessoa? @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
+  pessoaId             String?               @unique
+  pessoa               Pessoa?               @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
 }
 
 model JornadaContribuicao {
@@ -220,18 +220,19 @@ enum StatusDireitoConcedido {
 }
 
 model Aluno {
-  id                String      @id @default(cuid())
-  leadId            String?     @unique
-  nome              String
-  email             String      @unique
-  whatsapp          String?
-  senhaHash         String?
-  status            StatusAluno @default(PENDENTE_ACESSO)
-  origem            OrigemAluno @default(HOTMART)
-  emailVerificadoEm DateTime?
-  ultimoLoginEm     DateTime?
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  id                     String      @id @default(cuid())
+  leadId                 String?     @unique
+  nome                   String
+  email                  String      @unique
+  whatsapp               String?
+  senhaHash              String?
+  status                 StatusAluno @default(PENDENTE_ACESSO)
+  origem                 OrigemAluno @default(HOTMART)
+  emailVerificadoEm      DateTime?
+  conviteLegadoEnviadoEm DateTime?
+  ultimoLoginEm          DateTime?
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
 
   lead               Lead?                @relation(fields: [leadId], references: [id], onDelete: SetNull)
   matriculas         Matricula[]
@@ -239,8 +240,8 @@ model Aluno {
   perfil             PerfilAluno?
   tokensAcesso       AlunoAccessToken[]
   direitosConcedidos DireitoConcedido[]
-  pessoaId String? @unique
-  pessoa   Pessoa? @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
+  pessoaId           String?              @unique
+  pessoa             Pessoa?              @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
 
   @@index([status])
   @@index([origem])
@@ -359,8 +360,8 @@ model AdminUser {
   passwordChangedAt        DateTime?
   createdAt                DateTime  @default(now())
   updatedAt                DateTime  @updatedAt
-  pessoaId String? @unique
-  pessoa   Pessoa? @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
+  pessoaId                 String?   @unique
+  pessoa                   Pessoa?   @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
 }
 
 // Tabela para gerenciar os valores das sucatas
@@ -590,7 +591,7 @@ model Pessoa {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  lead              Lead?
-  aluno             Aluno?
-  adminUser         AdminUser?
+  lead      Lead?
+  aluno     Aluno?
+  adminUser AdminUser?
 }

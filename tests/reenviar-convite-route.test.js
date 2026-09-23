@@ -125,6 +125,7 @@ describe('POST /api/alunos/reenviar-convite', () => {
       senhaHash: null,
       status: 'ATIVO',
       origem: 'LEGADO',
+      conviteLegadoEnviadoEm: new Date('2026-09-22T18:00:00.000Z'),
     });
 
     tokenFindFirstMock.mockResolvedValue(null);
@@ -165,6 +166,8 @@ describe('POST /api/alunos/reenviar-convite', () => {
         email: true,
         senhaHash: true,
         status: true,
+        origem: true,
+        conviteLegadoEnviadoEm: true,
       },
     });
 
@@ -236,5 +239,35 @@ describe('POST /api/alunos/reenviar-convite', () => {
       nome: 'Aluno Manual',
       token: 'token-reenvio',
     });
+  });
+
+  it('não permite reenvio público antes do primeiro convite do legado', async () => {
+    alunoFindUniqueMock.mockResolvedValue({
+      id: 'aluno-legado-pendente',
+      nome: 'Aluno Legado Pendente',
+      email: 'legado-pendente@example.test',
+      senhaHash: null,
+      status: 'ATIVO',
+      origem: 'LEGADO',
+      conviteLegadoEnviadoEm: null,
+    });
+
+    const request = {
+      json: vi.fn().mockResolvedValue({
+        email: 'legado-pendente@example.test',
+      }),
+    };
+
+    const resposta = await POST(request);
+    const corpo = await resposta.json();
+
+    expect(resposta.status).toBe(200);
+    expect(corpo.ok).toBe(true);
+
+    expect(tokenFindFirstMock).not.toHaveBeenCalled();
+    expect(tokenUpdateManyMock).not.toHaveBeenCalled();
+    expect(tokenCreateMock).not.toHaveBeenCalled();
+    expect(transactionMock).not.toHaveBeenCalled();
+    expect(enviarConviteMock).not.toHaveBeenCalled();
   });
 });

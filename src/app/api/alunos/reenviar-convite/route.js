@@ -38,6 +38,8 @@ export async function POST(request) {
         email: true,
         senhaHash: true,
         status: true,
+        origem: true,
+        conviteLegadoEnviadoEm: true,
       },
     });
 
@@ -45,6 +47,16 @@ export async function POST(request) {
       !aluno ||
       aluno.status !== 'ATIVO' ||
       aluno.senhaHash
+    ) {
+      return respostaGenerica();
+    }
+
+    // O primeiro convite de um legado depende da decisão
+    // do administrador. A rota pública só pode reenviá-lo
+    // depois que um envio inicial tiver sido confirmado.
+    if (
+      aluno.origem === 'LEGADO' &&
+      !aluno.conviteLegadoEnviadoEm
     ) {
       return respostaGenerica();
     }
