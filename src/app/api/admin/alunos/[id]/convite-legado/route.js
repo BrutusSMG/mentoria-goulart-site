@@ -4,8 +4,13 @@ import {
   respostaAcessoNegado,
 } from '@/lib/admin-permissoes';
 
-import { verificarElegibilidadeConviteLegado } from
-  '@/lib/elegibilidade-convite-legado';
+import {
+  verificarElegibilidadeConviteLegado,
+} from '@/lib/elegibilidade-convite-legado';
+
+import {
+  executarPrimeiroConviteLegado,
+} from '@/lib/executar-primeiro-convite-legado';
 
 function respostaPrivada(dados, status) {
   return Response.json(dados, {
@@ -17,7 +22,8 @@ function respostaPrivada(dados, status) {
 }
 
 export async function POST(_request, { params }) {
-  // Desabilitada por padrão em todos os ambientes.
+  // Primeiro bloqueio: a funcionalidade administrativa
+  // permanece desabilitada por padrão.
   if (
     process.env.CONVITE_LEGADO_ADMIN_HABILITADO !== 'true'
   ) {
@@ -81,26 +87,94 @@ export async function POST(_request, { params }) {
       );
     }
 
-    // Esta etapa é somente uma conferência.
-    // Não reserva tentativa, não cria token e não envia e-mail.
+    // Segundo bloqueio: mesmo após autorização e consulta,
+    // nenhuma tentativa é preparada enquanto esta flag
+    // adicional permanecer desabilitada.
+    if (
+      process.env.CONVITE_LEGADO_ENVIO_REAL_HABILITADO !== 'true'
+    ) {
+      return respostaPrivada(
+        {
+          ok: false,
+          elegivel: true,
+          erro: 'Envio de convite não habilitado.',
+        },
+        503,
+      );
+    }
+
+    // A função faz uma NOVA verificação de elegibilidade
+    // dentro da transação de preparação.
+    const resultado = await executarPrimeiroConviteLegado({
+      prisma,
+      alunoId: id,
+    });
+
+    if (resultado.estado === 'RECUSADO') {
+      return respostaPrivada(
+        {
+          ok: false,
+          estado: 'RECUSADO',
+          erro: resultado.motivo,
+        },
+        409,
+      );
+    }
+
+    if (resultado.estado === 'ENVIADO') {
+      return respostaPrivada(
+        {
+          ok: true,
+          estado: 'ENVIADO',
+          mensagem: 'Convite aceito pelo provedor de e-mail.',
+        },
+        200,
+      );
+    }
+
+    if (resultado.estado === 'FALHA') {
+      return respostaPrivada(
+        {
+          ok: false,
+          estado: 'FALHA',
+          erro: 'O convite não foi enviado. É necessária conferência.',
+        },
+        503,
+      );
+    }
+
+    if (
+      resultado.estado === 'INDETERMINADO' ||
+      resultado.estado === 'CONFERIR'
+    ) {
+      return respostaPrivada(
+        {
+          ok: false,
+          estado: resultado.estado,
+          erro: 'O resultado do convite exige conferência manual.',
+        },
+        409,
+      );
+    }
+
     return respostaPrivada(
       {
         ok: false,
-        elegivel: true,
-        erro: 'Envio de convite ainda não implementado.',
+        erro: 'Resultado de convite não reconhecido.',
       },
-      503,
+      500,
     );
-  } catch (error) {
+  } catch {
+    // Não registrar tokens, e-mails ou outros dados
+    // eventualmente presentes em mensagens de exceção.
     console.error(
-      'Erro ao conferir elegibilidade do convite legado:',
-      error?.message,
+      'Falha operacional na rota administrativa de convite legado.',
     );
 
     return respostaPrivada(
       {
         ok: false,
-        erro: 'Não foi possível conferir o cadastro do aluno.',
+        erro: 'Não foi possível concluir a operação de convite.',
       },
       500,
     );
