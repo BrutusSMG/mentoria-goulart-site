@@ -40,6 +40,7 @@ export async function enviarConvitePrimeiroAcesso({
   email,
   nome,
   token,
+  detalharResultado = false,
 }) {
   const apiKey = process.env.RESEND_API_KEY;
 
@@ -47,7 +48,10 @@ export async function enviarConvitePrimeiroAcesso({
     console.warn(
       '[RESEND] RESEND_API_KEY ausente; convite não enviado.',
     );
-    return { ok: false };
+
+    return detalharResultado
+      ? { ok: false, resultado: 'FALHA' }
+      : { ok: false };
   }
 
   const baseAlunoConfigurado =
@@ -66,7 +70,7 @@ export async function enviarConvitePrimeiroAcesso({
     : 'Olá.';
 
   try {
-    const resultado = await new Resend(apiKey).emails.send({
+    const respostaProvedor = await new Resend(apiKey).emails.send({
       from: 'Prof. Goulart <contato@mentoriagarimpourbano.com.br>',
       to: email,
       subject: 'Seu acesso ao Portal Garimpo Urbano',
@@ -81,14 +85,48 @@ export async function enviarConvitePrimeiroAcesso({
       `,
     });
 
-    if (resultado?.error) {
+    if (respostaProvedor?.error) {
       console.error(
         'Erro ao enviar convite de primeiro acesso:',
-        resultado.error,
+        respostaProvedor.error,
       );
-      return { ok: false };
+
+      // A rota de convite legado deverá exigir conferência
+      // antes de permitir qualquer nova tentativa.
+      return detalharResultado
+        ? { ok: false, resultado: 'INDETERMINADO' }
+        : { ok: false };
     }
 
+    if (detalharResultado) {
+      const mensagemProvedorId = respostaProvedor?.data?.id;
+
+      if (
+        typeof mensagemProvedorId !== 'string' ||
+        !mensagemProvedorId.trim()
+      ) {
+        console.error(
+          'O provedor não retornou confirmação identificável do convite.',
+        );
+
+        return {
+          ok: false,
+          resultado: 'INDETERMINADO',
+        };
+      }
+
+      console.info(
+        'Convite de primeiro acesso aceito pelo provedor.',
+      );
+
+      return {
+        ok: true,
+        resultado: 'ENVIADO',
+        mensagemProvedorId: mensagemProvedorId.trim(),
+      };
+    }
+
+    // Preserva o formato de resposta dos fluxos existentes.
     console.info('Convite de primeiro acesso enviado', { email });
     return { ok: true };
   } catch (error) {
@@ -96,6 +134,9 @@ export async function enviarConvitePrimeiroAcesso({
       'Erro ao enviar convite de primeiro acesso:',
       error?.message,
     );
-    return { ok: false };
+
+    return detalharResultado
+      ? { ok: false, resultado: 'INDETERMINADO' }
+      : { ok: false };
   }
 }
