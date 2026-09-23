@@ -66,6 +66,11 @@ function criarTx({ cadastroExistente = false } = {}) {
         id: 'concessao-1',
       }),
     },
+    controleConviteLegado: {
+      create: vi.fn().mockResolvedValue({
+        id: 'controle-1',
+      }),
+    },
   };
 }
 
@@ -122,6 +127,15 @@ describe('criarAlunoLegado', () => {
     expect(resultado.produtos[0].expiraEm).toEqual(
       new Date('2027-11-01T03:00:00.000Z'),
     );
+
+    expect(
+      tx.controleConviteLegado.create,
+    ).toHaveBeenCalledWith({
+      data: {
+        alunoId: 'aluno-1',
+        status: 'PENDENTE',
+      },
+    });
   });
 
   it('registra prazo encerrado sem conceder acesso ativo', async () => {

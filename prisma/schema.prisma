@@ -230,22 +230,47 @@ model Aluno {
   origem                 OrigemAluno @default(HOTMART)
   emailVerificadoEm      DateTime?
   conviteLegadoEnviadoEm DateTime?
-  ultimoLoginEm          DateTime?
-  createdAt              DateTime    @default(now())
-  updatedAt              DateTime    @updatedAt
 
-  lead               Lead?                @relation(fields: [leadId], references: [id], onDelete: SetNull)
-  matriculas         Matricula[]
-  transacoesHotmart  HotmartTransaction[]
-  perfil             PerfilAluno?
-  tokensAcesso       AlunoAccessToken[]
-  direitosConcedidos DireitoConcedido[]
-  pessoaId           String?              @unique
-  pessoa             Pessoa?              @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
+  ultimoLoginEm DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  lead                  Lead?                  @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  matriculas            Matricula[]
+  transacoesHotmart     HotmartTransaction[]
+  perfil                PerfilAluno?
+  tokensAcesso          AlunoAccessToken[]
+  direitosConcedidos    DireitoConcedido[]
+  pessoaId              String?                @unique
+  pessoa                Pessoa?                @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
+  controleConviteLegado ControleConviteLegado?
 
   @@index([status])
   @@index([origem])
   @@index([createdAt])
+}
+
+enum StatusConviteLegado {
+  PENDENTE
+  EM_ANDAMENTO
+  ENVIADO
+  FALHA
+  INDETERMINADO
+}
+
+model ControleConviteLegado {
+  id                   String              @id @default(cuid())
+  alunoId              String              @unique
+  status               StatusConviteLegado @default(PENDENTE)
+  tentativas           Int                 @default(0)
+  tentativaIniciadaEm  DateTime?
+  tentativaEncerradaEm DateTime?
+  ultimoErro           String?
+  mensagemProvedorId   String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  aluno Aluno @relation(fields: [alunoId], references: [id], onDelete: Cascade)
 }
 
 model Matricula {

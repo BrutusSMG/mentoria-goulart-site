@@ -97,6 +97,13 @@ export async function criarAlunoLegado(tx, dados, agora = new Date()) {
     data: { alunoId: aluno.id },
   });
 
+  await tx.controleConviteLegado.create({
+    data: {
+      alunoId: aluno.id,
+      status: 'PENDENTE',
+    },
+  });
+
   const vigenciaPorProduto = new Map(
     vigencias.map((vigencia) => [
       vigencia.produtoId,
