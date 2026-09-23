@@ -42,6 +42,11 @@ beforeEach(() => {
   vi.clearAllMocks();
   vi.stubEnv('CONVITE_LEGADO_ADMIN_HABILITADO', '');
   vi.stubEnv('CONVITE_LEGADO_ENVIO_REAL_HABILITADO', '');
+  vi.stubEnv('RESEND_API_KEY', 'chave-ficticia');
+  vi.stubEnv(
+    'NEXT_PUBLIC_ALUNO_URL',
+    'https://aluno.example.test',
+  );
 
   mocks.executarPrimeiroConviteLegado.mockResolvedValue({
     estado: 'ENVIADO',
@@ -362,5 +367,43 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
     } finally {
       consoleError.mockRestore();
     }
+  });
+
+  it('não prepara convite sem a chave do provedor', async () => {
+    vi.stubEnv('CONVITE_LEGADO_ADMIN_HABILITADO', 'true');
+    vi.stubEnv('CONVITE_LEGADO_ENVIO_REAL_HABILITADO', 'true');
+    vi.stubEnv('RESEND_API_KEY', '');
+
+    const resposta = await POST(null, contexto());
+    const corpo = await resposta.json();
+
+    expect(resposta.status).toBe(503);
+    expect(corpo.erro).toBe(
+      'Configuração de envio indisponível.',
+    );
+    expect(
+      mocks.executarPrimeiroConviteLegado,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('não prepara convite sem endereço HTTPS válido', async () => {
+    vi.stubEnv('CONVITE_LEGADO_ADMIN_HABILITADO', 'true');
+    vi.stubEnv('CONVITE_LEGADO_ENVIO_REAL_HABILITADO', 'true');
+    vi.stubEnv(
+      'NEXT_PUBLIC_ALUNO_URL',
+      'http://localhost:3000',
+    );
+    vi.stubEnv('NEXT_PUBLIC_BASE_URL', '');
+
+    const resposta = await POST(null, contexto());
+    const corpo = await resposta.json();
+
+    expect(resposta.status).toBe(503);
+    expect(corpo.erro).toBe(
+      'Configuração de envio indisponível.',
+    );
+    expect(
+      mocks.executarPrimeiroConviteLegado,
+    ).not.toHaveBeenCalled();
   });
 });

@@ -12,6 +12,37 @@ import {
   executarPrimeiroConviteLegado,
 } from '@/lib/executar-primeiro-convite-legado';
 
+function configuracaoEnvioPronta() {
+  if (!process.env.RESEND_API_KEY?.trim()) {
+    return false;
+  }
+
+  const endereco =
+    process.env.NEXT_PUBLIC_ALUNO_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL;
+
+  if (!endereco || endereco !== endereco.trim()) {
+    return false;
+  }
+
+  try {
+    const url = new URL(endereco);
+
+    return (
+      url.protocol === 'https:' &&
+      !['localhost', '127.0.0.1', '[::1]'].includes(
+        url.hostname.toLowerCase(),
+      ) &&
+      !url.username &&
+      !url.password &&
+      !url.search &&
+      !url.hash
+    );
+  } catch {
+    return false;
+  }
+}
+
 function respostaPrivada(dados, status) {
   return Response.json(dados, {
     status,
@@ -98,6 +129,16 @@ export async function POST(_request, { params }) {
           ok: false,
           elegivel: true,
           erro: 'Envio de convite não habilitado.',
+        },
+        503,
+      );
+    }
+
+    if (!configuracaoEnvioPronta()) {
+      return respostaPrivada(
+        {
+          ok: false,
+          erro: 'Configuração de envio indisponível.',
         },
         503,
       );
