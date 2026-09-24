@@ -49,7 +49,11 @@ export async function POST(request) {
       tokenAcesso.usadoEm ||
       tokenAcesso.expiraEm <= new Date() ||
       tokenAcesso.aluno.status !== 'ATIVO' ||
-      tokenAcesso.aluno.senhaHash;
+      tokenAcesso.aluno.senhaHash ||
+      (
+        tokenAcesso.aluno.origem === 'LEGADO' &&
+        !tokenAcesso.aluno.conviteLegadoEnviadoEm
+      );
 
     if (tokenInvalido) {
       return respostaErro('Este convite é inválido, expirou ou já foi utilizado.');

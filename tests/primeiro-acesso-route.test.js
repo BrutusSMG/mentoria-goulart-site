@@ -140,4 +140,81 @@ describe('POST /api/alunos/primeiro-acesso', () => {
     expect(tokenUpdateManyMock).not.toHaveBeenCalled();
     expect(transactionMock).not.toHaveBeenCalled();
   });
+
+  it('não permite primeiro acesso legado com convite apenas preparado', async () => {
+    findUniqueMock.mockResolvedValue({
+      id: 'token-legado-pendente',
+      alunoId: 'aluno-legado',
+      tipo: 'PRIMEIRO_ACESSO',
+      usadoEm: null,
+      expiraEm: new Date(Date.now() + 60 * 60 * 1000),
+      aluno: {
+        id: 'aluno-legado',
+        origem: 'LEGADO',
+        status: 'ATIVO',
+        senhaHash: null,
+        conviteLegadoEnviadoEm: null,
+      },
+    });
+
+    const request = {
+      json: vi.fn().mockResolvedValue({
+        token: 'token-ficticio',
+        senha: 'Senha123!',
+      }),
+    };
+
+    const resposta = await POST(request);
+
+    expect(resposta.status).toBe(400);
+    expect(await resposta.json()).toEqual({
+      ok: false,
+      erro: 'Este convite é inválido, expirou ou já foi utilizado.',
+    });
+
+    expect(bcryptHashMock).not.toHaveBeenCalled();
+    expect(alunoUpdateMock).not.toHaveBeenCalled();
+    expect(tokenUpdateManyMock).not.toHaveBeenCalled();
+    expect(transactionMock).not.toHaveBeenCalled();
+  });
+
+  it('permite primeiro acesso legado após confirmação do envio', async () => {
+    findUniqueMock.mockResolvedValue({
+      id: 'token-legado-confirmado',
+      alunoId: 'aluno-legado',
+      tipo: 'PRIMEIRO_ACESSO',
+      usadoEm: null,
+      expiraEm: new Date(Date.now() + 60 * 60 * 1000),
+      aluno: {
+        id: 'aluno-legado',
+        origem: 'LEGADO',
+        status: 'ATIVO',
+        senhaHash: null,
+        conviteLegadoEnviadoEm: new Date(),
+      },
+    });
+
+    bcryptHashMock.mockResolvedValue('hash-ficticio');
+    alunoUpdateMock.mockReturnValue({
+      operacao: 'atualizar-aluno',
+    });
+    tokenUpdateManyMock.mockReturnValue({
+      operacao: 'invalidar-convites',
+    });
+    transactionMock.mockResolvedValue([]);
+
+    const request = {
+      json: vi.fn().mockResolvedValue({
+        token: 'token-ficticio',
+        senha: 'Senha123!',
+      }),
+    };
+
+    const resposta = await POST(request);
+
+    expect(resposta.status).toBe(200);
+    expect(await resposta.json()).toEqual({ ok: true });
+    expect(bcryptHashMock).toHaveBeenCalledTimes(1);
+    expect(transactionMock).toHaveBeenCalledTimes(1);
+  });
 });
