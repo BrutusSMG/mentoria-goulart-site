@@ -48,6 +48,44 @@ function classeStatus(status) {
   return "bg-zinc-700/50 text-zinc-300";
 }
 
+const INFORMACOES_CONVITE_LEGADO = {
+  PENDENTE: {
+    rotulo: "Pendente",
+    descricao:
+      "Não há envio confirmado no cadastro. Verifique os dados antes de iniciar qualquer tentativa.",
+  },
+  EM_ANDAMENTO: {
+    rotulo: "Em andamento",
+    descricao:
+      "Uma tentativa de envio foi iniciada. Não inicie outra tentativa enquanto o resultado não for confirmado.",
+  },
+  ENVIADO: {
+    rotulo: "Envio aceito pelo provedor",
+    descricao:
+      "O provedor aceitou o envio do convite. Isso não confirma a entrega na caixa de entrada do aluno.",
+  },
+  FALHA: {
+    rotulo: "Falha no envio",
+    descricao:
+      "A tentativa foi registrada como falha. É necessária conferência antes de qualquer nova ação.",
+  },
+  INDETERMINADO: {
+    rotulo: "Resultado indeterminado",
+    descricao:
+      "Não foi possível confirmar o resultado do envio. Confira o registro no provedor antes de considerar um reenvio.",
+  },
+  CONFERIR: {
+    rotulo: "Conferência necessária",
+    descricao:
+      "Os dados do convite ou do primeiro acesso estão incompletos ou inconsistentes. Confira os registros antes de agir.",
+  },
+  PRIMEIRO_ACESSO_CONCLUIDO: {
+    rotulo: "Primeiro acesso concluído",
+    descricao:
+      "A conta possui senha configurada e registro de verificação do e-mail.",
+  },
+};
+
 function classeSituacaoVigencia(status) {
   if (status === "ATIVA") {
     return "bg-green-500/15 text-green-400";
@@ -155,6 +193,17 @@ export default function AlunoDetalhePage() {
 
   const perfil = aluno.perfil;
 
+  const informacoesConvite =
+    aluno.origem === "LEGADO"
+      ? INFORMACOES_CONVITE_LEGADO[
+          aluno.estadoConviteLegado
+        ] ?? {
+          rotulo: "Estado indisponível",
+          descricao:
+            "Não foi possível identificar o estado do convite. Confira os registros antes de agir.",
+        }
+      : null;
+
   return (
     <div className="space-y-7">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -170,6 +219,36 @@ export default function AlunoDetalhePage() {
           {aluno.status}
         </span>
       </div>
+
+            {informacoesConvite && (
+        <Secao titulo="Convite de primeiro acesso" icone={Mail}>
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              Estado do convite legado
+            </p>
+
+            <p className="text-base font-bold text-white">
+              {informacoesConvite.rotulo}
+            </p>
+
+            <p className="text-sm leading-relaxed text-zinc-400">
+              {informacoesConvite.descricao}
+            </p>
+
+            {aluno.conviteLegadoEnviadoEm && (
+              <p className="text-xs text-zinc-500">
+                Aceite do envio registrado em:{" "}
+                {formatarData(aluno.conviteLegadoEnviadoEm)}
+              </p>
+            )}
+
+            <p className="border-t border-zinc-800 pt-3 text-xs text-zinc-500">
+              Esta seção é somente para consulta. Nenhum convite
+              pode ser enviado ou reenviado por aqui.
+            </p>
+          </div>
+        </Secao>
+      )}
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Secao titulo="Identificação e contato" icone={UserRound}>
