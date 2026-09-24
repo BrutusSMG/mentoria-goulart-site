@@ -237,10 +237,53 @@ export default function AlunoDetalhePage() {
 
             {aluno.conviteLegadoEnviadoEm && (
               <p className="text-xs text-zinc-500">
-                Aceite do envio registrado em:{" "}
+                Data de envio registrada no cadastro:{" "}
                 {formatarData(aluno.conviteLegadoEnviadoEm)}
               </p>
             )}
+
+                        <div className="rounded-xl border border-zinc-800 bg-zinc-950/60 p-4">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                Auditoria da tentativa
+              </p>
+
+              {aluno.controleConviteLegado ? (
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  <Campo
+                    rotulo="Estado registrado no controle"
+                    valor={aluno.controleConviteLegado.status}
+                  />
+
+                  <Campo
+                    rotulo="Tentativas registradas"
+                    valor={
+                      aluno.controleConviteLegado.tentativas == null
+                        ? "Não informado"
+                        : String(aluno.controleConviteLegado.tentativas)
+                    }
+                  />
+
+                  <Campo
+                    rotulo="Tentativa iniciada em"
+                    valor={formatarData(
+                      aluno.controleConviteLegado.tentativaIniciadaEm
+                    )}
+                  />
+
+                  <Campo
+                    rotulo="Tentativa encerrada em"
+                    valor={formatarData(
+                      aluno.controleConviteLegado.tentativaEncerradaEm
+                    )}
+                  />
+                </dl>
+              ) : (
+                <p className="text-sm leading-relaxed text-orange-300">
+                  Nenhum controle de convite encontrado para este aluno.
+                  É necessária conferência dos registros.
+                </p>
+              )}
+            </div>
 
             <p className="border-t border-zinc-800 pt-3 text-xs text-zinc-500">
               Esta seção é somente para consulta. Nenhum convite
