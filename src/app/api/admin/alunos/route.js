@@ -1,6 +1,9 @@
 // src/app/api/admin/alunos/route.js
 import { obterAcessoAdmin, prisma, respostaAcessoNegado } from "@/lib/admin-permissoes";
 import { inteiroLimitado } from "@/lib/validacoes";
+import {
+  obterEstadoConviteLegado,
+} from '@/lib/estado-convite-legado';
 
 function respostaPrivada(data, status = 200) {
   return Response.json(data, {
@@ -68,6 +71,14 @@ export async function GET(req) {
           whatsapp: true,
           status: true,
           origem: true,
+          senhaHash: true,
+          emailVerificadoEm: true,
+          conviteLegadoEnviadoEm: true,
+          controleConviteLegado: {
+            select: {
+              status: true,
+            },
+          },
           ultimoLoginEm: true,
           createdAt: true,
           perfil: {
@@ -93,11 +104,27 @@ export async function GET(req) {
       }),
     ]);
 
-    const items = alunos.map((aluno) => ({
-      ...aluno,
-      statusRotulo: rotuloStatus(aluno.status),
-      produtos: aluno.matriculas.map((matricula) => matricula.produtoNome),
-    }));
+    const items = alunos.map((aluno) => {
+      // Campos usados somente no servidor para calcular
+      // o estado do convite. Não devem integrar a resposta.
+      const {
+        senhaHash: _senhaHash,
+        emailVerificadoEm: _emailVerificadoEm,
+        conviteLegadoEnviadoEm: _conviteLegadoEnviadoEm,
+        controleConviteLegado: _controleConviteLegado,
+        ...alunoPublico
+      } = aluno;
+
+      return {
+        ...alunoPublico,
+        estadoConviteLegado:
+          obterEstadoConviteLegado(aluno),
+        statusRotulo: rotuloStatus(aluno.status),
+        produtos: aluno.matriculas.map(
+          (matricula) => matricula.produtoNome,
+        ),
+      };
+    });
 
     return respostaPrivada({
       items,
