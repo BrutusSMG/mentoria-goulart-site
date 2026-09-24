@@ -44,6 +44,9 @@ export async function GET(_req, { params }) {
         controleConviteLegado: {
           select: {
             status: true,
+            tentativas: true,
+            tentativaIniciadaEm: true,
+            tentativaEncerradaEm: true,
           },
         },
         ultimoLoginEm: true,
@@ -139,12 +142,30 @@ export async function GET(_req, { params }) {
 
     // O hash é usado apenas no servidor para determinar
     // o estado do primeiro acesso. Nunca vai para a API.
-    const { senhaHash: _senhaHash, ...alunoPublico } = aluno;
+    const {
+      senhaHash: _senhaHash,
+      controleConviteLegado: controleConvite,
+      ...alunoPublico
+    } = aluno;
 
     return respostaPrivada({
       item: {
         ...alunoPublico,
         estadoConviteLegado: obterEstadoConviteLegado(aluno),
+
+        // Expor somente os dados de auditoria necessários
+        // à consulta administrativa.
+        controleConviteLegado:
+          aluno.origem === 'LEGADO' && controleConvite
+            ? {
+                status: controleConvite.status,
+                tentativas: controleConvite.tentativas,
+                tentativaIniciadaEm:
+                  controleConvite.tentativaIniciadaEm,
+                tentativaEncerradaEm:
+                  controleConvite.tentativaEncerradaEm,
+              }
+            : null,
 
         matriculas: aluno.matriculas.map((matricula) => ({
           ...matricula,

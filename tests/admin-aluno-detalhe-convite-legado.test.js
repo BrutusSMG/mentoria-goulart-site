@@ -84,6 +84,9 @@ describe('GET /api/admin/alunos/[id] — convite legado', () => {
           controleConviteLegado: {
             select: {
               status: true,
+              tentativas: true,
+              tentativaIniciadaEm: true,
+              tentativaEncerradaEm: true,
             },
           },
         }),
@@ -128,5 +131,77 @@ describe('GET /api/admin/alunos/[id] — convite legado', () => {
 
     expect(resposta.status).toBe(200);
     expect(corpo.item.estadoConviteLegado).toBeNull();
+  });
+
+  it('retorna somente os dados de auditoria permitidos', async () => {
+    const inicio = new Date('2026-09-20T10:00:00.000Z');
+    const fim = new Date('2026-09-20T10:01:00.000Z');
+
+    mocks.alunoFindUnique.mockResolvedValue({
+      ...alunoFicticio(),
+      controleConviteLegado: {
+        status: 'INDETERMINADO',
+        tentativas: 1,
+        tentativaIniciadaEm: inicio,
+        tentativaEncerradaEm: fim,
+        ultimoErro: 'detalhe-operacional-confidencial',
+        mensagemProvedorId: 'identificador-privado',
+      },
+    });
+
+    const resposta = await GET(null, contexto());
+    const corpo = await resposta.json();
+
+    expect(resposta.status).toBe(200);
+    expect(corpo.item.estadoConviteLegado).toBe(
+      'INDETERMINADO',
+    );
+
+    expect(corpo.item.controleConviteLegado).toEqual({
+      status: 'INDETERMINADO',
+      tentativas: 1,
+      tentativaIniciadaEm: inicio.toISOString(),
+      tentativaEncerradaEm: fim.toISOString(),
+    });
+
+    const respostaSerializada = JSON.stringify(corpo);
+
+    expect(respostaSerializada).not.toContain(
+      'detalhe-operacional-confidencial',
+    );
+    expect(respostaSerializada).not.toContain(
+      'identificador-privado',
+    );
+
+    expect(mocks.alunoFindUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({
+          controleConviteLegado: {
+            select: {
+              status: true,
+              tentativas: true,
+              tentativaIniciadaEm: true,
+              tentativaEncerradaEm: true,
+            },
+          },
+        }),
+      }),
+    );
+  });
+
+  it('exige conferência quando não existe controle de convite', async () => {
+    mocks.alunoFindUnique.mockResolvedValue({
+      ...alunoFicticio(),
+      controleConviteLegado: null,
+    });
+
+    const resposta = await GET(null, contexto());
+    const corpo = await resposta.json();
+
+    expect(resposta.status).toBe(200);
+    expect(corpo.item.estadoConviteLegado).toBe(
+      'CONFERIR',
+    );
+    expect(corpo.item.controleConviteLegado).toBeNull();
   });
 });
