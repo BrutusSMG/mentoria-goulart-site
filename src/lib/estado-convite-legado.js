@@ -24,15 +24,18 @@ export function obterEstadoConviteLegado(aluno) {
     return 'CONFERIR';
   }
 
-  const statusControle =
-    aluno.controleConviteLegado?.status;
+  // Sem controle registrado, não há como confirmar
+  // que o convite está realmente pendente de envio.
+  if (!aluno.controleConviteLegado) {
+    return 'CONFERIR';
+  }
 
-  // A data de envio e o controle precisam ser coerentes.
+  const statusControle =
+    aluno.controleConviteLegado.status;
+
+   // A data de envio e o controle precisam ser coerentes.
   if (aluno.conviteLegadoEnviadoEm) {
-    if (
-      statusControle &&
-      statusControle !== 'ENVIADO'
-    ) {
+    if (statusControle !== 'ENVIADO') {
       return 'CONFERIR';
     }
 
@@ -53,14 +56,10 @@ export function obterEstadoConviteLegado(aluno) {
     return statusControle;
   }
 
-  if (
-    statusControle &&
-    statusControle !== 'PENDENTE'
-  ) {
-    return 'CONFERIR';
+  if (statusControle === 'PENDENTE') {
+    return 'PENDENTE';
   }
 
-  // Mantém compatibilidade com cadastros antigos
-  // que ainda não possuem o controle carregado.
-  return 'PENDENTE';
+  // Inclui estados desconhecidos ou ausentes.
+  return 'CONFERIR';
 }

@@ -8,6 +8,9 @@ const legado = {
   senhaHash: null,
   emailVerificadoEm: null,
   conviteLegadoEnviadoEm: null,
+  controleConviteLegado: {
+    status: 'PENDENTE',
+  },
 };
 
 describe('obterEstadoConviteLegado', () => {
@@ -22,6 +25,9 @@ describe('obterEstadoConviteLegado', () => {
       obterEstadoConviteLegado({
         ...legado,
         conviteLegadoEnviadoEm: new Date(),
+        controleConviteLegado: {
+          status: 'ENVIADO',
+        },
       }),
     ).toBe('ENVIADO');
   });
@@ -117,6 +123,25 @@ describe('obterEstadoConviteLegado', () => {
         controleConviteLegado: {
           status: 'FALHA',
         },
+      }),
+    ).toBe('CONFERIR');
+  });
+
+  it('exige conferência quando o aluno legado não possui controle de convite', () => {
+    expect(
+      obterEstadoConviteLegado({
+        ...legado,
+        controleConviteLegado: null,
+      }),
+    ).toBe('CONFERIR');
+  });
+
+  it('exige conferência quando há data de envio mas não há controle', () => {
+    expect(
+      obterEstadoConviteLegado({
+        ...legado,
+        conviteLegadoEnviadoEm: new Date(),
+        controleConviteLegado: null,
       }),
     ).toBe('CONFERIR');
   });
