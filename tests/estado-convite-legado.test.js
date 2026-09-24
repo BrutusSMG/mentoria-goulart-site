@@ -53,4 +53,71 @@ describe('obterEstadoConviteLegado', () => {
       }),
     ).toBeNull();
   });
+
+  it('identifica controle de convite em andamento', () => {
+    expect(
+      obterEstadoConviteLegado({
+        ...legado,
+        controleConviteLegado: {
+          status: 'EM_ANDAMENTO',
+        },
+      }),
+    ).toBe('EM_ANDAMENTO');
+  });
+
+  it('identifica falha registrada no controle', () => {
+    expect(
+      obterEstadoConviteLegado({
+        ...legado,
+        controleConviteLegado: {
+          status: 'FALHA',
+        },
+      }),
+    ).toBe('FALHA');
+  });
+
+  it('identifica resultado indeterminado', () => {
+    expect(
+      obterEstadoConviteLegado({
+        ...legado,
+        controleConviteLegado: {
+          status: 'INDETERMINADO',
+        },
+      }),
+    ).toBe('INDETERMINADO');
+  });
+
+  it('mantém PENDENTE quando o controle ainda não foi reservado', () => {
+    expect(
+      obterEstadoConviteLegado({
+        ...legado,
+        controleConviteLegado: {
+          status: 'PENDENTE',
+        },
+      }),
+    ).toBe('PENDENTE');
+  });
+
+  it('exige conferência quando o controle indica envio sem data no aluno', () => {
+    expect(
+      obterEstadoConviteLegado({
+        ...legado,
+        controleConviteLegado: {
+          status: 'ENVIADO',
+        },
+      }),
+    ).toBe('CONFERIR');
+  });
+
+  it('exige conferência quando existe data de envio mas o controle indica falha', () => {
+    expect(
+      obterEstadoConviteLegado({
+        ...legado,
+        conviteLegadoEnviadoEm: new Date(),
+        controleConviteLegado: {
+          status: 'FALHA',
+        },
+      }),
+    ).toBe('CONFERIR');
+  });
 });
