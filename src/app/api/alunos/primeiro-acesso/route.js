@@ -11,6 +11,10 @@ import {
   TIPO_PRIMEIRO_ACESSO,
   hashTokenAcesso,
 } from '@/lib/convite-primeiro-acesso';
+import {
+  concluirPrimeiroAcessoTransacional,
+  ConvitePrimeiroAcessoIndisponivelError,
+} from '@/lib/concluir-primeiro-acesso-transacional';
 
 function respostaErro(mensagem, status = 400) {
   return NextResponse.json({ ok: false, erro: mensagem }, { status });
@@ -62,29 +66,33 @@ export async function POST(request) {
     const senhaHash = await bcrypt.hash(senha, 12);
     const agora = new Date();
 
-    await prisma.$transaction([
-      prisma.aluno.update({
-        where: { id: tokenAcesso.alunoId },
-        data: {
-          senhaHash,
-          emailVerificadoEm: agora,
-        },
+    await prisma.$transaction((tx) =>
+      concluirPrimeiroAcessoTransacional(tx, {
+        tokenAcesso,
+        senhaHash,
+        agora,
       }),
-      prisma.alunoAccessToken.updateMany({
-        where: {
-          alunoId: tokenAcesso.alunoId,
-          tipo: TIPO_PRIMEIRO_ACESSO,
-          usadoEm: null,
-        },
-        data: {
-          usadoEm: agora,
-        },
-      }),
-    ]);
+    );
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error('Erro no primeiro acesso do aluno:', error?.message);
-    return respostaErro('Não foi possível concluir o primeiro acesso.', 500);
+    if (
+      error instanceof
+      ConvitePrimeiroAcessoIndisponivelError
+    ) {
+      return respostaErro(
+        'Este convite é inválido, expirou ou já foi utilizado.',
+      );
+    }
+
+    // Não incluir token, senha ou detalhes da exceção no log.
+    console.error(
+      'Falha operacional ao concluir o primeiro acesso do aluno.',
+    );
+
+    return respostaErro(
+      'Não foi possível concluir o primeiro acesso.',
+      500,
+    );
   }
 }
