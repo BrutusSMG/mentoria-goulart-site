@@ -59,7 +59,7 @@ beforeEach(() => {
   vi.stubEnv('RESEND_API_KEY', 'chave-ficticia');
   vi.stubEnv(
     'NEXT_PUBLIC_ALUNO_URL',
-    'https://aluno.example.test',
+    'https://mentoria-goulart-site.vercel.app/aluno',
   );
 
   mocks.executarPrimeiroConviteLegado.mockResolvedValue({
@@ -490,5 +490,82 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
     expect(
       mocks.executarPrimeiroConviteLegado,
     ).not.toHaveBeenCalled();
+  });
+
+  it('não aceita domínio HTTPS fora da lista permitida', async () => {
+    vi.stubEnv('CONVITE_LEGADO_ADMIN_HABILITADO', 'true');
+    vi.stubEnv('CONVITE_LEGADO_ENVIO_REAL_HABILITADO', 'true');
+    vi.stubEnv(
+      'NEXT_PUBLIC_ALUNO_URL',
+      'https://portal-externo.example.test',
+    );
+
+    const resposta = await POST(
+      requisicaoValida(),
+      contexto(),
+    );
+
+    const corpo = await resposta.json();
+
+    expect(resposta.status).toBe(503);
+    expect(corpo.erro).toBe(
+      'Configuração de envio indisponível.',
+    );
+
+    expect(
+      mocks.executarPrimeiroConviteLegado,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('não usa NEXT_PUBLIC_BASE_URL como fallback para convite legado', async () => {
+    vi.stubEnv('CONVITE_LEGADO_ADMIN_HABILITADO', 'true');
+    vi.stubEnv('CONVITE_LEGADO_ENVIO_REAL_HABILITADO', 'true');
+    vi.stubEnv('NEXT_PUBLIC_ALUNO_URL', '');
+    vi.stubEnv(
+      'NEXT_PUBLIC_BASE_URL',
+      'https://mentoria-goulart-site.vercel.app',
+    );
+
+    const resposta = await POST(
+      requisicaoValida(),
+      contexto(),
+    );
+
+    const corpo = await resposta.json();
+
+    expect(resposta.status).toBe(503);
+    expect(corpo.erro).toBe(
+      'Configuração de envio indisponível.',
+    );
+
+    expect(
+      mocks.executarPrimeiroConviteLegado,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('aceita o endereço oficial do Portal do Aluno em produção', async () => {
+    vi.stubEnv('CONVITE_LEGADO_ADMIN_HABILITADO', 'true');
+    vi.stubEnv('CONVITE_LEGADO_ENVIO_REAL_HABILITADO', 'true');
+    vi.stubEnv(
+      'NEXT_PUBLIC_ALUNO_URL',
+      'https://aluno.mentoriagarimpourbano.com.br',
+    );
+
+    const resposta = await POST(
+      requisicaoValida(),
+      contexto(),
+    );
+
+    const corpo = await resposta.json();
+
+    expect(resposta.status).toBe(200);
+    expect(corpo.estado).toBe('ENVIADO');
+
+    expect(
+      mocks.executarPrimeiroConviteLegado,
+    ).toHaveBeenCalledExactlyOnceWith({
+      prisma: expect.anything(),
+      alunoId: 'aluno-ficticio',
+    });
   });
 });

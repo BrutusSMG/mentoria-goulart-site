@@ -12,14 +12,17 @@ import {
   executarPrimeiroConviteLegado,
 } from '@/lib/executar-primeiro-convite-legado';
 
+const ENDERECOS_ALUNO_PERMITIDOS = new Set([
+  'https://mentoria-goulart-site.vercel.app/aluno',
+  'https://aluno.mentoriagarimpourbano.com.br',
+]);
+
 function configuracaoEnvioPronta() {
   if (!process.env.RESEND_API_KEY?.trim()) {
     return false;
   }
 
-  const endereco =
-    process.env.NEXT_PUBLIC_ALUNO_URL ||
-    process.env.NEXT_PUBLIC_BASE_URL;
+  const endereco = process.env.NEXT_PUBLIC_ALUNO_URL;
 
   if (!endereco || endereco !== endereco.trim()) {
     return false;
@@ -29,10 +32,8 @@ function configuracaoEnvioPronta() {
     const url = new URL(endereco);
 
     return (
+      ENDERECOS_ALUNO_PERMITIDOS.has(endereco) &&
       url.protocol === 'https:' &&
-      !['localhost', '127.0.0.1', '[::1]'].includes(
-        url.hostname.toLowerCase(),
-      ) &&
       !url.username &&
       !url.password &&
       !url.search &&
