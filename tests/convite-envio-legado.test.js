@@ -92,6 +92,19 @@ describe('resultado detalhado do primeiro convite legado', () => {
       ok: false,
       resultado: 'INDETERMINADO',
     });
+    const logs = JSON.stringify(console.error.mock.calls);
+
+    expect(logs).not.toContain(
+      'Erro fictício do provedor',
+    );
+
+    expect(logs).not.toContain(
+      dadosFicticios.email,
+    );
+
+    expect(logs).not.toContain(
+      dadosFicticios.token,
+    );
   });
 
   it('classifica exceção de conexão como INDETERMINADO', async () => {
@@ -107,6 +120,20 @@ describe('resultado detalhado do primeiro convite legado', () => {
       ok: false,
       resultado: 'INDETERMINADO',
     });
+
+    const logs = JSON.stringify(console.error.mock.calls);
+
+    expect(logs).not.toContain(
+      'Conexão interrompida — teste fictício',
+    );
+
+    expect(logs).not.toContain(
+      dadosFicticios.email,
+    );
+
+    expect(logs).not.toContain(
+      dadosFicticios.token,
+    );
   });
 
   it('não confirma envio quando falta o identificador do provedor', async () => {

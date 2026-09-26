@@ -87,8 +87,7 @@ export async function enviarConvitePrimeiroAcesso({
 
     if (respostaProvedor?.error) {
       console.error(
-        'Erro ao enviar convite de primeiro acesso:',
-        respostaProvedor.error,
+        'Falha reportada pelo provedor ao processar convite de primeiro acesso.',
       );
 
       // A rota de convite legado deverá exigir conferência
@@ -127,12 +126,13 @@ export async function enviarConvitePrimeiroAcesso({
     }
 
     // Preserva o formato de resposta dos fluxos existentes.
-    console.info('Convite de primeiro acesso enviado', { email });
+    console.info(
+      'Convite de primeiro acesso aceito pelo provedor.',
+    );
     return { ok: true };
-  } catch (error) {
+  } catch {
     console.error(
-      'Erro ao enviar convite de primeiro acesso:',
-      error?.message,
+      'Falha operacional ao processar convite de primeiro acesso.',
     );
 
     return detalharResultado
