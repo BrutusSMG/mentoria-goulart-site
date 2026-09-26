@@ -155,12 +155,107 @@ validação da migração do banco de dados.
 
 ---
 
+## Etapa 4 — Identidade, alunos legados e primeiro acesso
+
+**Status: em homologação.**
+
+A quarta etapa introduz uma nova base de identidade para permitir que a
+plataforma evolua sem depender da duplicação de dados entre diferentes
+tipos de cadastro.
+
+A entidade Pessoa passa a representar gradualmente a identidade central
+do usuário, enquanto aluno, lead e outros papéis continuam representando
+os diferentes relacionamentos dessa pessoa com o MGU.
+
+A implementação foi realizada de forma incremental e não destrutiva,
+preservando as estruturas existentes durante a transição.
+
+### Cadastro e integração de alunos legados
+
+Também foi estruturado um fluxo específico para alunos que já possuíam
+relacionamento com o MGU antes da automação atual da plataforma.
+
+Esse fluxo permite:
+
+- registrar o aluno dentro da nova estrutura de identidade;
+- associar os produtos já adquiridos;
+- preservar regras de matrícula, vigência e direitos de acesso;
+- diferenciar cadastros históricos das compras originadas pelas integrações
+  atuais;
+- interromper automaticamente situações que apresentem conflito ou
+  ambiguidade de identidade.
+
+A plataforma evita realizar associações automáticas quando os dados não
+permitem confirmar com segurança que os registros pertencem à mesma pessoa.
+
+### Primeiro acesso e segurança do convite
+
+O primeiro acesso dos alunos legados também passou a possuir um fluxo
+controlado.
+
+A evolução inclui:
+
+- geração de convites individuais de primeiro acesso;
+- links temporários e de uso único;
+- proteção contra tentativas duplicadas;
+- registro do andamento e do resultado das tentativas;
+- bloqueio de novas ações quando o resultado anterior não puder ser
+  determinado com segurança;
+- conclusão transacional da criação da senha;
+- separação entre credenciais, situação do aluno e direitos adquiridos.
+
+Os estados do convite também passaram a ser apresentados no painel
+administrativo, permitindo identificar situações que exigem conferência
+antes de uma nova ação.
+
+### Auditoria administrativa
+
+A listagem e o detalhe administrativo do aluno foram ampliados para permitir
+acompanhar o processo de primeiro acesso dos cadastros históricos.
+
+O painel apresenta somente as informações necessárias à operação,
+preservando dados internos e credenciais que não devem ser expostos
+à interface administrativa.
+
+Nesta fase, a consulta e a auditoria já estão disponíveis em homologação,
+enquanto o envio administrativo real permanece submetido às validações
+operacionais previstas para o fechamento da etapa.
+
+### Portal do Aluno
+
+A estrutura do Portal do Aluno também foi preparada para utilizar um
+subdomínio próprio, mantendo compatibilidade com as rotas já existentes
+da aplicação.
+
+Essa evolução permite oferecer ao aluno uma navegação mais simples e
+independente da estrutura interna de URLs da plataforma.
+
+### Situação atual
+
+A Etapa 4 já possui em homologação:
+
+- base inicial para a identidade centralizada;
+- vínculo entre identidade e aluno;
+- cadastro controlado de alunos legados;
+- preservação de produtos, matrículas, vigências e direitos;
+- primeiro acesso seguro;
+- controle e auditoria dos convites;
+- visualização administrativa do estado do processo;
+- preparação do endereço próprio do Portal do Aluno.
+
+A etapa continuará em homologação até a conclusão dos testes operacionais,
+validação do fluxo completo de convite e preparação controlada das
+alterações necessárias para produção.
+
+---
+
 ## Próximas evoluções
 
 A plataforma continuará sendo desenvolvida de forma incremental.
 
 Entre as direções previstas estão:
 
+- evolução da identidade, usuários, acessos e permissões;
 - expansão do Ecossistema MGU;
 - evolução da experiência dos alunos;
 - ampliação dos recursos administrativos;
