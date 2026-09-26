@@ -52,7 +52,28 @@ function respostaPrivada(dados, status) {
   });
 }
 
-export async function POST(_request, { params }) {
+function requisicaoMesmaOrigem(request) {
+  if (!request?.url) {
+    return false;
+  }
+
+  const origem = request.headers?.get('origin');
+
+  if (!origem) {
+    return false;
+  }
+
+  try {
+    const urlRequisicao = new URL(request.url);
+    const urlOrigem = new URL(origem);
+
+    return urlOrigem.origin === urlRequisicao.origin;
+  } catch {
+    return false;
+  }
+}
+
+export async function POST(request, { params }) {
   // Primeiro bloqueio: a funcionalidade administrativa
   // permanece desabilitada por padrão.
   if (
@@ -61,6 +82,16 @@ export async function POST(_request, { params }) {
     return respostaPrivada(
       { ok: false, erro: 'Envio de convite indisponível.' },
       503,
+    );
+  }
+
+  if (!requisicaoMesmaOrigem(request)) {
+    return respostaPrivada(
+      {
+        ok: false,
+        erro: 'Origem da requisição não permitida.',
+      },
+      403,
     );
   }
 

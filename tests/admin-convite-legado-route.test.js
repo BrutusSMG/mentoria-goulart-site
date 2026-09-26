@@ -38,6 +38,20 @@ function contexto(id = 'aluno-ficticio') {
   };
 }
 
+function requisicaoValida() {
+  const origem = 'https://admin.example.test';
+
+  return new Request(
+    `${origem}/api/admin/alunos/aluno-ficticio/convite-legado`,
+    {
+      method: 'POST',
+      headers: {
+        Origin: origem,
+      },
+    },
+  );
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubEnv('CONVITE_LEGADO_ADMIN_HABILITADO', '');
@@ -90,7 +104,7 @@ afterEach(() => {
 describe('POST /api/admin/alunos/[id]/convite-legado', () => {
   it('permanece bloqueada por padrão', async () => {
     const resposta = await POST(
-      null,
+      requisicaoValida(),
       contexto(),
     );
 
@@ -119,7 +133,7 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
     });
 
     const resposta = await POST(
-      null,
+      requisicaoValida(),
       contexto(),
     );
 
@@ -133,7 +147,7 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
     );
 
     const resposta = await POST(
-      null,
+      requisicaoValida(),
       contexto(''),
     );
 
@@ -147,7 +161,7 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
     );
 
     const resposta = await POST(
-      null,
+      requisicaoValida(),
       contexto(),
     );
 
@@ -169,7 +183,7 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
 
     mocks.alunoFindUnique.mockResolvedValue(null);
 
-    const resposta = await POST(null, contexto());
+    const resposta = await POST(requisicaoValida(), contexto());
 
     expect(resposta.status).toBe(404);
   });
@@ -182,7 +196,7 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
       origem: 'HOTMART',
     });
 
-    const resposta = await POST(null, contexto());
+    const resposta = await POST(requisicaoValida(), contexto());
 
     expect(resposta.status).toBe(409);
   });
@@ -206,7 +220,7 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
       },
     });
 
-    const resposta = await POST(null, contexto());
+    const resposta = await POST(requisicaoValida(), contexto());
 
     expect(resposta.status).toBe(409);
   });
@@ -214,7 +228,7 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
   it('consulta um legado elegível, mas continua sem executar envio', async () => {
     vi.stubEnv('CONVITE_LEGADO_ADMIN_HABILITADO', 'true');
 
-    const resposta = await POST(null, contexto());
+    const resposta = await POST(requisicaoValida(), contexto());
     const corpo = await resposta.json();
 
     expect(resposta.status).toBe(503);
@@ -256,7 +270,7 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
   it('não executa o fluxo quando apenas a segunda flag está habilitada', async () => {
     vi.stubEnv('CONVITE_LEGADO_ENVIO_REAL_HABILITADO', 'true');
 
-    const resposta = await POST(null, contexto());
+    const resposta = await POST(requisicaoValida(), contexto());
 
     expect(resposta.status).toBe(503);
     expect(mocks.obterAcessoAdmin).not.toHaveBeenCalled();
@@ -269,7 +283,7 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
     vi.stubEnv('CONVITE_LEGADO_ADMIN_HABILITADO', 'true');
     vi.stubEnv('CONVITE_LEGADO_ENVIO_REAL_HABILITADO', 'true');
 
-    const resposta = await POST(null, contexto());
+    const resposta = await POST(requisicaoValida(), contexto());
     const corpo = await resposta.json();
 
     expect(resposta.status).toBe(200);
@@ -296,7 +310,7 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
       motivo: 'O convite já foi reservado.',
     });
 
-    const resposta = await POST(null, contexto());
+    const resposta = await POST(requisicaoValida(), contexto());
     const corpo = await resposta.json();
 
     expect(resposta.status).toBe(409);
@@ -315,7 +329,7 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
       estado: 'FALHA',
     });
 
-    const resposta = await POST(null, contexto());
+    const resposta = await POST(requisicaoValida(), contexto());
     const corpo = await resposta.json();
 
     expect(resposta.status).toBe(503);
@@ -333,7 +347,7 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
         estado,
       });
 
-      const resposta = await POST(null, contexto());
+      const resposta = await POST(requisicaoValida(), contexto());
       const corpo = await resposta.json();
 
       expect(resposta.status).toBe(409);
@@ -354,10 +368,10 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
 
     const consoleError = vi
       .spyOn(console, 'error')
-      .mockImplementation(() => {});
+      .mockImplementation(() => { });
 
     try {
-      const resposta = await POST(null, contexto());
+      const resposta = await POST(requisicaoValida(), contexto());
       const corpo = await resposta.json();
 
       expect(resposta.status).toBe(500);
@@ -374,7 +388,7 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
     vi.stubEnv('CONVITE_LEGADO_ENVIO_REAL_HABILITADO', 'true');
     vi.stubEnv('RESEND_API_KEY', '');
 
-    const resposta = await POST(null, contexto());
+    const resposta = await POST(requisicaoValida(), contexto());
     const corpo = await resposta.json();
 
     expect(resposta.status).toBe(503);
@@ -395,13 +409,84 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
     );
     vi.stubEnv('NEXT_PUBLIC_BASE_URL', '');
 
-    const resposta = await POST(null, contexto());
+    const resposta = await POST(requisicaoValida(), contexto());
     const corpo = await resposta.json();
 
     expect(resposta.status).toBe(503);
     expect(corpo.erro).toBe(
       'Configuração de envio indisponível.',
     );
+    expect(
+      mocks.executarPrimeiroConviteLegado,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('rejeita requisição sem Origin quando a funcionalidade administrativa está habilitada', async () => {
+    vi.stubEnv(
+      'CONVITE_LEGADO_ADMIN_HABILITADO',
+      'true',
+    );
+
+    const request = new Request(
+      'https://admin.example.test/api/admin/alunos/aluno-ficticio/convite-legado',
+      {
+        method: 'POST',
+      },
+    );
+
+    const resposta = await POST(
+      request,
+      contexto(),
+    );
+
+    const corpo = await resposta.json();
+
+    expect(resposta.status).toBe(403);
+    expect(corpo.erro).toBe(
+      'Origem da requisição não permitida.',
+    );
+
+    expect(
+      mocks.obterAcessoAdmin,
+    ).not.toHaveBeenCalled();
+
+    expect(
+      mocks.executarPrimeiroConviteLegado,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('rejeita requisição de origem diferente', async () => {
+    vi.stubEnv(
+      'CONVITE_LEGADO_ADMIN_HABILITADO',
+      'true',
+    );
+
+    const request = new Request(
+      'https://admin.example.test/api/admin/alunos/aluno-ficticio/convite-legado',
+      {
+        method: 'POST',
+        headers: {
+          Origin: 'https://externo.example.test',
+        },
+      },
+    );
+
+    const resposta = await POST(
+      request,
+      contexto(),
+    );
+
+    const corpo = await resposta.json();
+
+    expect(resposta.status).toBe(403);
+    expect(corpo.erro).toBe(
+      'Origem da requisição não permitida.',
+    );
+
+    expect(
+      mocks.obterAcessoAdmin,
+    ).not.toHaveBeenCalled();
+
     expect(
       mocks.executarPrimeiroConviteLegado,
     ).not.toHaveBeenCalled();
