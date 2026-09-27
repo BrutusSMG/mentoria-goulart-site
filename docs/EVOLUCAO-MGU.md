@@ -215,6 +215,12 @@ aluno.
 
 A reutilização de um convite já consumido é recusada pela plataforma.
 
+Também foi definido um procedimento específico para situações em que o
+resultado de uma tentativa não pode ser determinado com segurança.
+
+Nesses casos, a plataforma preserva as evidências existentes e impede que
+a incerteza resulte automaticamente em uma nova tentativa de envio.
+
 ### Auditoria administrativa
 
 A listagem e o detalhe administrativo do aluno foram ampliados para permitir
@@ -249,6 +255,7 @@ A Etapa 4 já possui em homologação:
 - preservação de produtos, matrículas, vigências e direitos;
 - primeiro acesso seguro;
 - controle e auditoria dos convites;
+- procedimento definido para situações que exigem conferência manual;
 - proteção contra duplicidade e reutilização do convite;
 - visualização administrativa do estado do processo;
 - validação controlada do envio e do primeiro acesso;
@@ -258,9 +265,8 @@ A Etapa 4 já possui em homologação:
 O fluxo completo foi validado em homologação sem liberar automaticamente
 a operação equivalente em produção.
 
-A etapa continuará em homologação enquanto são concluídos os procedimentos
-de conferência de situações excepcionais, a preparação das alterações de
-banco e a publicação controlada para produção.
+A etapa continuará em homologação enquanto são concluídas a preparação
+das alterações de banco e a publicação controlada para produção.
 
 ---
 
