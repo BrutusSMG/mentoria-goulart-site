@@ -208,6 +208,13 @@ Os estados do convite também passaram a ser apresentados no painel
 administrativo, permitindo identificar situações que exigem conferência
 antes de uma nova ação.
 
+O fluxo completo também foi validado em ambiente de homologação,
+incluindo envio controlado do convite, criação da senha, consumo único
+do link, login posterior e reconhecimento dos acessos adquiridos pelo
+aluno.
+
+A reutilização de um convite já consumido é recusada pela plataforma.
+
 ### Auditoria administrativa
 
 A listagem e o detalhe administrativo do aluno foram ampliados para permitir
@@ -217,9 +224,11 @@ O painel apresenta somente as informações necessárias à operação,
 preservando dados internos e credenciais que não devem ser expostos
 à interface administrativa.
 
-Nesta fase, a consulta e a auditoria já estão disponíveis em homologação,
-enquanto o envio administrativo real permanece submetido às validações
-operacionais previstas para o fechamento da etapa.
+A consulta, a auditoria e o fluxo controlado de primeiro acesso já foram
+validados em homologação.
+
+O envio permanece protegido por barreiras operacionais e não é habilitado
+automaticamente em produção.
 
 ### Portal do Aluno
 
@@ -240,12 +249,18 @@ A Etapa 4 já possui em homologação:
 - preservação de produtos, matrículas, vigências e direitos;
 - primeiro acesso seguro;
 - controle e auditoria dos convites;
+- proteção contra duplicidade e reutilização do convite;
 - visualização administrativa do estado do processo;
+- validação controlada do envio e do primeiro acesso;
+- login posterior do aluno com reconhecimento dos acessos adquiridos;
 - preparação do endereço próprio do Portal do Aluno.
 
-A etapa continuará em homologação até a conclusão dos testes operacionais,
-validação do fluxo completo de convite e preparação controlada das
-alterações necessárias para produção.
+O fluxo completo foi validado em homologação sem liberar automaticamente
+a operação equivalente em produção.
+
+A etapa continuará em homologação enquanto são concluídos os procedimentos
+de conferência de situações excepcionais, a preparação das alterações de
+banco e a publicação controlada para produção.
 
 ---
 
