@@ -265,8 +265,12 @@ A Etapa 4 já possui em homologação:
 O fluxo completo foi validado em homologação sem liberar automaticamente
 a operação equivalente em produção.
 
-A etapa continuará em homologação enquanto são concluídas a preparação
-das alterações de banco e a publicação controlada para produção.
+A preparação das alterações de banco necessárias para a Etapa 4 também
+foi concluída e validada em ambiente técnico isolado, preservando o
+histórico existente da linha de produção e os dados preexistentes.
+
+A publicação controlada e as verificações posteriores em produção ainda
+permanecem pendentes antes da conclusão definitiva da Etapa 4.
 
 ---
 
