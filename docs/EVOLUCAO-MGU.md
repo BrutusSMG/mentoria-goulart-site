@@ -247,7 +247,9 @@ independente da estrutura interna de URLs da plataforma.
 
 ### Situação atual
 
-A Etapa 4 já possui em homologação:
+A Etapa 4 foi concluída e publicada em produção.
+
+A evolução incorporou:
 
 - base inicial para a identidade centralizada;
 - vínculo entre identidade e aluno;
@@ -258,19 +260,16 @@ A Etapa 4 já possui em homologação:
 - procedimento definido para situações que exigem conferência manual;
 - proteção contra duplicidade e reutilização do convite;
 - visualização administrativa do estado do processo;
-- validação controlada do envio e do primeiro acesso;
-- login posterior do aluno com reconhecimento dos acessos adquiridos;
-- preparação do endereço próprio do Portal do Aluno.
+- validação do fluxo completo de primeiro acesso;
+- Portal do Aluno preparado para seu endereço próprio;
+- publicação controlada das novas estruturas e funcionalidades.
 
-O fluxo completo foi validado em homologação sem liberar automaticamente
-a operação equivalente em produção.
+A atualização de produção foi concluída preservando os dados existentes e
+com validação das principais áreas públicas e administrativas.
 
-A preparação das alterações de banco necessárias para a Etapa 4 também
-foi concluída e validada em ambiente técnico isolado, preservando o
-histórico existente da linha de produção e os dados preexistentes.
-
-A publicação controlada e as verificações posteriores em produção ainda
-permanecem pendentes antes da conclusão definitiva da Etapa 4.
+As capacidades operacionais mais sensíveis relacionadas ao cadastro e ao
+envio de convites legados permanecem desabilitadas por decisão operacional
+e só deverão ser habilitadas futuramente mediante nova validação explícita.
 
 ---
 
