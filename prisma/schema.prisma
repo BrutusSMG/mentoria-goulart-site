@@ -81,6 +81,8 @@ model Lead {
   updatedAt            DateTime              @updatedAt
   transacoesHotmart    HotmartTransaction[]
   aluno                Aluno?
+  pessoaId             String?               @unique
+  pessoa               Pessoa?               @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
 }
 
 model JornadaContribuicao {
@@ -218,29 +220,57 @@ enum StatusDireitoConcedido {
 }
 
 model Aluno {
-  id                String      @id @default(cuid())
-  leadId            String?     @unique
-  nome              String
-  email             String      @unique
-  whatsapp          String?
-  senhaHash         String?
-  status            StatusAluno @default(PENDENTE_ACESSO)
-  origem            OrigemAluno @default(HOTMART)
-  emailVerificadoEm DateTime?
-  ultimoLoginEm     DateTime?
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  id                     String      @id @default(cuid())
+  leadId                 String?     @unique
+  nome                   String
+  email                  String      @unique
+  whatsapp               String?
+  senhaHash              String?
+  status                 StatusAluno @default(PENDENTE_ACESSO)
+  origem                 OrigemAluno @default(HOTMART)
+  emailVerificadoEm      DateTime?
+  conviteLegadoEnviadoEm DateTime?
 
-  lead               Lead?                @relation(fields: [leadId], references: [id], onDelete: SetNull)
-  matriculas         Matricula[]
-  transacoesHotmart  HotmartTransaction[]
-  perfil             PerfilAluno?
-  tokensAcesso       AlunoAccessToken[]
-  direitosConcedidos DireitoConcedido[]
+  ultimoLoginEm DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  lead                  Lead?                  @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  matriculas            Matricula[]
+  transacoesHotmart     HotmartTransaction[]
+  perfil                PerfilAluno?
+  tokensAcesso          AlunoAccessToken[]
+  direitosConcedidos    DireitoConcedido[]
+  pessoaId              String?                @unique
+  pessoa                Pessoa?                @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
+  controleConviteLegado ControleConviteLegado?
 
   @@index([status])
   @@index([origem])
   @@index([createdAt])
+}
+
+enum StatusConviteLegado {
+  PENDENTE
+  EM_ANDAMENTO
+  ENVIADO
+  FALHA
+  INDETERMINADO
+}
+
+model ControleConviteLegado {
+  id                   String              @id @default(cuid())
+  alunoId              String              @unique
+  status               StatusConviteLegado @default(PENDENTE)
+  tentativas           Int                 @default(0)
+  tentativaIniciadaEm  DateTime?
+  tentativaEncerradaEm DateTime?
+  ultimoErro           String?
+  mensagemProvedorId   String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  aluno Aluno @relation(fields: [alunoId], references: [id], onDelete: Cascade)
 }
 
 model Matricula {
@@ -355,6 +385,8 @@ model AdminUser {
   passwordChangedAt        DateTime?
   createdAt                DateTime  @default(now())
   updatedAt                DateTime  @updatedAt
+  pessoaId                 String?   @unique
+  pessoa                   Pessoa?   @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
 }
 
 // Tabela para gerenciar os valores das sucatas
@@ -573,4 +605,18 @@ model HotmartTransaction {
   @@index([produtoCatalogoId])
   @@index([status])
   @@index([criadoEm])
+}
+
+model Pessoa {
+  id                String   @id @default(cuid())
+  nome              String
+  emailPrincipal    String   @unique
+  telefonePrincipal String?
+  ativo             Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  lead      Lead?
+  aluno     Aluno?
+  adminUser AdminUser?
 }

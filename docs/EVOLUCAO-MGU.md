@@ -152,6 +152,125 @@ Com a conclusão da Etapa 3, o MGU dispõe de uma base ampliada para comercializ
 
 ---
 
+## Etapa 4 — Identidade, alunos legados e primeiro acesso
+
+**Status: em homologação.**
+
+A quarta etapa introduz uma nova base de identidade para permitir que a
+plataforma evolua sem depender da duplicação de dados entre diferentes
+tipos de cadastro.
+
+A entidade Pessoa passa a representar gradualmente a identidade central
+do usuário, enquanto aluno, lead e outros papéis continuam representando
+os diferentes relacionamentos dessa pessoa com o MGU.
+
+A implementação foi realizada de forma incremental e não destrutiva,
+preservando as estruturas existentes durante a transição.
+
+### Cadastro e integração de alunos legados
+
+Também foi estruturado um fluxo específico para alunos que já possuíam
+relacionamento com o MGU antes da automação atual da plataforma.
+
+Esse fluxo permite:
+
+- registrar o aluno dentro da nova estrutura de identidade;
+- associar os produtos já adquiridos;
+- preservar regras de matrícula, vigência e direitos de acesso;
+- diferenciar cadastros históricos das compras originadas pelas integrações
+  atuais;
+- interromper automaticamente situações que apresentem conflito ou
+  ambiguidade de identidade.
+
+A plataforma evita realizar associações automáticas quando os dados não
+permitem confirmar com segurança que os registros pertencem à mesma pessoa.
+
+### Primeiro acesso e segurança do convite
+
+O primeiro acesso dos alunos legados também passou a possuir um fluxo
+controlado.
+
+A evolução inclui:
+
+- geração de convites individuais de primeiro acesso;
+- links temporários e de uso único;
+- proteção contra tentativas duplicadas;
+- registro do andamento e do resultado das tentativas;
+- bloqueio de novas ações quando o resultado anterior não puder ser
+  determinado com segurança;
+- conclusão transacional da criação da senha;
+- separação entre credenciais, situação do aluno e direitos adquiridos.
+
+Os estados do convite também passaram a ser apresentados no painel
+administrativo, permitindo identificar situações que exigem conferência
+antes de uma nova ação.
+
+O fluxo completo também foi validado em ambiente de homologação,
+incluindo envio controlado do convite, criação da senha, consumo único
+do link, login posterior e reconhecimento dos acessos adquiridos pelo
+aluno.
+
+A reutilização de um convite já consumido é recusada pela plataforma.
+
+Também foi definido um procedimento específico para situações em que o
+resultado de uma tentativa não pode ser determinado com segurança.
+
+Nesses casos, a plataforma preserva as evidências existentes e impede que
+a incerteza resulte automaticamente em uma nova tentativa de envio.
+
+### Auditoria administrativa
+
+A listagem e o detalhe administrativo do aluno foram ampliados para permitir
+acompanhar o processo de primeiro acesso dos cadastros históricos.
+
+O painel apresenta somente as informações necessárias à operação,
+preservando dados internos e credenciais que não devem ser expostos
+à interface administrativa.
+
+A consulta, a auditoria e o fluxo controlado de primeiro acesso já foram
+validados em homologação.
+
+O envio permanece protegido por barreiras operacionais e não é habilitado
+automaticamente em produção.
+
+### Portal do Aluno
+
+A estrutura do Portal do Aluno também foi preparada para utilizar um
+subdomínio próprio, mantendo compatibilidade com as rotas já existentes
+da aplicação.
+
+Essa evolução permite oferecer ao aluno uma navegação mais simples e
+independente da estrutura interna de URLs da plataforma.
+
+### Situação atual
+
+A Etapa 4 já possui em homologação:
+
+- base inicial para a identidade centralizada;
+- vínculo entre identidade e aluno;
+- cadastro controlado de alunos legados;
+- preservação de produtos, matrículas, vigências e direitos;
+- primeiro acesso seguro;
+- controle e auditoria dos convites;
+- procedimento definido para situações que exigem conferência manual;
+- proteção contra duplicidade e reutilização do convite;
+- visualização administrativa do estado do processo;
+- validação controlada do envio e do primeiro acesso;
+- login posterior do aluno com reconhecimento dos acessos adquiridos;
+- preparação do endereço próprio do Portal do Aluno.
+
+O fluxo completo foi validado em homologação sem liberar automaticamente
+a operação equivalente em produção.
+
+A preparação das alterações de banco necessárias para a Etapa 4 também
+foi concluída e validada em ambiente técnico isolado, preservando o
+histórico existente da linha de produção e os dados preexistentes.
+
+A publicação controlada e as verificações posteriores em produção ainda
+permanecem pendentes antes da conclusão definitiva da Etapa 4.
+
+---
+
 ## Próximas evoluções
 
 A plataforma continuará sendo desenvolvida de forma incremental.

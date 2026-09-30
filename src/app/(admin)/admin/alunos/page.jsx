@@ -42,6 +42,35 @@ function EstadoVazio() {
   );
 }
 
+const ROTULOS_CONVITE_LEGADO = {
+  PENDENTE: "Pendente",
+  EM_ANDAMENTO: "Em andamento",
+  ENVIADO: "Envio aceito",
+  FALHA: "Falha",
+  INDETERMINADO: "Indeterminado",
+  CONFERIR: "Conferir",
+  PRIMEIRO_ACESSO_CONCLUIDO: "Acesso concluído",
+};
+
+function classeEstadoConviteLegado(estado) {
+  if (
+    estado === "PRIMEIRO_ACESSO_CONCLUIDO" ||
+    estado === "ENVIADO"
+  ) {
+    return "bg-green-500/15 text-green-400";
+  }
+
+  if (estado === "PENDENTE") {
+    return "bg-amber-500/15 text-amber-200";
+  }
+
+  if (estado === "EM_ANDAMENTO") {
+    return "bg-blue-500/15 text-blue-300";
+  }
+
+  return "bg-orange-500/15 text-orange-300";
+}
+
 export default function AlunosPage() {
   const [dados, setDados] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -198,6 +227,7 @@ export default function AlunosPage() {
                 <tr>
                   <th className="p-4 font-semibold">Aluno</th>
                   <th className="p-4 font-semibold">Status</th>
+                  <th className="p-4 font-semibold">Convite legado</th>
                   <th className="p-4 font-semibold">Matrículas</th>
                   <th className="p-4 font-semibold">Comunidade</th>
                   <th className="p-4 font-semibold">Último login</th>
@@ -207,7 +237,7 @@ export default function AlunosPage() {
               <tbody className="divide-y divide-zinc-800">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="p-12 text-center">
+                    <td colSpan={7} className="p-12 text-center">
                       <Loader2 className="mx-auto h-6 w-6 animate-spin text-[#d89900]" />
                     </td>
                   </tr>
@@ -230,6 +260,19 @@ export default function AlunosPage() {
                         </span>
                       </td>
                       <td className="p-4">
+                        {aluno.origem === "LEGADO" ? (
+                          <span
+                            className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium ${classeEstadoConviteLegado(aluno.estadoConviteLegado)}`}
+                          >
+                            {ROTULOS_CONVITE_LEGADO[
+                              aluno.estadoConviteLegado
+                            ] ?? "Estado indisponível"}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-zinc-600">—</span>
+                        )}
+                      </td>
+                      <td className="p-4">
                         <div className="space-y-1">
                           {aluno.matriculas?.length ? aluno.matriculas.map((matricula) => (
                             <p key={matricula.id} className="text-sm text-zinc-300">
@@ -246,7 +289,7 @@ export default function AlunosPage() {
                       <td className="p-4 whitespace-nowrap text-sm text-zinc-500">{formatarData(aluno.createdAt)}</td>
                     </tr>
                   ))
-                ) : <tr><td colSpan={6}><EstadoVazio /></td></tr>}
+                ) : <tr><td colSpan={7}><EstadoVazio /></td></tr>}
               </tbody>
             </table>
           </div>

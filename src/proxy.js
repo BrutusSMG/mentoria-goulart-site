@@ -21,10 +21,10 @@ export default function proxy(req) {
     hostname.startsWith('admin.localhost') ||
     hostname.startsWith('admin.127.0.0.1');
 
-  const isAlunosSubdomain =
-    hostname === 'alunos.mentoriagarimpourbano.com.br' ||
-    hostname.startsWith('alunos.localhost') ||
-    hostname.startsWith('alunos.127.0.0.1');
+  const isAlunoSubdomain =
+    hostname === 'aluno.mentoriagarimpourbano.com.br' ||
+    hostname.startsWith('aluno.localhost') ||
+    hostname.startsWith('aluno.127.0.0.1');
 
   // ebook.dominio.com.br/          → /ebook
   // ebook.dominio.com.br/obrigado  → /ebook/obrigado
@@ -56,7 +56,7 @@ export default function proxy(req) {
     return response;
   }
 
-  if (isAlunosSubdomain) {
+  if (isAlunoSubdomain) {
     // Compatibilidade com links internos existentes em /aluno/...
     // No subdomínio, o prefixo /aluno não deve aparecer na URL pública.
     if (

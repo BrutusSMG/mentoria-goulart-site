@@ -79,7 +79,21 @@ export async function obterAcessoAdmin() {
     };
   }
 
-  return { permitido: true, status: 200, conta: acesso.conta, ehAdmin: true };
+  if (acesso.conta.mustChangePassword) {
+    return {
+      permitido: false,
+      status: 403,
+      motivo: "É necessário definir uma nova senha antes de continuar.",
+      conta: acesso.conta,
+    };
+  }
+
+  return {
+    permitido: true,
+    status: 200,
+    conta: acesso.conta,
+    ehAdmin: true,
+  };
 }
 
 export function respostaAcessoNegado(acesso) {

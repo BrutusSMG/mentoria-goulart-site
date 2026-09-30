@@ -1,6 +1,9 @@
 // src/app/api/admin/alunos/[id]/route.js
 import { obterAcessoAdmin, prisma, respostaAcessoNegado } from "@/lib/admin-permissoes";
 import { obterSituacaoVigencia } from '@/lib/situacao-vigencia';
+import {
+  obterEstadoConviteLegado,
+} from '@/lib/estado-convite-legado';
 
 function respostaPrivada(data, status = 200) {
   return Response.json(data, {
@@ -35,7 +38,17 @@ export async function GET(_req, { params }) {
         whatsapp: true,
         status: true,
         origem: true,
+        senhaHash: true,
         emailVerificadoEm: true,
+        conviteLegadoEnviadoEm: true,
+        controleConviteLegado: {
+          select: {
+            status: true,
+            tentativas: true,
+            tentativaIniciadaEm: true,
+            tentativaEncerradaEm: true,
+          },
+        },
         ultimoLoginEm: true,
         createdAt: true,
         updatedAt: true,
@@ -127,9 +140,32 @@ export async function GET(_req, { params }) {
       return respostaPrivada({ error: "Aluno não encontrado." }, 404);
     }
 
+    // O hash é usado apenas no servidor para determinar
+    // o estado do primeiro acesso. Nunca vai para a API.
+    const {
+      senhaHash: _senhaHash,
+      controleConviteLegado: controleConvite,
+      ...alunoPublico
+    } = aluno;
+
     return respostaPrivada({
       item: {
-        ...aluno,
+        ...alunoPublico,
+        estadoConviteLegado: obterEstadoConviteLegado(aluno),
+
+        // Expor somente os dados de auditoria necessários
+        // à consulta administrativa.
+        controleConviteLegado:
+          aluno.origem === 'LEGADO' && controleConvite
+            ? {
+                status: controleConvite.status,
+                tentativas: controleConvite.tentativas,
+                tentativaIniciadaEm:
+                  controleConvite.tentativaIniciadaEm,
+                tentativaEncerradaEm:
+                  controleConvite.tentativaEncerradaEm,
+              }
+            : null,
 
         matriculas: aluno.matriculas.map((matricula) => ({
           ...matricula,
