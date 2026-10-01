@@ -154,7 +154,7 @@ Com a conclusão da Etapa 3, o MGU dispõe de uma base ampliada para comercializ
 
 ## Etapa 4 — Identidade, alunos legados e primeiro acesso
 
-**Status: em homologação.**
+**Status: concluída e publicada em produção.**
 
 A quarta etapa introduz uma nova base de identidade para permitir que a
 plataforma evolua sem depender da duplicação de dados entre diferentes
