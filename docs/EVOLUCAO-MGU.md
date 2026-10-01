@@ -157,7 +157,7 @@ validação da migração do banco de dados.
 
 ## Etapa 4 — Identidade, alunos legados e primeiro acesso
 
-**Status: em homologação.**
+**Status: concluída e publicada em produção.**
 
 A quarta etapa introduz uma nova base de identidade para permitir que a
 plataforma evolua sem depender da duplicação de dados entre diferentes
