@@ -30,6 +30,7 @@ vi.mock('@/lib/prisma', () => ({
 import {
   obterAcessoAdmin,
   obterAcessoAtual,
+  obterAcessoModulo,
 } from '../src/lib/admin-permissoes';
 
 beforeEach(() => {
@@ -142,4 +143,140 @@ describe('admin-permissoes', () => {
     expect(acesso.ehAdmin).toBe(true);
     expect(acesso.conta.id).toBe('admin-ficticio');
   });
+
+  it('mantém flag legada como fallback para PARCEIRO', async () => {
+    mocks.adminFindUnique.mockResolvedValue({
+      id: 'parceiro-ficticio',
+      role: 'PARCEIRO',
+      ativo: true,
+      mustChangePassword: false,
+      podeGerenciarSucatas: true,
+      podeGerenciarDepoimentos: false,
+      podeGerenciarJornada: false,
+      pessoa: {
+        usuario: null,
+      },
+    });
+
+    const acesso = await obterAcessoModulo('SUCATAS');
+
+    expect(acesso.permitido).toBe(true);
+    expect(acesso.ehAdmin).toBe(false);
+  });
+
+  it('permite PARCEIRO pela nova UsuarioPermissao ativa', async () => {
+    mocks.adminFindUnique.mockResolvedValue({
+      id: 'parceiro-ficticio',
+      role: 'PARCEIRO',
+      ativo: true,
+      mustChangePassword: false,
+      podeGerenciarSucatas: false,
+      podeGerenciarDepoimentos: false,
+      podeGerenciarJornada: false,
+      pessoa: {
+        usuario: {
+          id: 'usuario-ficticio',
+          status: 'ATIVO',
+          acessoAdministrativo: {
+            papel: 'PARCEIRO',
+            ativo: true,
+          },
+          permissoes: [
+            {
+              permissao: {
+                codigo: 'DEPOIMENTOS_GERENCIAR',
+                ativo: true,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const acesso = await obterAcessoModulo('DEPOIMENTOS');
+
+    expect(acesso.permitido).toBe(true);
+    expect(acesso.ehAdmin).toBe(false);
+  });
+
+  it('não concede permissão nova quando Usuario está bloqueado', async () => {
+    mocks.adminFindUnique.mockResolvedValue({
+      id: 'parceiro-ficticio',
+      role: 'PARCEIRO',
+      ativo: true,
+      mustChangePassword: false,
+      podeGerenciarSucatas: false,
+      podeGerenciarDepoimentos: false,
+      podeGerenciarJornada: true,
+      pessoa: {
+        usuario: {
+          id: 'usuario-ficticio',
+          status: 'BLOQUEADO',
+          acessoAdministrativo: {
+            papel: 'PARCEIRO',
+            ativo: true,
+          },
+          permissoes: [
+            {
+              permissao: {
+                codigo: 'JORNADA_GERENCIAR',
+                ativo: true,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const acesso = await obterAcessoModulo('JORNADA');
+
+    expect(acesso.permitido).toBe(false);
+    expect(acesso.status).toBe(403);
+  });
+
+  it('mantém ADMIN com acesso total sem depender de UsuarioPermissao', async () => {
+    const acesso = await obterAcessoModulo('SUCATAS');
+
+    expect(acesso.permitido).toBe(true);
+    expect(acesso.ehAdmin).toBe(true);
+  });
+
+
+  it('projeta UsuarioPermissao nos campos efetivos usados pela interface', async () => {
+    mocks.adminFindUnique.mockResolvedValue({
+      id: 'parceiro-ficticio',
+      role: 'PARCEIRO',
+      ativo: true,
+      mustChangePassword: false,
+      podeGerenciarSucatas: false,
+      podeGerenciarDepoimentos: false,
+      podeGerenciarJornada: false,
+      pessoa: {
+        usuario: {
+          id: 'usuario-ficticio',
+          status: 'ATIVO',
+          acessoAdministrativo: {
+            papel: 'PARCEIRO',
+            ativo: true,
+          },
+          permissoes: [
+            {
+              permissao: {
+                codigo: 'SUCATAS_GERENCIAR',
+                ativo: true,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const acesso = await obterAcessoAtual();
+
+    expect(acesso.permitido).toBe(true);
+    expect(acesso.conta.podeGerenciarSucatas).toBe(true);
+    expect(acesso.conta.podeGerenciarDepoimentos).toBe(false);
+    expect(acesso.conta.podeGerenciarJornada).toBe(false);
+  });
+
 });
