@@ -3,7 +3,6 @@
 export const ROLES_ADMIN = Object.freeze([
   "ADMIN",
   "PARCEIRO",
-  "FORNECEDOR",
 ]);
 
 export const SENHA_ADMIN_MIN = 12;

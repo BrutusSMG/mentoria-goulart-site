@@ -17,7 +17,7 @@ import {
   X,
 } from "lucide-react";
 
-const PERFIS = ["ADMIN", "PARCEIRO", "FORNECEDOR"];
+const PERFIS = ["ADMIN", "PARCEIRO"];
 
 function formatarData(data) {
   if (!data) return "Nunca";

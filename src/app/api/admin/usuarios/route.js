@@ -12,6 +12,7 @@ import {
   roleAdminValida,
   senhaAdminValida,
 } from "@/lib/validacoes";
+import { sincronizarAdminUserComUsuario } from "@/lib/sincronizar-admin-usuario";
 
 function respostaPrivada(data, status = 200) {
   return NextResponse.json(data, {
@@ -99,19 +100,25 @@ export async function POST(req) {
 
     const senhaHash = await bcrypt.hash(senhaTemporaria, 12);
 
-    const usuario = await prisma.adminUser.create({
-      data: {
-        nome,
-        email,
-        role,
-        senha: senhaHash,
-        ativo: true,
-        podeGerenciarSucatas,
-        podeGerenciarDepoimentos,
-        podeGerenciarJornada,
-        mustChangePassword: true,
-      },
-      select: camposSeguros,
+    const usuario = await prisma.$transaction(async (tx) => {
+      const criado = await tx.adminUser.create({
+        data: {
+          nome,
+          email,
+          role,
+          senha: senhaHash,
+          ativo: true,
+          podeGerenciarSucatas,
+          podeGerenciarDepoimentos,
+          podeGerenciarJornada,
+          mustChangePassword: true,
+        },
+        select: camposSeguros,
+      });
+
+      await sincronizarAdminUserComUsuario(tx, criado.id);
+
+      return criado;
     });
 
     return respostaPrivada({ item: usuario }, 201);

@@ -10,6 +10,7 @@ import {
   SENHA_ADMIN_MIN,
   senhaAdminValida,
 } from "@/lib/validacoes";
+import { sincronizarAdminUserComUsuario } from "@/lib/sincronizar-admin-usuario";
 
 function respostaPrivada(data, status = 200) {
   return NextResponse.json(data, {
@@ -75,14 +76,19 @@ export async function POST(req) {
     }
 
     const senhaHash = await bcrypt.hash(novaSenha, 12);
+    const passwordChangedAt = new Date();
 
-    await prisma.adminUser.update({
-      where: { id: usuario.id },
-      data: {
-        senha: senhaHash,
-        mustChangePassword: false,
-        passwordChangedAt: new Date(),
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.adminUser.update({
+        where: { id: usuario.id },
+        data: {
+          senha: senhaHash,
+          mustChangePassword: false,
+          passwordChangedAt,
+        },
+      });
+
+      await sincronizarAdminUserComUsuario(tx, usuario.id);
     });
 
     return respostaPrivada({ success: true });

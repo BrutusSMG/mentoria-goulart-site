@@ -58,7 +58,7 @@ describe("validações compartilhadas", () => {
     it("valida roles administrativas permitidas", () => {
       expect(roleAdminValida("ADMIN")).toBe(true);
       expect(roleAdminValida("PARCEIRO")).toBe(true);
-      expect(roleAdminValida("FORNECEDOR")).toBe(true);
+      expect(roleAdminValida("FORNECEDOR")).toBe(false);
       expect(roleAdminValida("ALUNO")).toBe(false);
     });
   });
