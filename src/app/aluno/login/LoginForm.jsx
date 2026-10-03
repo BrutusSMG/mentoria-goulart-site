@@ -37,6 +37,11 @@ export default function LoginAlunoPage() {
 
     const sessao = await getSession();
 
+    if (sessao?.user?.mustChangePassword) {
+      router.replace('/alterar-senha');
+      return;
+    }
+
     if (sessao?.user?.tipoConta !== 'ALUNO') {
       setStatus('error');
       setErro('Esta conta não possui acesso ao Portal Garimpo Urbano.');

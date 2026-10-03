@@ -74,28 +74,38 @@ export function permissoesEfetivasDaConta(conta) {
 export async function obterAcessoAtual() {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.id) {
-    return { permitido: false, status: 401, motivo: "Não autorizado." };
+  if (
+    !session?.user?.usuarioId ||
+    !session?.user?.pessoaId
+  ) {
+    return {
+      permitido: false,
+      status: 401,
+      motivo: "Não autorizado.",
+    };
   }
 
   const conta = await prisma.adminUser.findUnique({
-    where: { id: session.user.id },
+    where: {
+      pessoaId: session.user.pessoaId,
+    },
     select: {
       id: true,
       nome: true,
       email: true,
       role: true,
       ativo: true,
-      mustChangePassword: true,
       podeGerenciarSucatas: true,
       podeGerenciarDepoimentos: true,
       podeGerenciarJornada: true,
       pessoa: {
         select: {
+          id: true,
           usuario: {
             select: {
               id: true,
               status: true,
+              mustChangePassword: true,
               acessoAdministrativo: {
                 select: {
                   papel: true,
@@ -120,16 +130,54 @@ export async function obterAcessoAtual() {
   });
 
   if (!conta?.ativo) {
-    return { permitido: false, status: 403, motivo: "Conta inativa." };
+    return {
+      permitido: false,
+      status: 403,
+      motivo: "Conta inativa.",
+    };
   }
 
-  const permissoesEfetivas = permissoesEfetivasDaConta(conta);
+  const usuario = conta.pessoa?.usuario;
+
+  const acessoAdministrativo =
+    usuario?.acessoAdministrativo;
+
+  if (
+    !usuario ||
+    usuario.id !== session.user.usuarioId ||
+    usuario.status !== "ATIVO" ||
+    !acessoAdministrativo?.ativo ||
+    acessoAdministrativo.papel !== conta.role
+  ) {
+    return {
+      permitido: false,
+      status: 403,
+      motivo: "Acesso administrativo indisponível.",
+    };
+  }
+
+  const permissoesEfetivas =
+    permissoesEfetivasDaConta(conta);
 
   return {
     permitido: true,
     status: 200,
     conta: {
       ...conta,
+
+      // Identidade canonica e contextos.
+      usuarioId: usuario.id,
+      pessoaId: conta.pessoa.id,
+      adminUserId: conta.id,
+
+      papelAdministrativo:
+        acessoAdministrativo.papel,
+
+      // A fonte canonica passa a ser Usuario.
+      mustChangePassword: Boolean(
+        usuario.mustChangePassword,
+      ),
+
       ...permissoesEfetivas,
     },
   };

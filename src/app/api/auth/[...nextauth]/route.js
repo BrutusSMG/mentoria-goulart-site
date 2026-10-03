@@ -40,6 +40,21 @@ export const authOptions = {
                     id: true,
                     senhaHash: true,
                     status: true,
+                    mustChangePassword: true,
+                    acessoAdministrativo: {
+                      select: {
+                        papel: true,
+                        ativo: true,
+                      },
+                    },
+                  },
+                },
+                adminUser: {
+                  select: {
+                    id: true,
+                    nome: true,
+                    role: true,
+                    ativo: true,
                   },
                 },
                 aluno: {
@@ -71,42 +86,122 @@ export const authOptions = {
 
             if (!senhaValida) return null;
 
+            const adminUser = pessoa.adminUser;
+            const acessoAdministrativo =
+              usuarioPortal.acessoAdministrativo;
+
+            const contextoAdministrativoValido = Boolean(
+              adminUser?.ativo &&
+              acessoAdministrativo?.ativo &&
+              acessoAdministrativo.papel === adminUser.role
+            );
+
+            const papelAdministrativo =
+              contextoAdministrativoValido
+                ? acessoAdministrativo.papel
+                : null;
+
             return {
-              // Compatibilidade temporária até a E5.5:
-              // session.user.id continua sendo Aluno.id.
-              id: aluno.id,
+              // Compatibilidade temporaria.
+              // tipoConta sera removido na E5.5.2.
+              // A identidade da sessao agora e Usuario.id.
+              id: usuarioPortal.id,
               email: pessoa.emailPrincipal,
               name: aluno.nome,
               tipoConta: "ALUNO",
               alunoId: aluno.id,
               usuarioId: usuarioPortal.id,
               pessoaId: pessoa.id,
-              role: null,
-              mustChangePassword: false,
+              adminUserId:
+                contextoAdministrativoValido
+                  ? adminUser.id
+                  : null,
+              papelAdministrativo,
+              role: papelAdministrativo,
+              mustChangePassword: Boolean(
+                usuarioPortal.mustChangePassword,
+              ),
             };
           }
 
-          const usuario = await prisma.adminUser.findUnique({
-            where: { email },
+          const pessoa = await prisma.pessoa.findUnique({
+            where: {
+              emailPrincipal: email,
+            },
+            select: {
+              id: true,
+              nome: true,
+              emailPrincipal: true,
+              usuario: {
+                select: {
+                  id: true,
+                  senhaHash: true,
+                  status: true,
+                  mustChangePassword: true,
+                  acessoAdministrativo: {
+                    select: {
+                      papel: true,
+                      ativo: true,
+                    },
+                  },
+                },
+              },
+              aluno: {
+                select: {
+                  id: true,
+                  nome: true,
+                  status: true,
+                },
+              },
+              adminUser: {
+                select: {
+                  id: true,
+                  nome: true,
+                  role: true,
+                  ativo: true,
+                },
+              },
+            },
           });
 
-          if (!usuario || !usuario.ativo) return null;
+          const usuarioPortal = pessoa?.usuario;
+          const adminUser = pessoa?.adminUser;
+          const acessoAdministrativo =
+            usuarioPortal?.acessoAdministrativo;
+
+          if (
+            !usuarioPortal ||
+            usuarioPortal.status !== "ATIVO" ||
+            !usuarioPortal.senhaHash ||
+            !adminUser?.ativo ||
+            !acessoAdministrativo?.ativo ||
+            acessoAdministrativo.papel !== adminUser.role
+          ) {
+            return null;
+          }
 
           const senhaValida = await bcrypt.compare(
             credentials.password,
-            usuario.senha,
+            usuarioPortal.senhaHash,
           );
 
           if (!senhaValida) return null;
 
           return {
-            id: usuario.id,
-            email: usuario.email,
-            name: usuario.nome,
+            id: usuarioPortal.id,
+            email: pessoa.emailPrincipal,
+            name: adminUser.nome || pessoa.nome,
             tipoConta: "ADMIN",
-            alunoId: null,
-            role: usuario.role,
-            mustChangePassword: usuario.mustChangePassword,
+            alunoId: pessoa.aluno?.id || null,
+            usuarioId: usuarioPortal.id,
+            pessoaId: pessoa.id,
+            adminUserId: adminUser.id,
+            papelAdministrativo:
+              acessoAdministrativo.papel,
+            role: acessoAdministrativo.papel,
+            mustChangePassword: Boolean(
+              usuarioPortal.mustChangePassword,
+            ),
           };
         } catch (error) {
           console.error("Erro ao autenticar usuário:", error?.message);
@@ -122,6 +217,9 @@ export const authOptions = {
         token.alunoId = user.alunoId || null;
         token.usuarioId = user.usuarioId || null;
         token.pessoaId = user.pessoaId || null;
+        token.adminUserId = user.adminUserId || null;
+        token.papelAdministrativo =
+          user.papelAdministrativo || null;
         token.role = user.role || null;
         token.mustChangePassword = Boolean(user.mustChangePassword);
       }
@@ -135,6 +233,10 @@ export const authOptions = {
         session.user.alunoId = token.alunoId || null;
         session.user.usuarioId = token.usuarioId || null;
         session.user.pessoaId = token.pessoaId || null;
+        session.user.adminUserId =
+          token.adminUserId || null;
+        session.user.papelAdministrativo =
+          token.papelAdministrativo || null;
         session.user.role = token.role || null;
         session.user.mustChangePassword = Boolean(token.mustChangePassword);
       }
