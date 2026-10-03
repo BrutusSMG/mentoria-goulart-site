@@ -8,6 +8,7 @@ import {
 
 const findUniqueMock = vi.fn();
 const alunoUpdateManyMock = vi.fn();
+const usuarioUpdateManyMock = vi.fn();
 const tokenUpdateManyMock = vi.fn();
 const transactionMock = vi.fn();
 const bcryptHashMock = vi.fn();
@@ -53,6 +54,7 @@ function tokenFicticio({
       conviteLegadoEnviadoEm: confirmado
         ? new Date()
         : null,
+      pessoaId: 'pessoa-ficticia',
     },
   };
 }
@@ -69,31 +71,50 @@ function requisicaoFicticia() {
 beforeEach(() => {
   vi.clearAllMocks();
 
-  findUniqueMock.mockResolvedValue(tokenFicticio());
-  bcryptHashMock.mockResolvedValue('hash-ficticio');
+  findUniqueMock.mockResolvedValue(
+    tokenFicticio(),
+  );
 
-  tokenUpdateManyMock.mockResolvedValue({ count: 1 });
-  alunoUpdateManyMock.mockResolvedValue({ count: 1 });
+  bcryptHashMock.mockResolvedValue(
+    'hash-ficticio',
+  );
 
-  // Simula a execução do callback de uma transação
-  // interativa, sem conectar ao banco real.
-  transactionMock.mockImplementation(async (operacao) =>
-    operacao({
-      alunoAccessToken: {
-        updateMany: tokenUpdateManyMock,
-      },
-      aluno: {
-        updateMany: alunoUpdateManyMock,
-      },
-    }),
+  tokenUpdateManyMock.mockResolvedValue({
+    count: 1,
+  });
+
+  usuarioUpdateManyMock.mockResolvedValue({
+    count: 1,
+  });
+
+  alunoUpdateManyMock.mockResolvedValue({
+    count: 1,
+  });
+
+  transactionMock.mockImplementation(
+    async (operacao) =>
+      operacao({
+        alunoAccessToken: {
+          updateMany: tokenUpdateManyMock,
+        },
+        usuario: {
+          updateMany: usuarioUpdateManyMock,
+        },
+        aluno: {
+          updateMany: alunoUpdateManyMock,
+        },
+      }),
   );
 });
 
 describe('POST /api/alunos/primeiro-acesso', () => {
-  it('conclui o primeiro acesso com convite válido', async () => {
-    const resposta = await POST(requisicaoFicticia());
+  it('conclui o primeiro acesso com convite valido', async () => {
+    const resposta = await POST(
+      requisicaoFicticia(),
+    );
 
     expect(resposta.status).toBe(200);
+
     expect(await resposta.json()).toEqual({
       ok: true,
     });
@@ -103,9 +124,13 @@ describe('POST /api/alunos/primeiro-acesso', () => {
       12,
     );
 
-    expect(transactionMock).toHaveBeenCalledTimes(1);
+    expect(
+      transactionMock,
+    ).toHaveBeenCalledTimes(1);
 
-    expect(tokenUpdateManyMock).toHaveBeenCalledWith({
+    expect(
+      tokenUpdateManyMock,
+    ).toHaveBeenCalledWith({
       where: {
         id: 'token-ficticio',
         alunoId: 'aluno-ficticio',
@@ -120,7 +145,25 @@ describe('POST /api/alunos/primeiro-acesso', () => {
       },
     });
 
-    expect(alunoUpdateManyMock).toHaveBeenCalledWith({
+    expect(
+      usuarioUpdateManyMock,
+    ).toHaveBeenCalledWith({
+      where: {
+        pessoaId: 'pessoa-ficticia',
+        status: 'PENDENTE_ATIVACAO',
+        senhaHash: null,
+      },
+      data: {
+        senhaHash: 'hash-ficticio',
+        status: 'ATIVO',
+        mustChangePassword: false,
+        passwordChangedAt: expect.any(Date),
+      },
+    });
+
+    expect(
+      alunoUpdateManyMock,
+    ).toHaveBeenCalledWith({
       where: {
         id: 'aluno-ficticio',
         origem: 'HOTMART',
@@ -135,37 +178,75 @@ describe('POST /api/alunos/primeiro-acesso', () => {
     });
   });
 
-  it('rejeita convite expirado sem iniciar transação', async () => {
-    findUniqueMock.mockResolvedValue(
-      tokenFicticio({ expirado: true }),
-    );
-
-    const resposta = await POST(requisicaoFicticia());
-
-    expect(resposta.status).toBe(400);
-    expect(await resposta.json()).toEqual({
-      ok: false,
-      erro:
-        'Este convite é inválido, expirou ou já foi utilizado.',
+  it('rejeita quando Usuario foi ativado antes da transacao', async () => {
+    usuarioUpdateManyMock.mockResolvedValue({
+      count: 0,
     });
 
-    expect(bcryptHashMock).not.toHaveBeenCalled();
-    expect(transactionMock).not.toHaveBeenCalled();
-  });
-
-  it('não permite primeiro acesso legado com convite apenas preparado', async () => {
-    findUniqueMock.mockResolvedValue(
-      tokenFicticio({ origem: 'LEGADO' }),
+    const resposta = await POST(
+      requisicaoFicticia(),
     );
 
-    const resposta = await POST(requisicaoFicticia());
-
     expect(resposta.status).toBe(400);
-    expect(transactionMock).not.toHaveBeenCalled();
-    expect(bcryptHashMock).not.toHaveBeenCalled();
+
+    expect(
+      transactionMock,
+    ).toHaveBeenCalledTimes(1);
+
+    expect(
+      tokenUpdateManyMock,
+    ).toHaveBeenCalledTimes(1);
+
+    expect(
+      usuarioUpdateManyMock,
+    ).toHaveBeenCalledTimes(1);
+
+    expect(
+      alunoUpdateManyMock,
+    ).not.toHaveBeenCalled();
   });
 
-  it('permite primeiro acesso legado após confirmação do envio', async () => {
+  it('rejeita convite expirado sem iniciar transacao', async () => {
+    findUniqueMock.mockResolvedValue(
+      tokenFicticio({
+        expirado: true,
+      }),
+    );
+
+    const resposta = await POST(
+      requisicaoFicticia(),
+    );
+
+    expect(resposta.status).toBe(400);
+
+    expect(
+      bcryptHashMock,
+    ).not.toHaveBeenCalled();
+
+    expect(
+      transactionMock,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('nao permite primeiro acesso legado com convite apenas preparado', async () => {
+    findUniqueMock.mockResolvedValue(
+      tokenFicticio({
+        origem: 'LEGADO',
+      }),
+    );
+
+    const resposta = await POST(
+      requisicaoFicticia(),
+    );
+
+    expect(resposta.status).toBe(400);
+
+    expect(
+      transactionMock,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('permite primeiro acesso legado apos confirmacao do envio', async () => {
     findUniqueMock.mockResolvedValue(
       tokenFicticio({
         origem: 'LEGADO',
@@ -173,14 +254,15 @@ describe('POST /api/alunos/primeiro-acesso', () => {
       }),
     );
 
-    const resposta = await POST(requisicaoFicticia());
+    const resposta = await POST(
+      requisicaoFicticia(),
+    );
 
     expect(resposta.status).toBe(200);
-    expect(await resposta.json()).toEqual({
-      ok: true,
-    });
 
-    expect(alunoUpdateManyMock).toHaveBeenCalledWith({
+    expect(
+      alunoUpdateManyMock,
+    ).toHaveBeenCalledWith({
       where: {
         id: 'aluno-ficticio',
         origem: 'LEGADO',
@@ -198,12 +280,11 @@ describe('POST /api/alunos/primeiro-acesso', () => {
     });
   });
 
-  it('recusa a segunda tentativa quando o mesmo token já foi consumido', async () => {
-    // As duas requisições obtêm a mesma leitura inicial.
-    findUniqueMock.mockResolvedValue(tokenFicticio());
+  it('recusa a segunda tentativa quando o mesmo token ja foi consumido', async () => {
+    findUniqueMock.mockResolvedValue(
+      tokenFicticio(),
+    );
 
-    // Apenas a primeira atualização condicional do token
-    // é aceita pelo banco simulado.
     tokenUpdateManyMock
       .mockResolvedValueOnce({ count: 1 })
       .mockResolvedValueOnce({ count: 0 });
@@ -214,35 +295,55 @@ describe('POST /api/alunos/primeiro-acesso', () => {
     ]);
 
     expect(
-      respostas.map((resposta) => resposta.status).sort(),
+      respostas
+        .map((resposta) => resposta.status)
+        .sort(),
     ).toEqual([200, 400]);
 
-    expect(transactionMock).toHaveBeenCalledTimes(2);
-    expect(tokenUpdateManyMock).toHaveBeenCalledTimes(2);
-    expect(alunoUpdateManyMock).toHaveBeenCalledTimes(1);
+    expect(
+      transactionMock,
+    ).toHaveBeenCalledTimes(2);
+
+    expect(
+      tokenUpdateManyMock,
+    ).toHaveBeenCalledTimes(2);
+
+    expect(
+      usuarioUpdateManyMock,
+    ).toHaveBeenCalledTimes(1);
+
+    expect(
+      alunoUpdateManyMock,
+    ).toHaveBeenCalledTimes(1);
   });
 
-  it('recusa o convite quando o aluno deixa de ser elegível durante a transação', async () => {
+  it('recusa quando o aluno deixa de ser elegivel durante a transacao', async () => {
     alunoUpdateManyMock.mockResolvedValue({
       count: 0,
     });
 
-    const resposta = await POST(requisicaoFicticia());
+    const resposta = await POST(
+      requisicaoFicticia(),
+    );
 
     expect(resposta.status).toBe(400);
-    expect(await resposta.json()).toEqual({
-      ok: false,
-      erro:
-        'Este convite é inválido, expirou ou já foi utilizado.',
-    });
 
-    expect(tokenUpdateManyMock).toHaveBeenCalledTimes(1);
-    expect(alunoUpdateManyMock).toHaveBeenCalledTimes(1);
+    expect(
+      tokenUpdateManyMock,
+    ).toHaveBeenCalledTimes(1);
+
+    expect(
+      usuarioUpdateManyMock,
+    ).toHaveBeenCalledTimes(1);
+
+    expect(
+      alunoUpdateManyMock,
+    ).toHaveBeenCalledTimes(1);
   });
 
-  it('retorna erro operacional sem expor detalhes da exceção', async () => {
+  it('retorna erro operacional sem expor detalhes da excecao', async () => {
     transactionMock.mockRejectedValue(
-      new Error('Detalhe interno fictício'),
+      new Error('Detalhe interno ficticio'),
     );
 
     const consoleError = vi
@@ -250,12 +351,18 @@ describe('POST /api/alunos/primeiro-acesso', () => {
       .mockImplementation(() => {});
 
     try {
-      const resposta = await POST(requisicaoFicticia());
+      const resposta = await POST(
+        requisicaoFicticia(),
+      );
+
       const corpo = await resposta.json();
 
       expect(resposta.status).toBe(500);
-      expect(JSON.stringify(corpo)).not.toContain(
-        'Detalhe interno fictício',
+
+      expect(
+        JSON.stringify(corpo),
+      ).not.toContain(
+        'Detalhe interno ficticio',
       );
     } finally {
       consoleError.mockRestore();

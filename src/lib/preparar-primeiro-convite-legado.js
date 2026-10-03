@@ -58,6 +58,13 @@ export async function prepararPrimeiroConviteLegado(
           id: true,
           emailPrincipal: true,
           ativo: true,
+          usuario: {
+            select: {
+              id: true,
+              status: true,
+              senhaHash: true,
+            },
+          },
         },
       },
     },

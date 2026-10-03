@@ -11,6 +11,7 @@ import {
   senhaAdminValida,
 } from "@/lib/validacoes";
 import { sincronizarAdminUserComUsuario } from "@/lib/sincronizar-admin-usuario";
+import { definirCredencialCanonica } from "@/lib/credencial-usuario";
 
 function respostaPrivada(data, status = 200) {
   return NextResponse.json(data, {
@@ -88,7 +89,17 @@ export async function POST(req) {
         },
       });
 
-      await sincronizarAdminUserComUsuario(tx, usuario.id);
+      const vinculo = await sincronizarAdminUserComUsuario(
+        tx,
+        usuario.id,
+      );
+
+      await definirCredencialCanonica(tx, {
+        pessoaId: vinculo.pessoaId,
+        senhaHash,
+        mustChangePassword: false,
+        passwordChangedAt,
+      });
     });
 
     return respostaPrivada({ success: true });

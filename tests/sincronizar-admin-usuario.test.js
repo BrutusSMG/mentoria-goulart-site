@@ -142,9 +142,7 @@ describe("sincronizar-admin-usuario", () => {
           status: "ATIVO",
           senhaHash: "$2b$12$hash-ficticio",
         }),
-        update: expect.objectContaining({
-          senhaHash: "$2b$12$hash-ficticio",
-        }),
+        update: {},
       }),
     );
 

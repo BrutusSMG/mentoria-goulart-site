@@ -28,34 +28,59 @@ export const authOptions = {
           const area = credentials.area === "aluno" ? "aluno" : "admin";
 
           if (area === "aluno") {
-            const aluno = await prisma.aluno.findUnique({
-              where: { email },
+            const pessoa = await prisma.pessoa.findUnique({
+              where: {
+                emailPrincipal: email,
+              },
               select: {
                 id: true,
-                nome: true,
-                email: true,
-                senhaHash: true,
-                status: true,
+                emailPrincipal: true,
+                usuario: {
+                  select: {
+                    id: true,
+                    senhaHash: true,
+                    status: true,
+                  },
+                },
+                aluno: {
+                  select: {
+                    id: true,
+                    nome: true,
+                    status: true,
+                  },
+                },
               },
             });
 
-            if (!aluno || aluno.status !== "ATIVO" || !aluno.senhaHash) {
+            const usuarioPortal = pessoa?.usuario;
+            const aluno = pessoa?.aluno;
+
+            if (
+              !aluno ||
+              !usuarioPortal ||
+              usuarioPortal.status !== "ATIVO" ||
+              !usuarioPortal.senhaHash
+            ) {
               return null;
             }
 
             const senhaValida = await bcrypt.compare(
               credentials.password,
-              aluno.senhaHash,
+              usuarioPortal.senhaHash,
             );
 
             if (!senhaValida) return null;
 
             return {
+              // Compatibilidade temporária até a E5.5:
+              // session.user.id continua sendo Aluno.id.
               id: aluno.id,
-              email: aluno.email,
+              email: pessoa.emailPrincipal,
               name: aluno.nome,
               tipoConta: "ALUNO",
               alunoId: aluno.id,
+              usuarioId: usuarioPortal.id,
+              pessoaId: pessoa.id,
               role: null,
               mustChangePassword: false,
             };
@@ -95,6 +120,8 @@ export const authOptions = {
       if (user) {
         token.tipoConta = user.tipoConta || "ADMIN";
         token.alunoId = user.alunoId || null;
+        token.usuarioId = user.usuarioId || null;
+        token.pessoaId = user.pessoaId || null;
         token.role = user.role || null;
         token.mustChangePassword = Boolean(user.mustChangePassword);
       }
@@ -106,6 +133,8 @@ export const authOptions = {
         session.user.id = token.sub;
         session.user.tipoConta = token.tipoConta || "ADMIN";
         session.user.alunoId = token.alunoId || null;
+        session.user.usuarioId = token.usuarioId || null;
+        session.user.pessoaId = token.pessoaId || null;
         session.user.role = token.role || null;
         session.user.mustChangePassword = Boolean(token.mustChangePassword);
       }

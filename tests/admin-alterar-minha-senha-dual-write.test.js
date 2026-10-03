@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   bcryptCompare: vi.fn(),
   bcryptHash: vi.fn(),
   sincronizar: vi.fn(),
+  definirCredencial: vi.fn(),
 }));
 
 vi.mock("next/server", () => ({
@@ -44,6 +45,10 @@ vi.mock("@/lib/admin-permissoes", () => ({
 
 vi.mock("@/lib/sincronizar-admin-usuario", () => ({
   sincronizarAdminUserComUsuario: mocks.sincronizar,
+}));
+
+vi.mock("@/lib/credencial-usuario", () => ({
+  definirCredencialCanonica: mocks.definirCredencial,
 }));
 
 import { POST } from "../src/app/api/admin/alterar-minha-senha/route";
@@ -81,7 +86,11 @@ beforeEach(() => {
       }),
   );
 
-  mocks.sincronizar.mockResolvedValue({});
+  mocks.sincronizar.mockResolvedValue({
+    pessoaId: "pessoa-1",
+  });
+
+  mocks.definirCredencial.mockResolvedValue({});
 });
 
 describe("alterar-minha-senha dual-write", () => {
@@ -118,6 +127,18 @@ describe("alterar-minha-senha dual-write", () => {
     expect(mocks.sincronizar).toHaveBeenCalledWith(
       expect.any(Object),
       "admin-1",
+    );
+
+    expect(
+      mocks.definirCredencial,
+    ).toHaveBeenCalledWith(
+      expect.any(Object),
+      {
+        pessoaId: "pessoa-1",
+        senhaHash: "$2b$12$hash-definitivo",
+        mustChangePassword: false,
+        passwordChangedAt: expect.any(Date),
+      },
     );
   });
 });

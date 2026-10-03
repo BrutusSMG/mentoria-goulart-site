@@ -12,6 +12,7 @@ import {
   senhaAdminValida,
 } from "@/lib/validacoes";
 import { sincronizarAdminUserComUsuario } from "@/lib/sincronizar-admin-usuario";
+import { definirCredencialCanonica } from "@/lib/credencial-usuario";
 
 function respostaPrivada(data, status = 200) {
   return NextResponse.json(data, {
@@ -115,7 +116,22 @@ export async function PATCH(req, { params }) {
         select: camposSeguros,
       });
 
-      await sincronizarAdminUserComUsuario(tx, atualizado.id);
+      const vinculo = await sincronizarAdminUserComUsuario(
+        tx,
+        atualizado.id,
+      );
+
+      if (
+        senhaTemporaria !== undefined &&
+        senhaTemporaria !== ""
+      ) {
+        await definirCredencialCanonica(tx, {
+          pessoaId: vinculo.pessoaId,
+          senhaHash: dadosAtualizacao.senha,
+          mustChangePassword: true,
+          passwordChangedAt: null,
+        });
+      }
 
       return atualizado;
     });

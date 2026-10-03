@@ -17,6 +17,11 @@ const alunoElegivel = {
     id: 'pessoa-ficticia',
     emailPrincipal: 'legado@example.test',
     ativo: true,
+    usuario: {
+      id: 'usuario-ficticio',
+      status: 'PENDENTE_ATIVACAO',
+      senhaHash: null,
+    },
   },
 };
 
@@ -84,6 +89,34 @@ describe('verificarElegibilidadeConviteLegado', () => {
         pessoa: {
           ...alunoElegivel.pessoa,
           ativo: false,
+        },
+      }).permitido,
+    ).toBe(false);
+  });
+
+  it('rejeita Pessoa sem Usuario', () => {
+    expect(
+      verificarElegibilidadeConviteLegado({
+        ...alunoElegivel,
+        pessoa: {
+          ...alunoElegivel.pessoa,
+          usuario: null,
+        },
+      }).permitido,
+    ).toBe(false);
+  });
+
+  it('rejeita Usuario que ja possui credencial ativa', () => {
+    expect(
+      verificarElegibilidadeConviteLegado({
+        ...alunoElegivel,
+        pessoa: {
+          ...alunoElegivel.pessoa,
+          usuario: {
+            id: 'usuario-ficticio',
+            status: 'ATIVO',
+            senhaHash: 'hash-existente',
+          },
         },
       }).permitido,
     ).toBe(false);

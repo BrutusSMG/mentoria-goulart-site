@@ -53,6 +53,20 @@ export function verificarElegibilidadeConviteLegado(aluno) {
     };
   }
 
+  const usuario = aluno.pessoa.usuario;
+
+  if (
+    !usuario ||
+    usuario.status !== 'PENDENTE_ATIVACAO' ||
+    usuario.senhaHash
+  ) {
+    return {
+      permitido: false,
+      motivo:
+        'A credencial de Usuario exige conferência.',
+    };
+  }
+
   const emailAluno = normalizarEmail(aluno.email);
   const emailPessoa = normalizarEmail(
     aluno.pessoa.emailPrincipal,

@@ -30,30 +30,53 @@ export async function POST(request) {
       return respostaGenerica();
     }
 
-    const aluno = await prisma.aluno.findUnique({
-      where: { email },
+    const pessoa = await prisma.pessoa.findFirst({
+      where: {
+        emailPrincipal: {
+          equals: email,
+          mode: 'insensitive',
+        },
+      },
       select: {
-        id: true,
-        nome: true,
-        email: true,
-        senhaHash: true,
-        status: true,
-        origem: true,
-        conviteLegadoEnviadoEm: true,
+        emailPrincipal: true,
+        usuario: {
+          select: {
+            id: true,
+            status: true,
+            senhaHash: true,
+          },
+        },
+        aluno: {
+          select: {
+            id: true,
+            nome: true,
+            email: true,
+            status: true,
+            origem: true,
+            conviteLegadoEnviadoEm: true,
+          },
+        },
       },
     });
 
+    const usuario = pessoa?.usuario;
+    const aluno = pessoa?.aluno;
+
     if (
       !aluno ||
+      !usuario ||
       aluno.status !== 'ATIVO' ||
-      aluno.senhaHash
+      usuario.status !== 'PENDENTE_ATIVACAO' ||
+      usuario.senhaHash ||
+      normalizarEmail(aluno.email) !==
+        normalizarEmail(pessoa.emailPrincipal)
     ) {
       return respostaGenerica();
     }
 
-    // O primeiro convite de um legado depende da decisão
-    // do administrador. A rota pública só pode reenviá-lo
-    // depois que um envio inicial tiver sido confirmado.
+    // O primeiro convite de um legado depende da decisao
+    // do administrador. A rota publica so pode reenvia-lo
+    // depois que o envio inicial tiver sido confirmado.
     if (
       aluno.origem === 'LEGADO' &&
       !aluno.conviteLegadoEnviadoEm
@@ -62,6 +85,7 @@ export async function POST(request) {
     }
 
     const agora = new Date();
+
     const limiteReenvio = new Date(
       agora.getTime() - 5 * 60 * 1000,
     );
@@ -72,10 +96,16 @@ export async function POST(request) {
           alunoId: aluno.id,
           tipo: TIPO_PRIMEIRO_ACESSO,
           usadoEm: null,
-          expiraEm: { gt: agora },
-          createdAt: { gt: limiteReenvio },
+          expiraEm: {
+            gt: agora,
+          },
+          createdAt: {
+            gt: limiteReenvio,
+          },
         },
-        select: { id: true },
+        select: {
+          id: true,
+        },
       });
 
     if (conviteRecente) {
@@ -102,13 +132,15 @@ export async function POST(request) {
           tokenHash: hashTokenAcesso(token),
           tipo: TIPO_PRIMEIRO_ACESSO,
           expiraEm:
-            calcularExpiracaoConvitePrimeiroAcesso(agora),
+            calcularExpiracaoConvitePrimeiroAcesso(
+              agora,
+            ),
         },
       }),
     ]);
 
     await enviarConvitePrimeiroAcesso({
-      email: aluno.email,
+      email: pessoa.emailPrincipal,
       nome: aluno.nome,
       token,
     });

@@ -93,6 +93,11 @@ beforeEach(() => {
       id: 'pessoa-ficticia',
       emailPrincipal: 'legado@example.test',
       ativo: true,
+      usuario: {
+        id: 'usuario-ficticio',
+        status: 'PENDENTE_ATIVACAO',
+        senhaHash: null,
+      },
     },
   });
 });
@@ -261,6 +266,13 @@ describe('POST /api/admin/alunos/[id]/convite-legado', () => {
             id: true,
             emailPrincipal: true,
             ativo: true,
+            usuario: {
+              select: {
+                id: true,
+                status: true,
+                senhaHash: true,
+              },
+            },
           },
         },
       },

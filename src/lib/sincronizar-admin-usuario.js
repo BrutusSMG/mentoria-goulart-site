@@ -47,12 +47,12 @@ export async function sincronizarAdminUserComUsuario(
   });
 
   if (!admin) {
-    throw new Error("AdminUser n?o encontrado para sincroniza??o.");
+    throw new Error("AdminUser não encontrado para sincronização.");
   }
 
   if (!["ADMIN", "PARCEIRO"].includes(admin.role)) {
     throw new Error(
-      `Role administrativa n?o suportada na E5: ${admin.role}`,
+      `Role administrativa não suportada na E5: ${admin.role}`,
     );
   }
 
@@ -110,7 +110,7 @@ export async function sincronizarAdminUserComUsuario(
       pessoa.adminUser.id !== admin.id
     ) {
       throw new Error(
-        "Pessoa j? vinculada a outro AdminUser.",
+        "Pessoa já vinculada a outro AdminUser.",
       );
     }
 
@@ -119,7 +119,7 @@ export async function sincronizarAdminUserComUsuario(
       pessoa.usuario.senhaHash !== admin.senha
     ) {
       throw new Error(
-        "Pessoa j? possui Usuario com credencial diferente.",
+        "Pessoa já possui Usuario com credencial diferente.",
       );
     }
 
@@ -162,11 +162,7 @@ export async function sincronizarAdminUserComUsuario(
       mustChangePassword: admin.mustChangePassword,
       passwordChangedAt: admin.passwordChangedAt,
     },
-    update: {
-      senhaHash: admin.senha,
-      mustChangePassword: admin.mustChangePassword,
-      passwordChangedAt: admin.passwordChangedAt,
-    },
+    update: {},
     select: {
       id: true,
     },
@@ -207,7 +203,7 @@ export async function sincronizarAdminUserComUsuario(
   for (const codigo of CODIGOS_ADMINISTRATIVOS) {
     if (!permissaoPorCodigo.has(codigo)) {
       throw new Error(
-        `Permiss?o administrativa ausente ou inativa: ${codigo}`,
+        `Permissão administrativa ausente ou inativa: ${codigo}`,
       );
     }
   }

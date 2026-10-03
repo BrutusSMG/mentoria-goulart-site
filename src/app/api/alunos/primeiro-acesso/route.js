@@ -54,6 +54,7 @@ export async function POST(request) {
       tokenAcesso.expiraEm <= new Date() ||
       tokenAcesso.aluno.status !== 'ATIVO' ||
       tokenAcesso.aluno.senhaHash ||
+      !tokenAcesso.aluno.pessoaId ||
       (
         tokenAcesso.aluno.origem === 'LEGADO' &&
         !tokenAcesso.aluno.conviteLegadoEnviadoEm
@@ -85,7 +86,6 @@ export async function POST(request) {
       );
     }
 
-    // Não incluir token, senha ou detalhes da exceção no log.
     console.error(
       'Falha operacional ao concluir o primeiro acesso do aluno.',
     );

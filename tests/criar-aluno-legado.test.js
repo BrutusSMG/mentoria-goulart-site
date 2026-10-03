@@ -17,6 +17,14 @@ function criarTx({ cadastroExistente = false } = {}) {
         id: 'pessoa-1',
       }),
     },
+    usuario: {
+      create: vi.fn().mockResolvedValue({
+        id: 'usuario-1',
+        pessoaId: 'pessoa-1',
+        senhaHash: null,
+        status: 'PENDENTE_ATIVACAO',
+      }),
+    },
     aluno: {
       findFirst: vi.fn().mockResolvedValue(null),
       create: vi.fn().mockResolvedValue({
@@ -104,6 +112,15 @@ describe('criarAlunoLegado', () => {
         nome: 'Aluno Fictício',
         emailPrincipal: 'ficticio@example.test',
         telefonePrincipal: null,
+      },
+    });
+
+    expect(tx.usuario.create).toHaveBeenCalledWith({
+      data: {
+        pessoaId: 'pessoa-1',
+        senhaHash: null,
+        status: 'PENDENTE_ATIVACAO',
+        mustChangePassword: false,
       },
     });
 

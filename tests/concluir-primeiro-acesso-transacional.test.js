@@ -20,6 +20,11 @@ function criarCenario(origem = 'HOTMART') {
         count: 1,
       }),
     },
+    usuario: {
+      updateMany: vi.fn().mockResolvedValue({
+        count: 1,
+      }),
+    },
     aluno: {
       updateMany: vi.fn().mockResolvedValue({
         count: 1,
@@ -31,7 +36,10 @@ function criarCenario(origem = 'HOTMART') {
     tokenAcesso: {
       id: 'token-ficticio',
       alunoId: 'aluno-ficticio',
-      aluno: { origem },
+      aluno: {
+        origem,
+        pessoaId: 'pessoa-ficticia',
+      },
     },
     senhaHash: 'hash-ficticio',
     agora: AGORA,
@@ -45,7 +53,7 @@ beforeEach(() => {
 });
 
 describe('concluirPrimeiroAcessoTransacional', () => {
-  it('consome o token específico e atualiza o aluno elegível', async () => {
+  it('consome o token e ativa a credencial canonica', async () => {
     const { tx, dados } = criarCenario();
 
     const resultado =
@@ -73,7 +81,25 @@ describe('concluirPrimeiroAcessoTransacional', () => {
       },
     });
 
-    expect(tx.aluno.updateMany).toHaveBeenCalledExactlyOnceWith({
+    expect(
+      tx.usuario.updateMany,
+    ).toHaveBeenCalledExactlyOnceWith({
+      where: {
+        pessoaId: 'pessoa-ficticia',
+        status: 'PENDENTE_ATIVACAO',
+        senhaHash: null,
+      },
+      data: {
+        senhaHash: 'hash-ficticio',
+        status: 'ATIVO',
+        mustChangePassword: false,
+        passwordChangedAt: AGORA,
+      },
+    });
+
+    expect(
+      tx.aluno.updateMany,
+    ).toHaveBeenCalledExactlyOnceWith({
       where: {
         id: 'aluno-ficticio',
         origem: 'HOTMART',
@@ -114,7 +140,7 @@ describe('concluirPrimeiroAcessoTransacional', () => {
     });
   });
 
-  it('rejeita uma segunda tentativa quando o token já foi consumido', async () => {
+  it('rejeita uma segunda tentativa quando o token ja foi consumido', async () => {
     const { tx, dados } = criarCenario();
 
     tx.alunoAccessToken.updateMany
@@ -139,11 +165,45 @@ describe('concluirPrimeiroAcessoTransacional', () => {
       tx.alunoAccessToken.updateMany,
     ).toHaveBeenCalledTimes(2);
 
-    // A segunda tentativa não chega a atualizar o aluno.
-    expect(tx.aluno.updateMany).toHaveBeenCalledTimes(1);
+    expect(
+      tx.usuario.updateMany,
+    ).toHaveBeenCalledTimes(1);
+
+    expect(
+      tx.aluno.updateMany,
+    ).toHaveBeenCalledTimes(1);
   });
 
-  it('lança erro para desfazer o token quando o aluno deixou de ser elegível', async () => {
+  it('rejeita quando Usuario deixou de estar pendente', async () => {
+    const { tx, dados } = criarCenario();
+
+    tx.usuario.updateMany.mockResolvedValue({
+      count: 0,
+    });
+
+    await expect(
+      concluirPrimeiroAcessoTransacional(
+        tx,
+        dados,
+      ),
+    ).rejects.toBeInstanceOf(
+      ConvitePrimeiroAcessoIndisponivelError,
+    );
+
+    expect(
+      tx.alunoAccessToken.updateMany,
+    ).toHaveBeenCalledTimes(1);
+
+    expect(
+      tx.usuario.updateMany,
+    ).toHaveBeenCalledTimes(1);
+
+    expect(
+      tx.aluno.updateMany,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('lanca erro quando o aluno deixou de ser elegivel', async () => {
     const { tx, dados } = criarCenario();
 
     tx.aluno.updateMany.mockResolvedValue({
@@ -162,10 +222,17 @@ describe('concluirPrimeiroAcessoTransacional', () => {
     expect(
       tx.alunoAccessToken.updateMany,
     ).toHaveBeenCalledTimes(1);
-    expect(tx.aluno.updateMany).toHaveBeenCalledTimes(1);
+
+    expect(
+      tx.usuario.updateMany,
+    ).toHaveBeenCalledTimes(1);
+
+    expect(
+      tx.aluno.updateMany,
+    ).toHaveBeenCalledTimes(1);
   });
 
-  it('rejeita dados inválidos antes de atualizar o banco', async () => {
+  it('rejeita dados invalidos antes de atualizar o banco', async () => {
     const { tx, dados } = criarCenario();
 
     dados.tokenAcesso.aluno.origem = undefined;
@@ -182,6 +249,13 @@ describe('concluirPrimeiroAcessoTransacional', () => {
     expect(
       tx.alunoAccessToken.updateMany,
     ).not.toHaveBeenCalled();
-    expect(tx.aluno.updateMany).not.toHaveBeenCalled();
+
+    expect(
+      tx.usuario.updateMany,
+    ).not.toHaveBeenCalled();
+
+    expect(
+      tx.aluno.updateMany,
+    ).not.toHaveBeenCalled();
   });
 });

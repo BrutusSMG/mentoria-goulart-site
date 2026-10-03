@@ -82,6 +82,15 @@ export async function criarAlunoLegado(tx, dados, agora = new Date()) {
     },
   });
 
+  await tx.usuario.create({
+    data: {
+      pessoaId: pessoa.id,
+      senhaHash: null,
+      status: 'PENDENTE_ATIVACAO',
+      mustChangePassword: false,
+    },
+  });
+
   const aluno = await tx.aluno.create({
     data: {
       nome: cadastro.nome,
