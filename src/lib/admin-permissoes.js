@@ -101,6 +101,11 @@ export async function obterAcessoAtual() {
       pessoa: {
         select: {
           id: true,
+          aluno: {
+            select: {
+              id: true,
+            },
+          },
           usuario: {
             select: {
               id: true,
@@ -169,6 +174,7 @@ export async function obterAcessoAtual() {
       usuarioId: usuario.id,
       pessoaId: conta.pessoa.id,
       adminUserId: conta.id,
+      alunoId: conta.pessoa.aluno?.id || null,
 
       papelAdministrativo:
         acessoAdministrativo.papel,

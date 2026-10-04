@@ -46,6 +46,7 @@ function contaAdministrativa({
   usuarioStatus = 'ATIVO',
   acessoAtivo = true,
   papel = role,
+  alunoId = null,
   permissoes = [],
   podeGerenciarSucatas = false,
   podeGerenciarDepoimentos = false,
@@ -62,6 +63,11 @@ function contaAdministrativa({
     podeGerenciarJornada,
     pessoa: {
       id: 'pessoa-ficticia',
+      aluno: alunoId
+        ? {
+            id: alunoId,
+          }
+        : null,
       usuario: {
         id: 'usuario-ficticio',
         status: usuarioStatus,
@@ -396,6 +402,31 @@ describe('admin-permissoes', () => {
           },
         }),
       );
+    },
+  );
+
+  it(
+    'projeta contexto de aluno na conta administrativa',
+    async () => {
+      mocks.adminFindUnique.mockResolvedValue(
+        contaAdministrativa({
+          role: 'PARCEIRO',
+          papel: 'PARCEIRO',
+          alunoId: 'aluno-ficticio',
+        }),
+      );
+
+      const acesso = await obterAcessoAtual();
+
+      expect(acesso.permitido).toBe(true);
+
+      expect(acesso.conta).toMatchObject({
+        usuarioId: 'usuario-ficticio',
+        pessoaId: 'pessoa-ficticia',
+        adminUserId: 'admin-ficticio',
+        alunoId: 'aluno-ficticio',
+        papelAdministrativo: 'PARCEIRO',
+      });
     },
   );
 

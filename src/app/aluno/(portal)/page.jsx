@@ -139,6 +139,33 @@ export default async function PortalAlunoPage() {
             </p>
           </Link>
 
+          {temContextoAdministrativo(usuario) ? (
+            <Link
+              href={
+                usuario.papelAdministrativo === 'ADMIN'
+                  ? '/admin'
+                  : '/admin/modulos'
+              }
+              className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 transition hover:border-[#d89900]"
+            >
+              <p className="text-xs font-bold uppercase tracking-wide text-[#d89900]">
+                Contexto adicional
+              </p>
+
+              <h2 className="mt-2 text-xl font-bold">
+                {usuario.papelAdministrativo === 'ADMIN'
+                  ? 'Administração'
+                  : 'Área do Parceiro'}
+              </h2>
+
+              <p className="mt-2 text-sm text-zinc-400">
+                {usuario.papelAdministrativo === 'ADMIN'
+                  ? 'Acesse o painel administrativo.'
+                  : 'Acesse os módulos autorizados para sua conta.'}
+              </p>
+            </Link>
+          ) : null}
+
           {acessoComunidade ? (
             <Link
               href="/aluno/comunidade"
