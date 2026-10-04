@@ -63,7 +63,6 @@ beforeEach(() => {
 
   mocks.getServerSession.mockResolvedValue({
     user: {
-      tipoConta: 'ALUNO',
       alunoId: 'aluno_1',
     },
   });
@@ -101,11 +100,11 @@ describe('POST /api/alunos/vincular-pessoa', () => {
     expect(mocks.obterOuCriarPessoa).not.toHaveBeenCalled();
   });
 
-  it('retorna 401 quando a sessão é administrativa', async () => {
+  it('retorna 401 quando nao existe contexto de aluno', async () => {
     mocks.getServerSession.mockResolvedValue({
       user: {
-        tipoConta: 'ADMIN',
-        alunoId: 'aluno_1',
+        adminUserId: 'admin_1',
+        papelAdministrativo: 'ADMIN',
       },
     });
 

@@ -128,13 +128,11 @@ describe("autenticação do aluno via Usuario", () => {
         id: "usuario-1",
         email: "aluno@example.com",
         name: "Aluno Teste",
-        tipoConta: "ALUNO",
         alunoId: "aluno-1",
         usuarioId: "usuario-1",
         pessoaId: "pessoa-1",
         adminUserId: null,
         papelAdministrativo: null,
-        role: null,
         mustChangePassword: false,
       });
 
@@ -321,13 +319,11 @@ describe("autenticação do aluno via Usuario", () => {
         id: "usuario-admin",
         email: "admin@example.com",
         name: "Admin Canonico",
-        tipoConta: "ADMIN",
         alunoId: null,
         usuarioId: "usuario-admin",
         pessoaId: "pessoa-admin",
         adminUserId: "admin-legado",
         papelAdministrativo: "ADMIN",
-        role: "ADMIN",
         mustChangePassword: false,
       });
 
@@ -386,8 +382,6 @@ describe("autenticação do aluno via Usuario", () => {
         alunoId: "aluno-compartilhado",
         adminUserId: "admin-compartilhado",
         papelAdministrativo: "PARCEIRO",
-        role: "PARCEIRO",
-        tipoConta: "ALUNO",
         mustChangePassword: true,
       });
     },
@@ -402,26 +396,22 @@ describe("autenticação do aluno via Usuario", () => {
         },
         user: {
           id: "usuario-1",
-          tipoConta: "ALUNO",
           alunoId: "aluno-1",
           usuarioId: "usuario-1",
           pessoaId: "pessoa-1",
           adminUserId: "admin-1",
           papelAdministrativo: "PARCEIRO",
-          role: "PARCEIRO",
           mustChangePassword: false,
         },
       });
 
       expect(token).toMatchObject({
         sub: "usuario-1",
-        tipoConta: "ALUNO",
         alunoId: "aluno-1",
         usuarioId: "usuario-1",
         pessoaId: "pessoa-1",
         adminUserId: "admin-1",
         papelAdministrativo: "PARCEIRO",
-        role: "PARCEIRO",
         mustChangePassword: false,
       });
     },
@@ -440,26 +430,22 @@ describe("autenticação do aluno via Usuario", () => {
           },
           token: {
             sub: "usuario-1",
-            tipoConta: "ALUNO",
             alunoId: "aluno-1",
             usuarioId: "usuario-1",
             pessoaId: "pessoa-1",
             adminUserId: "admin-1",
             papelAdministrativo: "PARCEIRO",
-            role: "PARCEIRO",
             mustChangePassword: false,
           },
         });
 
       expect(session.user).toMatchObject({
         id: "usuario-1",
-        tipoConta: "ALUNO",
         alunoId: "aluno-1",
         usuarioId: "usuario-1",
         pessoaId: "pessoa-1",
         adminUserId: "admin-1",
         papelAdministrativo: "PARCEIRO",
-        role: "PARCEIRO",
         mustChangePassword: false,
       });
     },

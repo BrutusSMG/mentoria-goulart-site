@@ -39,11 +39,11 @@ describe('GET /api/alunos/minhas-vigencias', () => {
     expect(listarVigenciasAlunoMock).not.toHaveBeenCalled();
   });
 
-  it('retorna 401 para outro tipo de conta', async () => {
+  it('retorna 401 sem contexto de aluno', async () => {
     getServerSessionMock.mockResolvedValue({
       user: {
-        tipoConta: 'ADMIN',
-        alunoId: 'aluno-123',
+        adminUserId: 'admin-1',
+        papelAdministrativo: 'ADMIN',
       },
     });
 
@@ -56,7 +56,6 @@ describe('GET /api/alunos/minhas-vigencias', () => {
   it('retorna as vigências do aluno autenticado', async () => {
     getServerSessionMock.mockResolvedValue({
       user: {
-        tipoConta: 'ALUNO',
         alunoId: 'aluno-123',
       },
     });
@@ -86,7 +85,6 @@ describe('GET /api/alunos/minhas-vigencias', () => {
   it('não exige acesso comercial ativo para consultar as vigências', async () => {
     getServerSessionMock.mockResolvedValue({
       user: {
-        tipoConta: 'ALUNO',
         alunoId: 'aluno-expirado',
       },
     });
@@ -108,7 +106,6 @@ describe('GET /api/alunos/minhas-vigencias', () => {
   it('retorna 500 quando ocorre erro ao consultar as vigências', async () => {
     getServerSessionMock.mockResolvedValue({
       user: {
-        tipoConta: 'ALUNO',
         alunoId: 'aluno-123',
       },
     });
@@ -132,4 +129,31 @@ describe('GET /api/alunos/minhas-vigencias', () => {
 
     consoleError.mockRestore();
   });
+  it(
+    'permite aluno que tambem possui contexto administrativo',
+    async () => {
+      getServerSessionMock.mockResolvedValue({
+        user: {
+          alunoId: 'aluno-compartilhado',
+          adminUserId: 'admin-1',
+          papelAdministrativo: 'PARCEIRO',
+        },
+      });
+
+      listarVigenciasAlunoMock.mockResolvedValue([]);
+
+      const resposta = await GET();
+      const corpo = await resposta.json();
+
+      expect(resposta.status).toBe(200);
+      expect(corpo.ok).toBe(true);
+
+      expect(
+        listarVigenciasAlunoMock,
+      ).toHaveBeenCalledWith(
+        'aluno-compartilhado',
+      );
+    },
+  );
+
 });

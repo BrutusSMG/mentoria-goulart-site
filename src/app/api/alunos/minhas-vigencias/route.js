@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { listarVigenciasAluno } from '@/lib/vigencias-aluno';
+import { temContextoAluno } from '@/lib/contextos-sessao';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,10 +20,7 @@ function resposta(data, status = 200) {
 export async function GET() {
   const session = await getServerSession(authOptions);
 
-  if (
-    session?.user?.tipoConta !== 'ALUNO' ||
-    !session?.user?.alunoId
-  ) {
+  if (!temContextoAluno(session?.user)) {
     return resposta(
       {
         ok: false,

@@ -3,22 +3,26 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import {
+  temContextoAdministrativo,
+  temContextoAluno,
+} from '@/lib/contextos-sessao';
 import { alunoTemAcessoComunidade } from '@/lib/direitos-produto';
 
 export default async function ComunidadeLayout({ children }) {
   const sessao = await getServerSession(authOptions);
-  const tipoConta = sessao?.user?.tipoConta;
+  const usuario = sessao?.user;
 
-  if (tipoConta === 'ADMIN') {
+  if (temContextoAdministrativo(usuario)) {
     return children;
   }
 
-  if (tipoConta !== 'ALUNO') {
+  if (!temContextoAluno(usuario)) {
     redirect('/aluno/login');
   }
 
   const acessoComunidade = await alunoTemAcessoComunidade(
-    sessao?.user?.alunoId,
+    usuario.alunoId,
   );
 
   if (!acessoComunidade) {

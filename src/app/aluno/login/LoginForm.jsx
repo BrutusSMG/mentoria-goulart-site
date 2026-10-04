@@ -6,6 +6,7 @@ import { getSession, signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, LockKeyhole, Mail } from 'lucide-react';
+import { temContextoAluno } from '@/lib/contextos-sessao';
 
 export default function LoginAlunoPage() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export default function LoginAlunoPage() {
       return;
     }
 
-    if (sessao?.user?.tipoConta !== 'ALUNO') {
+    if (!temContextoAluno(sessao?.user)) {
       setStatus('error');
       setErro('Esta conta não possui acesso ao Portal Garimpo Urbano.');
       return;

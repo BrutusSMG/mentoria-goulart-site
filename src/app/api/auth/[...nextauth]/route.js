@@ -102,13 +102,10 @@ export const authOptions = {
                 : null;
 
             return {
-              // Compatibilidade temporaria.
-              // tipoConta sera removido na E5.5.2.
               // A identidade da sessao agora e Usuario.id.
               id: usuarioPortal.id,
               email: pessoa.emailPrincipal,
               name: aluno.nome,
-              tipoConta: "ALUNO",
               alunoId: aluno.id,
               usuarioId: usuarioPortal.id,
               pessoaId: pessoa.id,
@@ -117,7 +114,6 @@ export const authOptions = {
                   ? adminUser.id
                   : null,
               papelAdministrativo,
-              role: papelAdministrativo,
               mustChangePassword: Boolean(
                 usuarioPortal.mustChangePassword,
               ),
@@ -191,14 +187,12 @@ export const authOptions = {
             id: usuarioPortal.id,
             email: pessoa.emailPrincipal,
             name: adminUser.nome || pessoa.nome,
-            tipoConta: "ADMIN",
             alunoId: pessoa.aluno?.id || null,
             usuarioId: usuarioPortal.id,
             pessoaId: pessoa.id,
             adminUserId: adminUser.id,
             papelAdministrativo:
               acessoAdministrativo.papel,
-            role: acessoAdministrativo.papel,
             mustChangePassword: Boolean(
               usuarioPortal.mustChangePassword,
             ),
@@ -213,14 +207,12 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.tipoConta = user.tipoConta || "ADMIN";
         token.alunoId = user.alunoId || null;
         token.usuarioId = user.usuarioId || null;
         token.pessoaId = user.pessoaId || null;
         token.adminUserId = user.adminUserId || null;
         token.papelAdministrativo =
           user.papelAdministrativo || null;
-        token.role = user.role || null;
         token.mustChangePassword = Boolean(user.mustChangePassword);
       }
 
@@ -229,7 +221,6 @@ export const authOptions = {
     async session({ session, token }) {
       if (session?.user) {
         session.user.id = token.sub;
-        session.user.tipoConta = token.tipoConta || "ADMIN";
         session.user.alunoId = token.alunoId || null;
         session.user.usuarioId = token.usuarioId || null;
         session.user.pessoaId = token.pessoaId || null;
@@ -237,7 +228,6 @@ export const authOptions = {
           token.adminUserId || null;
         session.user.papelAdministrativo =
           token.papelAdministrativo || null;
-        session.user.role = token.role || null;
         session.user.mustChangePassword = Boolean(token.mustChangePassword);
       }
 

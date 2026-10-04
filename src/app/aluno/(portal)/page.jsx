@@ -4,6 +4,10 @@ import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import {
+  temContextoAdministrativo,
+  temContextoAluno,
+} from '@/lib/contextos-sessao';
+import {
   alunoTemAcessoAtivo,
   alunoTemContaAtiva,
 } from '@/lib/acesso-aluno';
@@ -23,7 +27,10 @@ export default async function PortalAlunoPage() {
   const sessao = await getServerSession(authOptions);
   const usuario = sessao?.user;
 
-  if (usuario?.tipoConta === 'ADMIN') {
+  if (
+    !temContextoAluno(usuario) &&
+    temContextoAdministrativo(usuario)
+  ) {
     return (
       <main className="min-h-screen bg-black px-4 py-12 text-white">
         <section className="mx-auto w-full max-w-4xl">
