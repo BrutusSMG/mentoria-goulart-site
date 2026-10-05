@@ -62,7 +62,7 @@ async function carregarPlano(tx) {
   for (const item of MAPEAMENTO_PERMISSOES) {
     if (!permissaoPorCodigo.has(item.codigo)) {
       throw new Error(
-        `Permiss?o obrigat?ria ausente ou inativa: ${item.codigo}`,
+        `Permissão obrigatória ausente ou inativa: ${item.codigo}`,
       );
     }
   }
@@ -72,7 +72,7 @@ async function carregarPlano(tx) {
   for (const admin of admins) {
     if (!["ADMIN", "PARCEIRO"].includes(admin.role)) {
       throw new Error(
-        `Role administrativa n?o suportada na E5.3: ${admin.role}`,
+        `Role administrativa não suportada na E5.3: ${admin.role}`,
       );
     }
 
@@ -119,7 +119,7 @@ async function carregarPlano(tx) {
       pessoa.adminUser.id !== admin.id
     ) {
       throw new Error(
-        `Pessoa j? vinculada a outro AdminUser.`,
+        `Pessoa já vinculada a outro AdminUser.`,
       );
     }
 
@@ -128,7 +128,7 @@ async function carregarPlano(tx) {
       pessoa.usuario.senhaHash !== admin.senha
     ) {
       throw new Error(
-        `Pessoa j? possui Usuario com credencial diferente.`,
+        `Pessoa já possui Usuario com credencial diferente.`,
       );
     }
 

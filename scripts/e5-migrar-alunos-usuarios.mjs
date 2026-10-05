@@ -17,7 +17,7 @@ if (
   RESOLVER_CONFLITOS !== "usuario"
 ) {
   throw new Error(
-    "Resolu??o inv?lida. Use --resolver-conflitos=usuario.",
+    "Resolução inválida. Use --resolver-conflitos=usuario.",
   );
 }
 
@@ -190,7 +190,7 @@ async function carregarPlano(tx) {
       pessoa.aluno.id !== aluno.id
     ) {
       throw new Error(
-        "Pessoa j? vinculada a outro Aluno.",
+        "Pessoa já vinculada a outro Aluno.",
       );
     }
 
@@ -326,7 +326,7 @@ async function aplicarPlano(tx, plano) {
       "CONFLITO_CREDENCIAL"
     ) {
       throw new Error(
-        "Conflito de credencial n?o resolvido.",
+        "Conflito de credencial não resolvido.",
       );
     }
   }
@@ -420,7 +420,7 @@ async function main() {
         !resumo.aplicavel
       ) {
         throw new Error(
-          "Existem conflitos de credencial n?o resolvidos. Nenhuma altera??o foi aplicada.",
+          "Existem conflitos de credencial não resolvidos. Nenhuma alteração foi aplicada.",
         );
       }
 
