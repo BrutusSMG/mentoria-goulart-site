@@ -1,21 +1,27 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
-const alunoFindUniqueMock = vi.fn();
+const pessoaFindUniqueMock = vi.fn();
 const adminFindUniqueMock = vi.fn();
 const bcryptCompareMock = vi.fn();
 
-vi.mock('next-auth', () => ({
+vi.mock("next-auth", () => ({
   default: vi.fn(() => vi.fn()),
 }));
 
-vi.mock('next-auth/providers/credentials', () => ({
+vi.mock("next-auth/providers/credentials", () => ({
   default: vi.fn((config) => config),
 }));
 
-vi.mock('@/lib/prisma', () => ({
+vi.mock("@/lib/prisma", () => ({
   prisma: {
-    aluno: {
-      findUnique: alunoFindUniqueMock,
+    pessoa: {
+      findUnique: pessoaFindUniqueMock,
     },
     adminUser: {
       findUnique: adminFindUniqueMock,
@@ -23,89 +29,426 @@ vi.mock('@/lib/prisma', () => ({
   },
 }));
 
-vi.mock('bcryptjs', () => ({
+vi.mock("bcryptjs", () => ({
   default: {
     compare: bcryptCompareMock,
   },
 }));
 
 const { authOptions } = await import(
-  '../src/app/api/auth/[...nextauth]/route.js'
+  "../src/app/api/auth/[...nextauth]/route.js"
 );
 
-const authorize = authOptions.providers[0].authorize;
+const authorize =
+  authOptions.providers[0].authorize;
 
-describe('autenticação do aluno', () => {
+describe("autenticação do aluno via Usuario", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('autentica aluno ativo com senha válida', async () => {
-    alunoFindUniqueMock.mockResolvedValue({
-      id: 'aluno-1',
-      nome: 'Aluno Teste',
-      email: 'aluno@example.com',
-      senhaHash: 'hash-senha',
-      status: 'ATIVO',
-    });
+  it(
+    "autentica pela credencial de Usuario e preserva alunoId",
+    async () => {
+      pessoaFindUniqueMock.mockResolvedValue({
+        id: "pessoa-1",
+        emailPrincipal: "aluno@example.com",
 
-    bcryptCompareMock.mockResolvedValue(true);
+        usuario: {
+          id: "usuario-1",
+          senhaHash: "hash-canonico",
+          status: "ATIVO",
+        },
 
-    const usuario = await authorize({
-      email: ' ALUNO@example.com ',
-      password: 'Senha123!',
-      area: 'aluno',
-    });
+        aluno: {
+          id: "aluno-1",
+          nome: "Aluno Teste",
+          status: "ATIVO",
+        },
+      });
 
-    expect(alunoFindUniqueMock).toHaveBeenCalledWith({
-      where: {
-        email: 'aluno@example.com',
-      },
-      select: {
-        id: true,
-        nome: true,
-        email: true,
-        senhaHash: true,
-        status: true,
-      },
-    });
+      bcryptCompareMock.mockResolvedValue(true);
 
-    expect(bcryptCompareMock).toHaveBeenCalledWith(
-      'Senha123!',
-      'hash-senha',
-    );
+      const usuario = await authorize({
+        email: " ALUNO@example.com ",
+        password: "Senha123!",
+        area: "aluno",
+      });
 
-    expect(usuario).toEqual({
-      id: 'aluno-1',
-      email: 'aluno@example.com',
-      name: 'Aluno Teste',
-      tipoConta: 'ALUNO',
-      alunoId: 'aluno-1',
-      role: null,
-      mustChangePassword: false,
-    });
+      expect(
+        pessoaFindUniqueMock,
+      ).toHaveBeenCalledWith({
+        where: {
+          emailPrincipal:
+            "aluno@example.com",
+        },
+        select: {
+          id: true,
+          emailPrincipal: true,
+          usuario: {
+            select: {
+              id: true,
+              senhaHash: true,
+              status: true,
+              mustChangePassword: true,
+              acessoAdministrativo: {
+                select: {
+                  papel: true,
+                  ativo: true,
+                },
+              },
+            },
+          },
+          adminUser: {
+            select: {
+              id: true,
+              nome: true,
+              role: true,
+              ativo: true,
+            },
+          },
+          aluno: {
+            select: {
+              id: true,
+              nome: true,
+              status: true,
+            },
+          },
+        },
+      });
 
-    expect(adminFindUniqueMock).not.toHaveBeenCalled();
-  });
+      expect(
+        bcryptCompareMock,
+      ).toHaveBeenCalledWith(
+        "Senha123!",
+        "hash-canonico",
+      );
 
-  it('nega login quando a senha do aluno é inválida', async () => {
-    alunoFindUniqueMock.mockResolvedValue({
-      id: 'aluno-1',
-      nome: 'Aluno Teste',
-      email: 'aluno@example.com',
-      senhaHash: 'hash-senha',
-      status: 'ATIVO',
-    });
+      expect(usuario).toEqual({
+        id: "usuario-1",
+        email: "aluno@example.com",
+        name: "Aluno Teste",
+        alunoId: "aluno-1",
+        usuarioId: "usuario-1",
+        pessoaId: "pessoa-1",
+        adminUserId: null,
+        papelAdministrativo: null,
+        mustChangePassword: false,
+      });
 
-    bcryptCompareMock.mockResolvedValue(false);
+      expect(
+        adminFindUniqueMock,
+      ).not.toHaveBeenCalled();
+    },
+  );
 
-    const usuario = await authorize({
-      email: 'aluno@example.com',
-      password: 'senha-incorreta',
-      area: 'aluno',
-    });
+  it(
+    "não usa status educacional do Aluno como status de login",
+    async () => {
+      pessoaFindUniqueMock.mockResolvedValue({
+        id: "pessoa-1",
+        emailPrincipal: "aluno@example.com",
 
-    expect(usuario).toBeNull();
-    expect(adminFindUniqueMock).not.toHaveBeenCalled();
-  });
+        usuario: {
+          id: "usuario-1",
+          senhaHash: "hash-canonico",
+          status: "ATIVO",
+        },
+
+        aluno: {
+          id: "aluno-1",
+          nome: "Aluno Teste",
+          status: "SUSPENSO",
+        },
+      });
+
+      bcryptCompareMock.mockResolvedValue(true);
+
+      const usuario = await authorize({
+        email: "aluno@example.com",
+        password: "Senha123!",
+        area: "aluno",
+      });
+
+      expect(usuario?.alunoId).toBe(
+        "aluno-1",
+      );
+
+      expect(usuario?.usuarioId).toBe(
+        "usuario-1",
+      );
+    },
+  );
+
+  it(
+    "nega login quando Usuario está bloqueado",
+    async () => {
+      pessoaFindUniqueMock.mockResolvedValue({
+        id: "pessoa-1",
+        emailPrincipal: "aluno@example.com",
+
+        usuario: {
+          id: "usuario-1",
+          senhaHash: "hash-canonico",
+          status: "BLOQUEADO",
+        },
+
+        aluno: {
+          id: "aluno-1",
+          nome: "Aluno Teste",
+          status: "ATIVO",
+        },
+      });
+
+      const usuario = await authorize({
+        email: "aluno@example.com",
+        password: "Senha123!",
+        area: "aluno",
+      });
+
+      expect(usuario).toBeNull();
+
+      expect(
+        bcryptCompareMock,
+      ).not.toHaveBeenCalled();
+    },
+  );
+
+  it(
+    "nega login quando a senha de Usuario é inválida",
+    async () => {
+      pessoaFindUniqueMock.mockResolvedValue({
+        id: "pessoa-1",
+        emailPrincipal: "aluno@example.com",
+
+        usuario: {
+          id: "usuario-1",
+          senhaHash: "hash-canonico",
+          status: "ATIVO",
+        },
+
+        aluno: {
+          id: "aluno-1",
+          nome: "Aluno Teste",
+          status: "ATIVO",
+        },
+      });
+
+      bcryptCompareMock.mockResolvedValue(false);
+
+      const usuario = await authorize({
+        email: "aluno@example.com",
+        password: "senha-incorreta",
+        area: "aluno",
+      });
+
+      expect(usuario).toBeNull();
+    },
+  );
+
+  it(
+    "nega contexto de aluno quando Pessoa não possui Aluno",
+    async () => {
+      pessoaFindUniqueMock.mockResolvedValue({
+        id: "pessoa-1",
+        emailPrincipal: "admin@example.com",
+
+        usuario: {
+          id: "usuario-1",
+          senhaHash: "hash-canonico",
+          status: "ATIVO",
+        },
+
+        aluno: null,
+      });
+
+      const usuario = await authorize({
+        email: "admin@example.com",
+        password: "Senha123!",
+        area: "aluno",
+      });
+
+      expect(usuario).toBeNull();
+    },
+  );
+  it(
+    "autentica ADMIN pela mesma credencial canonica de Usuario",
+    async () => {
+      pessoaFindUniqueMock.mockResolvedValue({
+        id: "pessoa-admin",
+        nome: "Admin Canonico",
+        emailPrincipal: "admin@example.com",
+
+        usuario: {
+          id: "usuario-admin",
+          senhaHash: "hash-canonico-admin",
+          status: "ATIVO",
+          mustChangePassword: false,
+          acessoAdministrativo: {
+            papel: "ADMIN",
+            ativo: true,
+          },
+        },
+
+        aluno: null,
+
+        adminUser: {
+          id: "admin-legado",
+          nome: "Admin Canonico",
+          role: "ADMIN",
+          ativo: true,
+        },
+      });
+
+      bcryptCompareMock.mockResolvedValue(true);
+
+      const usuario = await authorize({
+        email: " ADMIN@example.com ",
+        password: "SenhaAdmin123!",
+        area: "admin",
+      });
+
+      expect(
+        bcryptCompareMock,
+      ).toHaveBeenCalledWith(
+        "SenhaAdmin123!",
+        "hash-canonico-admin",
+      );
+
+      expect(usuario).toEqual({
+        id: "usuario-admin",
+        email: "admin@example.com",
+        name: "Admin Canonico",
+        alunoId: null,
+        usuarioId: "usuario-admin",
+        pessoaId: "pessoa-admin",
+        adminUserId: "admin-legado",
+        papelAdministrativo: "ADMIN",
+        mustChangePassword: false,
+      });
+
+      expect(
+        adminFindUniqueMock,
+      ).not.toHaveBeenCalled();
+    },
+  );
+
+  it(
+    "preserva contextos Aluno e administrativo na mesma sessao",
+    async () => {
+      pessoaFindUniqueMock.mockResolvedValue({
+        id: "pessoa-compartilhada",
+        nome: "Pessoa Compartilhada",
+        emailPrincipal:
+          "compartilhado@example.com",
+
+        usuario: {
+          id: "usuario-compartilhado",
+          senhaHash: "hash-compartilhado",
+          status: "ATIVO",
+          mustChangePassword: true,
+          acessoAdministrativo: {
+            papel: "PARCEIRO",
+            ativo: true,
+          },
+        },
+
+        aluno: {
+          id: "aluno-compartilhado",
+          nome: "Pessoa Compartilhada",
+          status: "ATIVO",
+        },
+
+        adminUser: {
+          id: "admin-compartilhado",
+          nome: "Pessoa Compartilhada",
+          role: "PARCEIRO",
+          ativo: true,
+        },
+      });
+
+      bcryptCompareMock.mockResolvedValue(true);
+
+      const usuario = await authorize({
+        email: "compartilhado@example.com",
+        password: "Senha123!",
+        area: "aluno",
+      });
+
+      expect(usuario).toMatchObject({
+        id: "usuario-compartilhado",
+        usuarioId: "usuario-compartilhado",
+        pessoaId: "pessoa-compartilhada",
+        alunoId: "aluno-compartilhado",
+        adminUserId: "admin-compartilhado",
+        papelAdministrativo: "PARCEIRO",
+        mustChangePassword: true,
+      });
+    },
+  );
+
+  it(
+    "propaga os contextos canonicos para o JWT",
+    async () => {
+      const token = await authOptions.callbacks.jwt({
+        token: {
+          sub: "usuario-1",
+        },
+        user: {
+          id: "usuario-1",
+          alunoId: "aluno-1",
+          usuarioId: "usuario-1",
+          pessoaId: "pessoa-1",
+          adminUserId: "admin-1",
+          papelAdministrativo: "PARCEIRO",
+          mustChangePassword: false,
+        },
+      });
+
+      expect(token).toMatchObject({
+        sub: "usuario-1",
+        alunoId: "aluno-1",
+        usuarioId: "usuario-1",
+        pessoaId: "pessoa-1",
+        adminUserId: "admin-1",
+        papelAdministrativo: "PARCEIRO",
+        mustChangePassword: false,
+      });
+    },
+  );
+
+  it(
+    "expoe Usuario como id da sessao e preserva os contextos",
+    async () => {
+      const session =
+        await authOptions.callbacks.session({
+          session: {
+            user: {
+              name: "Pessoa Compartilhada",
+              email: "compartilhado@example.com",
+            },
+          },
+          token: {
+            sub: "usuario-1",
+            alunoId: "aluno-1",
+            usuarioId: "usuario-1",
+            pessoaId: "pessoa-1",
+            adminUserId: "admin-1",
+            papelAdministrativo: "PARCEIRO",
+            mustChangePassword: false,
+          },
+        });
+
+      expect(session.user).toMatchObject({
+        id: "usuario-1",
+        alunoId: "aluno-1",
+        usuarioId: "usuario-1",
+        pessoaId: "pessoa-1",
+        adminUserId: "admin-1",
+        papelAdministrativo: "PARCEIRO",
+        mustChangePassword: false,
+      });
+    },
+  );
+
 });

@@ -28,31 +28,76 @@ vi.mock('@/lib/prisma', () => ({
 }));
 
 import {
+  contaTemPermissao,
   obterAcessoAdmin,
   obterAcessoAtual,
+  obterAcessoModulo,
 } from '../src/lib/admin-permissoes';
+
+import {
+  PERMISSOES,
+} from '../src/lib/permissoes';
+
+function contaAdministrativa({
+  id = 'admin-ficticio',
+  role = 'ADMIN',
+  ativo = true,
+  mustChangePassword = false,
+  usuarioStatus = 'ATIVO',
+  acessoAtivo = true,
+  papel = role,
+  alunoId = null,
+  permissoes = [],
+  podeGerenciarSucatas = false,
+  podeGerenciarDepoimentos = false,
+  podeGerenciarJornada = false,
+} = {}) {
+  return {
+    id,
+    nome: 'Conta Ficticia',
+    email: 'conta@example.test',
+    role,
+    ativo,
+    podeGerenciarSucatas,
+    podeGerenciarDepoimentos,
+    podeGerenciarJornada,
+    pessoa: {
+      id: 'pessoa-ficticia',
+      aluno: alunoId
+        ? {
+            id: alunoId,
+          }
+        : null,
+      usuario: {
+        id: 'usuario-ficticio',
+        status: usuarioStatus,
+        mustChangePassword,
+        acessoAdministrativo: {
+          papel,
+          ativo: acessoAtivo,
+        },
+        permissoes,
+      },
+    },
+  };
+}
 
 beforeEach(() => {
   vi.clearAllMocks();
 
   mocks.getServerSession.mockResolvedValue({
     user: {
-      id: 'admin-ficticio',
+      id: 'usuario-ficticio',
+      usuarioId: 'usuario-ficticio',
+      pessoaId: 'pessoa-ficticia',
     },
   });
 
-  mocks.adminFindUnique.mockResolvedValue({
-    id: 'admin-ficticio',
-    nome: 'Admin Fictício',
-    email: 'admin@example.test',
-    role: 'ADMIN',
-    ativo: true,
-    mustChangePassword: false,
-    podeGerenciarSucatas: false,
-    podeGerenciarDepoimentos: false,
-    podeGerenciarJornada: false,
-  });
+  mocks.adminFindUnique.mockResolvedValue(
+    contaAdministrativa(),
+  );
 });
+
 
 describe('admin-permissoes', () => {
   it('nega acesso quando não existe sessão autenticada', async () => {
@@ -72,12 +117,11 @@ describe('admin-permissoes', () => {
   });
 
   it('nega acesso administrativo para conta inativa', async () => {
-    mocks.adminFindUnique.mockResolvedValue({
-      id: 'admin-ficticio',
-      role: 'ADMIN',
-      ativo: false,
-      mustChangePassword: false,
-    });
+    mocks.adminFindUnique.mockResolvedValue(
+      contaAdministrativa({
+        ativo: false,
+      }),
+    );
 
     const acesso = await obterAcessoAdmin();
 
@@ -87,12 +131,13 @@ describe('admin-permissoes', () => {
   });
 
   it('nega acesso administrativo para role diferente de ADMIN', async () => {
-    mocks.adminFindUnique.mockResolvedValue({
-      id: 'parceiro-ficticio',
-      role: 'PARCEIRO',
-      ativo: true,
-      mustChangePassword: false,
-    });
+    mocks.adminFindUnique.mockResolvedValue(
+      contaAdministrativa({
+        id: 'parceiro-ficticio',
+        role: 'PARCEIRO',
+        papel: 'PARCEIRO',
+      }),
+    );
 
     const acesso = await obterAcessoAdmin();
 
@@ -104,12 +149,11 @@ describe('admin-permissoes', () => {
   });
 
   it('mantém acesso básico para ADMIN com troca de senha pendente', async () => {
-    mocks.adminFindUnique.mockResolvedValue({
-      id: 'admin-ficticio',
-      role: 'ADMIN',
-      ativo: true,
-      mustChangePassword: true,
-    });
+    mocks.adminFindUnique.mockResolvedValue(
+      contaAdministrativa({
+        mustChangePassword: true,
+      }),
+    );
 
     const acesso = await obterAcessoAtual();
 
@@ -118,12 +162,11 @@ describe('admin-permissoes', () => {
   });
 
   it('bloqueia operações administrativas enquanto a troca de senha estiver pendente', async () => {
-    mocks.adminFindUnique.mockResolvedValue({
-      id: 'admin-ficticio',
-      role: 'ADMIN',
-      ativo: true,
-      mustChangePassword: true,
-    });
+    mocks.adminFindUnique.mockResolvedValue(
+      contaAdministrativa({
+        mustChangePassword: true,
+      }),
+    );
 
     const acesso = await obterAcessoAdmin();
 
@@ -142,4 +185,249 @@ describe('admin-permissoes', () => {
     expect(acesso.ehAdmin).toBe(true);
     expect(acesso.conta.id).toBe('admin-ficticio');
   });
+
+  it('mantém flag legada como fallback para PARCEIRO', async () => {
+    const conta = {
+      role: 'PARCEIRO',
+      podeGerenciarSucatas: true,
+      podeGerenciarDepoimentos: false,
+      podeGerenciarJornada: false,
+      pessoa: {
+        usuario: null,
+      },
+    };
+
+    expect(
+      contaTemPermissao(
+        conta,
+        PERMISSOES.SUCATAS_GERENCIAR,
+      ),
+    ).toBe(true);
+  });
+
+  it('permite PARCEIRO pela nova UsuarioPermissao ativa', async () => {
+    mocks.adminFindUnique.mockResolvedValue({
+      id: 'parceiro-ficticio',
+      role: 'PARCEIRO',
+      ativo: true,
+      mustChangePassword: false,
+      podeGerenciarSucatas: false,
+      podeGerenciarDepoimentos: false,
+      podeGerenciarJornada: false,
+      pessoa: {
+        usuario: {
+          id: 'usuario-ficticio',
+          status: 'ATIVO',
+          acessoAdministrativo: {
+            papel: 'PARCEIRO',
+            ativo: true,
+          },
+          permissoes: [
+            {
+              permissao: {
+                codigo: 'DEPOIMENTOS_GERENCIAR',
+                ativo: true,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const acesso = await obterAcessoModulo('DEPOIMENTOS');
+
+    expect(acesso.permitido).toBe(true);
+    expect(acesso.ehAdmin).toBe(false);
+  });
+
+  it('não concede permissão nova quando Usuario está bloqueado', async () => {
+    mocks.adminFindUnique.mockResolvedValue({
+      id: 'parceiro-ficticio',
+      role: 'PARCEIRO',
+      ativo: true,
+      mustChangePassword: false,
+      podeGerenciarSucatas: false,
+      podeGerenciarDepoimentos: false,
+      podeGerenciarJornada: true,
+      pessoa: {
+        usuario: {
+          id: 'usuario-ficticio',
+          status: 'BLOQUEADO',
+          acessoAdministrativo: {
+            papel: 'PARCEIRO',
+            ativo: true,
+          },
+          permissoes: [
+            {
+              permissao: {
+                codigo: 'JORNADA_GERENCIAR',
+                ativo: true,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const acesso = await obterAcessoModulo('JORNADA');
+
+    expect(acesso.permitido).toBe(false);
+    expect(acesso.status).toBe(403);
+  });
+
+  it('mantém ADMIN com acesso total sem depender de UsuarioPermissao', async () => {
+    const acesso = await obterAcessoModulo('SUCATAS');
+
+    expect(acesso.permitido).toBe(true);
+    expect(acesso.ehAdmin).toBe(true);
+  });
+
+
+  it('projeta UsuarioPermissao nos campos efetivos usados pela interface', async () => {
+    mocks.adminFindUnique.mockResolvedValue({
+      id: 'parceiro-ficticio',
+      role: 'PARCEIRO',
+      ativo: true,
+      mustChangePassword: false,
+      podeGerenciarSucatas: false,
+      podeGerenciarDepoimentos: false,
+      podeGerenciarJornada: false,
+      pessoa: {
+        usuario: {
+          id: 'usuario-ficticio',
+          status: 'ATIVO',
+          acessoAdministrativo: {
+            papel: 'PARCEIRO',
+            ativo: true,
+          },
+          permissoes: [
+            {
+              permissao: {
+                codigo: 'SUCATAS_GERENCIAR',
+                ativo: true,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const acesso = await obterAcessoAtual();
+
+    expect(acesso.permitido).toBe(true);
+    expect(acesso.conta.podeGerenciarSucatas).toBe(true);
+    expect(acesso.conta.podeGerenciarDepoimentos).toBe(false);
+    expect(acesso.conta.podeGerenciarJornada).toBe(false);
+  });
+
+  it(
+    'nega acesso quando usuarioId da sessao diverge da Pessoa',
+    async () => {
+      mocks.getServerSession.mockResolvedValue({
+        user: {
+          id: 'usuario-outro',
+          usuarioId: 'usuario-outro',
+          pessoaId: 'pessoa-ficticia',
+        },
+      });
+
+      const acesso = await obterAcessoAtual();
+
+      expect(acesso.permitido).toBe(false);
+      expect(acesso.status).toBe(403);
+      expect(acesso.motivo).toBe(
+        'Acesso administrativo indisponível.',
+      );
+    },
+  );
+
+  it(
+    'nega acesso quando AcessoAdministrativo esta inativo',
+    async () => {
+      mocks.adminFindUnique.mockResolvedValue(
+        contaAdministrativa({
+          acessoAtivo: false,
+        }),
+      );
+
+      const acesso = await obterAcessoAtual();
+
+      expect(acesso.permitido).toBe(false);
+      expect(acesso.status).toBe(403);
+      expect(acesso.motivo).toBe(
+        'Acesso administrativo indisponível.',
+      );
+    },
+  );
+
+  it(
+    'usa mustChangePassword do Usuario canonico',
+    async () => {
+      mocks.adminFindUnique.mockResolvedValue(
+        contaAdministrativa({
+          mustChangePassword: true,
+        }),
+      );
+
+      const acesso = await obterAcessoAtual();
+
+      expect(acesso.permitido).toBe(true);
+      expect(
+        acesso.conta.mustChangePassword,
+      ).toBe(true);
+    },
+  );
+
+  it(
+    'projeta os identificadores canonicos no acesso administrativo',
+    async () => {
+      const acesso = await obterAcessoAtual();
+
+      expect(acesso.permitido).toBe(true);
+
+      expect(acesso.conta).toMatchObject({
+        id: 'admin-ficticio',
+        adminUserId: 'admin-ficticio',
+        usuarioId: 'usuario-ficticio',
+        pessoaId: 'pessoa-ficticia',
+        papelAdministrativo: 'ADMIN',
+      });
+
+      expect(
+        mocks.adminFindUnique,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            pessoaId: 'pessoa-ficticia',
+          },
+        }),
+      );
+    },
+  );
+
+  it(
+    'projeta contexto de aluno na conta administrativa',
+    async () => {
+      mocks.adminFindUnique.mockResolvedValue(
+        contaAdministrativa({
+          role: 'PARCEIRO',
+          papel: 'PARCEIRO',
+          alunoId: 'aluno-ficticio',
+        }),
+      );
+
+      const acesso = await obterAcessoAtual();
+
+      expect(acesso.permitido).toBe(true);
+
+      expect(acesso.conta).toMatchObject({
+        usuarioId: 'usuario-ficticio',
+        pessoaId: 'pessoa-ficticia',
+        adminUserId: 'admin-ficticio',
+        alunoId: 'aluno-ficticio',
+        papelAdministrativo: 'PARCEIRO',
+      });
+    },
+  );
+
 });

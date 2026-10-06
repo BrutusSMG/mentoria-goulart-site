@@ -51,7 +51,6 @@ describe('GET /api/alunos/meu-perfil', () => {
   it('retorna 403 quando a conta nao esta ativa', async () => {
     getServerSessionMock.mockResolvedValue({
       user: {
-        tipoConta: 'ALUNO',
         alunoId: 'aluno-inativo',
       },
     });
@@ -67,7 +66,6 @@ describe('GET /api/alunos/meu-perfil', () => {
   it('permite conta ativa sem exigir matricula', async () => {
     getServerSessionMock.mockResolvedValue({
       user: {
-        tipoConta: 'ALUNO',
         alunoId: 'aluno-ebook',
       },
     });
@@ -92,4 +90,38 @@ describe('GET /api/alunos/meu-perfil', () => {
       'aluno-ebook',
     );
   });
+  it(
+    'permite aluno que tambem possui contexto administrativo',
+    async () => {
+      getServerSessionMock.mockResolvedValue({
+        user: {
+          alunoId: 'aluno-compartilhado',
+          adminUserId: 'admin-1',
+          papelAdministrativo: 'PARCEIRO',
+        },
+      });
+
+      alunoTemContaAtivaMock.mockResolvedValue(true);
+
+      alunoFindUniqueMock.mockResolvedValue({
+        nome: 'Pessoa Compartilhada',
+        email: 'compartilhado@example.com',
+        whatsapp: null,
+        perfil: null,
+      });
+
+      const resposta = await GET();
+      const corpo = await resposta.json();
+
+      expect(resposta.status).toBe(200);
+      expect(corpo.ok).toBe(true);
+
+      expect(
+        alunoTemContaAtivaMock,
+      ).toHaveBeenCalledWith(
+        'aluno-compartilhado',
+      );
+    },
+  );
+
 });

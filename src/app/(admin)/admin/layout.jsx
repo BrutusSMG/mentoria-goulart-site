@@ -14,7 +14,7 @@ const LINKS_DESKTOP = {
   sucatas: "Valores de Sucata",
   depoimentos: "Depoimentos",
   jornada: "Jornada do Aluno",
-  aluno: "Área do Aluno",
+  aluno: "Portal do Aluno",
   alunos: "Alunos",
 };
 
@@ -96,7 +96,7 @@ export default async function AdminLayout({ children }) {
     });
   }
 
-  if (ehAdmin) {
+  if (contaAtual.alunoId) {
     itensNavegacao.push({
       href: "/aluno",
       rotulo: LINKS_DESKTOP.aluno,

@@ -27,6 +27,11 @@ function criarTx() {
           id: 'pessoa-ficticia',
           emailPrincipal: 'legado@example.test',
           ativo: true,
+          usuario: {
+            id: 'usuario-ficticio',
+            status: 'PENDENTE_ATIVACAO',
+            senhaHash: null,
+          },
         },
       }),
     },

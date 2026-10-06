@@ -1,18 +1,25 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 
 const { sendMock } = vi.hoisted(() => ({
   sendMock: vi.fn(),
 }));
 
-const alunoFindUniqueMock = vi.fn();
+const pessoaFindFirstMock = vi.fn();
 const tokenUpdateManyMock = vi.fn();
 const tokenCreateMock = vi.fn();
 const transactionMock = vi.fn();
 
 vi.mock('@/lib/prisma', () => ({
   prisma: {
-    aluno: {
-      findUnique: alunoFindUniqueMock,
+    pessoa: {
+      findFirst: pessoaFindFirstMock,
     },
     alunoAccessToken: {
       updateMany: tokenUpdateManyMock,
@@ -34,58 +41,48 @@ const { POST } = await import(
   '../src/app/api/alunos/esqueci-senha/route.js'
 );
 
+function pessoaFicticia({
+  statusUsuario = 'ATIVO',
+  senhaHash = 'hash-existente',
+  possuiAluno = true,
+  nome = 'Cliente Portal',
+} = {}) {
+  return {
+    emailPrincipal: 'portal@example.com',
+    usuario: {
+      status: statusUsuario,
+      senhaHash,
+    },
+    aluno: possuiAluno
+      ? {
+          id: 'aluno-portal',
+          nome,
+        }
+      : null,
+  };
+}
+
+function requisicao(email = ' portal@example.com ') {
+  return {
+    json: vi.fn().mockResolvedValue({
+      email,
+    }),
+  };
+}
+
 describe('POST /api/alunos/esqueci-senha', () => {
-  const apiKeyOriginal = process.env.RESEND_API_KEY;
+  const apiKeyOriginal =
+    process.env.RESEND_API_KEY;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.RESEND_API_KEY = 'chave-teste';
-  });
 
-  afterEach(() => {
-    if (apiKeyOriginal === undefined) {
-      delete process.env.RESEND_API_KEY;
-    } else {
-      process.env.RESEND_API_KEY = apiKeyOriginal;
-    }
-  });
+    process.env.RESEND_API_KEY =
+      'chave-teste';
 
-  it('não cria recuperação antes do primeiro acesso', async () => {
-    alunoFindUniqueMock.mockResolvedValue({
-      id: 'aluno-1',
-      nome: 'Aluno Teste',
-      status: 'ATIVO',
-      senhaHash: null,
-    });
-
-    const request = {
-      json: vi.fn().mockResolvedValue({
-        email: ' aluno@example.com ',
-      }),
-    };
-
-    const resposta = await POST(request);
-    const corpo = await resposta.json();
-
-    expect(resposta.status).toBe(200);
-    expect(corpo).toEqual({
-      ok: true,
-      mensagem:
-        'Se houver uma conta para este e-mail, enviaremos as instruções de recuperação.',
-    });
-
-    expect(tokenUpdateManyMock).not.toHaveBeenCalled();
-    expect(tokenCreateMock).not.toHaveBeenCalled();
-    expect(transactionMock).not.toHaveBeenCalled();
-  });
-
-  it('envia recuperacao com linguagem do Portal', async () => {
-    alunoFindUniqueMock.mockResolvedValue({
-      id: 'aluno-portal',
-      nome: 'Cliente Portal',
-      status: 'ATIVO',
-      senhaHash: 'hash-existente',
-    });
+    pessoaFindFirstMock.mockResolvedValue(
+      pessoaFicticia(),
+    );
 
     tokenUpdateManyMock.mockReturnValue({
       operacao: 'invalidar-recuperacoes',
@@ -103,85 +100,149 @@ describe('POST /api/alunos/esqueci-senha', () => {
       },
       error: null,
     });
+  });
 
-    const request = {
-      json: vi.fn().mockResolvedValue({
-        email: ' portal@example.com ',
+  afterEach(() => {
+    if (apiKeyOriginal === undefined) {
+      delete process.env.RESEND_API_KEY;
+    } else {
+      process.env.RESEND_API_KEY =
+        apiKeyOriginal;
+    }
+  });
+
+  it('nao cria recuperacao antes da ativacao do Usuario', async () => {
+    pessoaFindFirstMock.mockResolvedValue(
+      pessoaFicticia({
+        statusUsuario: 'PENDENTE_ATIVACAO',
+        senhaHash: null,
       }),
-    };
+    );
 
-    const resposta = await POST(request);
-    const corpo = await resposta.json();
+    const resposta = await POST(
+      requisicao(' aluno@example.com '),
+    );
 
     expect(resposta.status).toBe(200);
-    expect(corpo.ok).toBe(true);
 
-    expect(transactionMock).toHaveBeenCalledTimes(1);
-    expect(sendMock).toHaveBeenCalledTimes(1);
+    expect(
+      transactionMock,
+    ).not.toHaveBeenCalled();
 
-    const mensagem = sendMock.mock.calls[0][0];
+    expect(
+      tokenCreateMock,
+    ).not.toHaveBeenCalled();
 
-    expect(mensagem.to).toBe('portal@example.com');
+    expect(
+      sendMock,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('nao cria recuperacao sem contexto de Aluno', async () => {
+    pessoaFindFirstMock.mockResolvedValue(
+      pessoaFicticia({
+        possuiAluno: false,
+      }),
+    );
+
+    const resposta = await POST(
+      requisicao(),
+    );
+
+    expect(resposta.status).toBe(200);
+
+    expect(
+      transactionMock,
+    ).not.toHaveBeenCalled();
+
+    expect(
+      sendMock,
+    ).not.toHaveBeenCalled();
+  });
+
+  it('usa Pessoa e Usuario para criar recuperacao', async () => {
+    const resposta = await POST(
+      requisicao(' PORTAL@example.com '),
+    );
+
+    expect(resposta.status).toBe(200);
+
+    expect(
+      pessoaFindFirstMock,
+    ).toHaveBeenCalledWith({
+      where: {
+        emailPrincipal: {
+          equals: 'portal@example.com',
+          mode: 'insensitive',
+        },
+      },
+      select: {
+        emailPrincipal: true,
+        usuario: {
+          select: {
+            status: true,
+            senhaHash: true,
+          },
+        },
+        aluno: {
+          select: {
+            id: true,
+            nome: true,
+          },
+        },
+      },
+    });
+
+    expect(
+      transactionMock,
+    ).toHaveBeenCalledTimes(1);
+
+    expect(
+      sendMock,
+    ).toHaveBeenCalledTimes(1);
+
+    const mensagem =
+      sendMock.mock.calls[0][0];
+
+    expect(mensagem.to).toBe(
+      'portal@example.com',
+    );
 
     expect(mensagem.subject).toBe(
-      'Recupera\u00e7\u00e3o de senha \u2014 Portal Garimpo Urbano',
+      'Recuperação de senha — Portal Garimpo Urbano',
     );
 
     expect(mensagem.html).toContain(
       'Portal Garimpo Urbano',
     );
-
-    expect(mensagem.html).not.toContain(
-      '\u00c1rea do Aluno',
-    );
   });
 
-
-  it('usa saudacao neutra na recuperacao quando nao houver nome', async () => {
-    alunoFindUniqueMock.mockResolvedValue({
-      id: 'aluno-sem-nome',
-      nome: null,
-      status: 'ATIVO',
-      senhaHash: 'hash-existente',
-    });
-
-    tokenUpdateManyMock.mockReturnValue({
-      operacao: 'invalidar-recuperacoes',
-    });
-
-    tokenCreateMock.mockReturnValue({
-      operacao: 'criar-recuperacao',
-    });
-
-    transactionMock.mockResolvedValue([]);
-
-    sendMock.mockResolvedValue({
-      data: {
-        id: 'email-sem-nome',
-      },
-      error: null,
-    });
-
-    const request = {
-      json: vi.fn().mockResolvedValue({
-        email: 'semnome@example.com',
+  it('usa saudacao neutra quando Aluno nao possui nome', async () => {
+    pessoaFindFirstMock.mockResolvedValue(
+      pessoaFicticia({
+        nome: null,
       }),
-    };
+    );
 
-    const resposta = await POST(request);
+    const resposta = await POST(
+      requisicao(),
+    );
 
     expect(resposta.status).toBe(200);
-    expect(sendMock).toHaveBeenCalledTimes(1);
 
-    const mensagem = sendMock.mock.calls[0][0];
+    expect(
+      sendMock,
+    ).toHaveBeenCalledTimes(1);
+
+    const mensagem =
+      sendMock.mock.calls[0][0];
 
     expect(mensagem.html).toContain(
-      '<h1>Ol\u00e1.</h1>',
+      '<h1>Olá.</h1>',
     );
 
     expect(mensagem.html).not.toContain(
-      '<h1>Ol\u00e1, Aluno.</h1>',
+      '<h1>Olá, Aluno.</h1>',
     );
   });
-
 });

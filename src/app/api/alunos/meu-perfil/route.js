@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import { alunoTemContaAtiva } from '@/lib/acesso-aluno';
+import { temContextoAluno } from '@/lib/contextos-sessao';
 import {
   normalizarUf,
   ufValida,
@@ -20,15 +21,11 @@ function respostaErro(erro, status = 400) {
 async function obterAlunoAutenticado() {
   const session = await getServerSession(authOptions);
 
-  if (session?.user?.tipoConta !== 'ALUNO') {
+  if (!temContextoAluno(session?.user)) {
     return null;
   }
 
-  const alunoId = session?.user?.alunoId;
-
-  if (!alunoId) {
-    return null;
-  }
+  const alunoId = session.user.alunoId;
 
   const contaAtiva = await alunoTemContaAtiva(alunoId);
 

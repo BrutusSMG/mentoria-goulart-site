@@ -3,12 +3,19 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import {
+  temContextoAdministrativo,
+  temContextoAluno,
+} from '@/lib/contextos-sessao';
 
 export default async function PortalAlunoLayout({ children }) {
   const sessao = await getServerSession(authOptions);
-  const tipoConta = sessao?.user?.tipoConta;
+  const usuario = sessao?.user;
 
-  if (!['ALUNO', 'ADMIN'].includes(tipoConta)) {
+  if (
+    !temContextoAluno(usuario) &&
+    !temContextoAdministrativo(usuario)
+  ) {
     redirect('/aluno/login');
   }
 

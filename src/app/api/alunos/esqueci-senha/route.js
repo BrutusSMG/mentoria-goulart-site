@@ -9,7 +9,10 @@ import {
 } from '@/lib/validacoes';
 
 function hashToken(token) {
-  return crypto.createHash('sha256').update(token).digest('hex');
+  return crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
 }
 
 function escaparHtml(valor = '') {
@@ -21,13 +24,17 @@ function escaparHtml(valor = '') {
     "'": '&#39;',
   };
 
-  return String(valor).replace(/[&<>"']/g, (caractere) => caracteres[caractere]);
+  return String(valor).replace(
+    /[&<>"']/g,
+    (caractere) => caracteres[caractere],
+  );
 }
 
 function respostaGenerica() {
   return NextResponse.json({
     ok: true,
-    mensagem: 'Se houver uma conta para este e-mail, enviaremos as instruções de recuperação.',
+    mensagem:
+      'Se houver uma conta para este e-mail, enviaremos as instruções de recuperação.',
   });
 }
 
@@ -40,27 +47,47 @@ export async function POST(request) {
       return respostaGenerica();
     }
 
-    const aluno = await prisma.aluno.findUnique({
-      where: { email },
+    const pessoa = await prisma.pessoa.findFirst({
+      where: {
+        emailPrincipal: {
+          equals: email,
+          mode: 'insensitive',
+        },
+      },
       select: {
-        id: true,
-        nome: true,
-        status: true,
-        senhaHash: true,
+        emailPrincipal: true,
+        usuario: {
+          select: {
+            status: true,
+            senhaHash: true,
+          },
+        },
+        aluno: {
+          select: {
+            id: true,
+            nome: true,
+          },
+        },
       },
     });
 
+    const usuario = pessoa?.usuario;
+    const aluno = pessoa?.aluno;
+
     if (
       !aluno ||
-      aluno.status !== 'ATIVO' ||
-      !aluno.senhaHash
+      !usuario ||
+      usuario.status !== 'ATIVO' ||
+      !usuario.senhaHash
     ) {
       return respostaGenerica();
     }
 
     const token = crypto.randomBytes(32).toString('hex');
     const agora = new Date();
-    const expiraEm = new Date(agora.getTime() + 60 * 60 * 1000);
+    const expiraEm = new Date(
+      agora.getTime() + 60 * 60 * 1000,
+    );
 
     await prisma.$transaction([
       prisma.alunoAccessToken.updateMany({
@@ -69,7 +96,9 @@ export async function POST(request) {
           tipo: 'RECUPERACAO_SENHA',
           usadoEm: null,
         },
-        data: { usadoEm: agora },
+        data: {
+          usadoEm: agora,
+        },
       }),
       prisma.alunoAccessToken.create({
         data: {
@@ -82,27 +111,36 @@ export async function POST(request) {
     ]);
 
     const apiKey = process.env.RESEND_API_KEY;
+
     if (apiKey) {
       const baseAlunoConfigurado =
-        process.env.NEXT_PUBLIC_ALUNO_URL?.replace(/\/$/, '');
+        process.env.NEXT_PUBLIC_ALUNO_URL?.replace(
+          /\/$/,
+          '',
+        );
 
       const baseFallback = (
-        process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+        process.env.NEXT_PUBLIC_BASE_URL ||
+        'http://localhost:3000'
       ).replace(/\/$/, '');
 
       const link = baseAlunoConfigurado
-        ? `${baseAlunoConfigurado}/redefinir-senha?token=${encodeURIComponent(token )}`
-        : `${baseFallback}/aluno/redefinir-senha?token=${encodeURIComponent(token )}`;
+        ? `${baseAlunoConfigurado}/redefinir-senha?token=${encodeURIComponent(token)}`
+        : `${baseFallback}/aluno/redefinir-senha?token=${encodeURIComponent(token)}`;
+
       const resend = new Resend(apiKey);
+
       const saudacao = aluno.nome
         ? `Olá, ${escaparHtml(aluno.nome)}.`
         : 'Olá.';
 
       try {
         await resend.emails.send({
-          from: 'Prof. Goulart <contato@mentoriagarimpourbano.com.br>',
-          to: email,
-          subject: 'Recuperação de senha — Portal Garimpo Urbano',
+          from:
+            'Prof. Goulart <contato@mentoriagarimpourbano.com.br>',
+          to: pessoa.emailPrincipal,
+          subject:
+            'Recuperação de senha — Portal Garimpo Urbano',
           html: `
             <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#fff;padding:32px;border-radius:16px">
               <p style="color:#d89900;font-weight:bold;letter-spacing:2px">GARIMPO URBANO</p>
@@ -114,15 +152,24 @@ export async function POST(request) {
           `,
         });
       } catch (emailError) {
-        console.error('Erro ao enviar recuperação de senha:', emailError?.message);
+        console.error(
+          'Erro ao enviar recuperação de senha:',
+          emailError?.message,
+        );
       }
     } else {
-      console.warn('[RESEND] RESEND_API_KEY ausente; recuperação criada sem envio de e-mail.');
+      console.warn(
+        '[RESEND] RESEND_API_KEY ausente; recuperação criada sem envio de e-mail.',
+      );
     }
 
     return respostaGenerica();
   } catch (error) {
-    console.error('Erro ao solicitar recuperação de senha:', error?.message);
+    console.error(
+      'Erro ao solicitar recuperação de senha:',
+      error?.message,
+    );
+
     return respostaGenerica();
   }
 }

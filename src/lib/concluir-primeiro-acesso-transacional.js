@@ -17,8 +17,8 @@ export class ConvitePrimeiroAcessoIndisponivelError
  *   concluirPrimeiroAcessoTransacional(tx, dados)
  * );
  *
- * Se qualquer atualização falhar, lança um erro para que
- * a transação inteira seja desfeita.
+ // Se qualquer atualização falhar, lança um erro para que
+ // a transação inteira seja desfeita.
  */
 export async function concluirPrimeiroAcessoTransacional(
   tx,
@@ -31,6 +31,7 @@ export async function concluirPrimeiroAcessoTransacional(
   if (
     !tokenAcesso?.id ||
     !tokenAcesso?.alunoId ||
+    !tokenAcesso?.aluno?.pessoaId ||
     !['HOTMART', 'LEGADO', 'MANUAL'].includes(
       tokenAcesso?.aluno?.origem,
     ) ||
@@ -66,9 +67,30 @@ export async function concluirPrimeiroAcessoTransacional(
 
   const origem = tokenAcesso.aluno.origem;
 
-  // A conta também precisa continuar elegível no momento
-  // da atualização. Para LEGADO, o envio deve estar
-  // confirmado no banco.
+  // A credencial só pode nascer quando o Usuario ainda
+  // estiver pendente e sem senha. O UPDATE condicional
+  // também protege contra ativações concorrentes.
+  const usuarioAtualizado =
+    await tx.usuario.updateMany({
+      where: {
+        pessoaId: tokenAcesso.aluno.pessoaId,
+        status: 'PENDENTE_ATIVACAO',
+        senhaHash: null,
+      },
+      data: {
+        senhaHash,
+        status: 'ATIVO',
+        mustChangePassword: false,
+        passwordChangedAt: agora,
+      },
+    });
+
+  if (usuarioAtualizado.count !== 1) {
+    throw new ConvitePrimeiroAcessoIndisponivelError();
+  }
+
+  // O vínculo educacional também precisa continuar
+  // elegível no momento da atualização.
   const alunoAtualizado = await tx.aluno.updateMany({
     where: {
       id: tokenAcesso.alunoId,
@@ -85,13 +107,14 @@ export async function concluirPrimeiroAcessoTransacional(
         : {}),
     },
     data: {
+      // Compatibilidade temporária até a remoção
+      // definitiva da credencial legada do Aluno.
       senhaHash,
       emailVerificadoEm: agora,
     },
   });
 
   if (alunoAtualizado.count !== 1) {
-    // O erro desfaz também a atualização do token.
     throw new ConvitePrimeiroAcessoIndisponivelError();
   }
 

@@ -363,6 +363,87 @@ model PerfilAluno {
   aluno Aluno @relation(fields: [alunoId], references: [id], onDelete: Cascade)
 }
 
+// Identidade de autenticação do Portal MGU.
+// Pessoa representa quem é; Usuario representa a credencial de acesso.
+enum StatusUsuario {
+  PENDENTE_ATIVACAO
+  ATIVO
+  BLOQUEADO
+}
+
+// Papel utilizado exclusivamente no contexto administrativo.
+// ALUNO e FORNECEDOR não pertencem a este enum.
+enum PapelAdministrativo {
+  ADMIN
+  PARCEIRO
+}
+
+model Usuario {
+  id                 String        @id @default(cuid())
+  pessoaId           String        @unique
+  senhaHash          String?
+  status             StatusUsuario @default(PENDENTE_ATIVACAO)
+  mustChangePassword Boolean       @default(false)
+  passwordChangedAt  DateTime?
+  ultimoLoginEm      DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  pessoa                Pessoa                 @relation(fields: [pessoaId], references: [id], onDelete: Restrict)
+  acessoAdministrativo  AcessoAdministrativo?
+  permissoes            UsuarioPermissao[]     @relation("UsuarioPermissoes")
+  permissoesConcedidas  UsuarioPermissao[]     @relation("PermissaoConcedidaPor")
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model AcessoAdministrativo {
+  id        String              @id @default(cuid())
+  usuarioId String              @unique
+  papel     PapelAdministrativo
+  ativo     Boolean             @default(true)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@index([papel])
+  @@index([ativo])
+}
+
+model Permissao {
+  id        String   @id @default(cuid())
+  codigo    String   @unique
+  modulo    String
+  descricao String?
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  usuarios UsuarioPermissao[]
+
+  @@index([modulo])
+  @@index([ativo])
+}
+
+model UsuarioPermissao {
+  id                    String   @id @default(cuid())
+  usuarioId             String
+  permissaoId           String
+  concedidaPorUsuarioId String?
+  concedidaEm           DateTime @default(now())
+
+  usuario      Usuario  @relation("UsuarioPermissoes", fields: [usuarioId], references: [id], onDelete: Restrict)
+  permissao    Permissao @relation(fields: [permissaoId], references: [id], onDelete: Restrict)
+  concedidaPor Usuario? @relation("PermissaoConcedidaPor", fields: [concedidaPorUsuarioId], references: [id], onDelete: SetNull)
+
+  @@unique([usuarioId, permissaoId])
+  @@index([usuarioId])
+  @@index([permissaoId])
+  @@index([concedidaPorUsuarioId])
+}
+
 // Enum para os perfis de acesso do painel admin
 enum Role {
   ADMIN
@@ -619,4 +700,5 @@ model Pessoa {
   lead      Lead?
   aluno     Aluno?
   adminUser AdminUser?
+  usuario   Usuario?
 }

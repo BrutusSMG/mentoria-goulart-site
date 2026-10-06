@@ -6,6 +6,7 @@ import {
   hashTokenAcesso,
 } from '@/lib/convite-primeiro-acesso';
 import { provisionarVigenciaHotmart } from '@/lib/vigencia-matricula';
+import { garantirIdentidadeAluno } from '@/lib/garantir-identidade-aluno';
 
 function normalizarEmail(email) {
   const valor = String(email || '').trim().toLowerCase();
@@ -41,7 +42,7 @@ export async function garantirContaHotmart(tx, {
       ? alunoExistente.status
       : 'ATIVO';
 
-  return tx.aluno.upsert({
+  const aluno = await tx.aluno.upsert({
     where: { email: emailNormalizado },
     update: {
       nome: nome || alunoExistente?.nome || 'Aluno',
@@ -61,6 +62,11 @@ export async function garantirContaHotmart(tx, {
       origem: 'HOTMART',
     },
   });
+
+  return garantirIdentidadeAluno(
+    tx,
+    aluno,
+  );
 }
 
 export async function garantirConvitePrimeiroAcesso(
@@ -70,8 +76,13 @@ export async function garantirConvitePrimeiroAcesso(
 ) {
   if (
     !aluno?.id
+    || !aluno.pessoaId
     || aluno.status !== 'ATIVO'
     || aluno.senhaHash
+    || !aluno.usuario
+    || aluno.usuario.status !==
+      'PENDENTE_ATIVACAO'
+    || aluno.usuario.senhaHash
   ) {
     return {
       conviteToken: null,

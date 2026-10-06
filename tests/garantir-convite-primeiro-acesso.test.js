@@ -28,6 +28,11 @@ describe('garantirConvitePrimeiroAcesso', () => {
         id: 'aluno-com-senha',
         status: 'ATIVO',
         senhaHash: 'hash-existente',
+        pessoaId: 'pessoa-1',
+        usuario: {
+          status: 'ATIVO',
+          senhaHash: 'hash-existente',
+        },
       },
       agora,
     );
@@ -55,6 +60,11 @@ describe('garantirConvitePrimeiroAcesso', () => {
         id: 'aluno-inativo',
         status: 'INATIVO',
         senhaHash: null,
+        pessoaId: 'pessoa-1',
+        usuario: {
+          status: 'PENDENTE_ATIVACAO',
+          senhaHash: null,
+        },
       },
       agora,
     );
@@ -86,6 +96,11 @@ describe('garantirConvitePrimeiroAcesso', () => {
         id: 'aluno-1',
         status: 'ATIVO',
         senhaHash: null,
+        pessoaId: 'pessoa-1',
+        usuario: {
+          status: 'PENDENTE_ATIVACAO',
+          senhaHash: null,
+        },
       },
       agora,
     );
@@ -130,6 +145,11 @@ describe('garantirConvitePrimeiroAcesso', () => {
         id: 'aluno-ebook',
         status: 'ATIVO',
         senhaHash: null,
+        pessoaId: 'pessoa-1',
+        usuario: {
+          status: 'PENDENTE_ATIVACAO',
+          senhaHash: null,
+        },
       },
       agora,
     );

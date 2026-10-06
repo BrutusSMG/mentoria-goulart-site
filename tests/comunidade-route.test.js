@@ -48,7 +48,6 @@ describe('GET /api/alunos/comunidade', () => {
   it('retorna 403 para aluno sem direito COMUNIDADE', async () => {
     getServerSessionMock.mockResolvedValue({
       user: {
-        tipoConta: 'ALUNO',
         alunoId: 'aluno-ebook',
       },
     });
@@ -67,7 +66,6 @@ describe('GET /api/alunos/comunidade', () => {
   it('permite aluno com direito COMUNIDADE sem depender de matricula', async () => {
     getServerSessionMock.mockResolvedValue({
       user: {
-        tipoConta: 'ALUNO',
         alunoId: 'aluno-ebook',
       },
     });
@@ -91,10 +89,11 @@ describe('GET /api/alunos/comunidade', () => {
     expect(perfilFindManyMock).toHaveBeenCalledTimes(1);
   });
 
-  it('preserva bypass administrativo', async () => {
+  it('preserva bypass do contexto administrativo', async () => {
     getServerSessionMock.mockResolvedValue({
       user: {
-        tipoConta: 'ADMIN',
+        adminUserId: 'admin-1',
+        papelAdministrativo: 'PARCEIRO',
       },
     });
 

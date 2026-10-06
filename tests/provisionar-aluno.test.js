@@ -1,5 +1,21 @@
 import { describe, expect, it, vi } from 'vitest';
 
+vi.mock('@/lib/garantir-identidade-aluno', () => ({
+  garantirIdentidadeAluno: vi.fn(
+    async (_tx, aluno) => ({
+      ...aluno,
+      pessoaId: 'pessoa-mock',
+      usuario: {
+        id: 'usuario-mock',
+        senhaHash: aluno.senhaHash || null,
+        status: aluno.senhaHash
+          ? 'ATIVO'
+          : 'PENDENTE_ATIVACAO',
+      },
+    }),
+  ),
+}));
+
 import {
   garantirContaHotmart,
   provisionarAlunoHotmart,
@@ -68,10 +84,15 @@ describe('garantirContaHotmart', () => {
       },
     });
 
-    expect(resultado).toEqual({
+    expect(resultado).toMatchObject({
       id: 'conta-ebook',
       email: 'ebook@example.com',
       status: 'ATIVO',
+      pessoaId: 'pessoa-mock',
+      usuario: {
+        status: 'PENDENTE_ATIVACAO',
+        senhaHash: null,
+      },
     });
 
     expect(tx.matricula.upsert).not.toHaveBeenCalled();

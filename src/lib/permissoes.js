@@ -1,0 +1,23 @@
+// src/lib/permissoes.js
+
+export const PERMISSOES = Object.freeze({
+  SUCATAS_GERENCIAR: "SUCATAS_GERENCIAR",
+  DEPOIMENTOS_GERENCIAR: "DEPOIMENTOS_GERENCIAR",
+  JORNADA_GERENCIAR: "JORNADA_GERENCIAR",
+});
+
+export const PERMISSAO_POR_MODULO = Object.freeze({
+  SUCATAS: PERMISSOES.SUCATAS_GERENCIAR,
+  DEPOIMENTOS: PERMISSOES.DEPOIMENTOS_GERENCIAR,
+  JORNADA: PERMISSOES.JORNADA_GERENCIAR,
+});
+
+export const CAMPO_LEGADO_POR_PERMISSAO = Object.freeze({
+  [PERMISSOES.SUCATAS_GERENCIAR]: "podeGerenciarSucatas",
+  [PERMISSOES.DEPOIMENTOS_GERENCIAR]: "podeGerenciarDepoimentos",
+  [PERMISSOES.JORNADA_GERENCIAR]: "podeGerenciarJornada",
+});
+
+export function obterPermissaoDoModulo(modulo) {
+  return PERMISSAO_POR_MODULO[modulo] || null;
+}

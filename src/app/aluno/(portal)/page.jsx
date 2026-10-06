@@ -4,6 +4,10 @@ import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import {
+  temContextoAdministrativo,
+  temContextoAluno,
+} from '@/lib/contextos-sessao';
+import {
   alunoTemAcessoAtivo,
   alunoTemContaAtiva,
 } from '@/lib/acesso-aluno';
@@ -23,7 +27,10 @@ export default async function PortalAlunoPage() {
   const sessao = await getServerSession(authOptions);
   const usuario = sessao?.user;
 
-  if (usuario?.tipoConta === 'ADMIN') {
+  if (
+    !temContextoAluno(usuario) &&
+    temContextoAdministrativo(usuario)
+  ) {
     return (
       <main className="min-h-screen bg-black px-4 py-12 text-white">
         <section className="mx-auto w-full max-w-4xl">
@@ -131,6 +138,33 @@ export default async function PortalAlunoPage() {
               Consulte e atualize seus dados no Portal.
             </p>
           </Link>
+
+          {temContextoAdministrativo(usuario) ? (
+            <Link
+              href={
+                usuario.papelAdministrativo === 'ADMIN'
+                  ? '/admin'
+                  : '/admin/modulos'
+              }
+              className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 transition hover:border-[#d89900]"
+            >
+              <p className="text-xs font-bold uppercase tracking-wide text-[#d89900]">
+                Contexto adicional
+              </p>
+
+              <h2 className="mt-2 text-xl font-bold">
+                {usuario.papelAdministrativo === 'ADMIN'
+                  ? 'Administração'
+                  : 'Área do Parceiro'}
+              </h2>
+
+              <p className="mt-2 text-sm text-zinc-400">
+                {usuario.papelAdministrativo === 'ADMIN'
+                  ? 'Acesse o painel administrativo.'
+                  : 'Acesse os módulos autorizados para sua conta.'}
+              </p>
+            </Link>
+          ) : null}
 
           {acessoComunidade ? (
             <Link

@@ -6,6 +6,9 @@ export async function GET() {
   if (!acesso.permitido) return respostaAcessoNegado(acesso);
 
   return Response.json({
+    adminUserId: acesso.conta.adminUserId,
+    papelAdministrativo:
+      acesso.conta.papelAdministrativo,
     role: acesso.conta.role,
     ehAdmin: acesso.conta.role === "ADMIN",
     podeGerenciarSucatas: acesso.conta.role === "ADMIN" || acesso.conta.podeGerenciarSucatas,

@@ -4,21 +4,28 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import { alunoTemAcessoComunidade } from '@/lib/direitos-produto';
+import {
+  temContextoAdministrativo,
+  temContextoAluno,
+} from '@/lib/contextos-sessao';
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  const tipoConta = session?.user?.tipoConta;
+  const usuario = session?.user;
 
-  if (!['ALUNO', 'ADMIN'].includes(tipoConta)) {
+  if (
+    !temContextoAluno(usuario) &&
+    !temContextoAdministrativo(usuario)
+  ) {
     return NextResponse.json(
       { ok: false, erro: 'Acesso não autorizado.' },
       { status: 401 },
     );
   }
 
-  if (tipoConta === 'ALUNO') {
+  if (!temContextoAdministrativo(usuario)) {
     const acessoComunidade = await alunoTemAcessoComunidade(
-      session?.user?.alunoId,
+      usuario.alunoId,
     );
 
     if (!acessoComunidade) {

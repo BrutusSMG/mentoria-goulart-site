@@ -5,6 +5,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import { obterOuCriarPessoa } from '@/lib/pessoa';
 import { vincularCadastroPessoa } from '@/lib/vincular-pessoa';
+import { temContextoAluno } from '@/lib/contextos-sessao';
 
 class ErroVinculoPessoa extends Error {
   constructor(mensagem, status) {
@@ -27,11 +28,11 @@ export async function POST() {
 
   const session = await getServerSession(authOptions);
 
-  if (
-    session?.user?.tipoConta !== 'ALUNO' ||
-    !session?.user?.alunoId
-  ) {
-    return respostaErro('Acesso não autorizado.', 401);
+  if (!temContextoAluno(session?.user)) {
+    return respostaErro(
+      'Acesso não autorizado.',
+      401,
+    );
   }
 
   // O identificador vem da sessão, nunca do corpo da requisição.
