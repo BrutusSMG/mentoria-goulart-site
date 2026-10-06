@@ -251,6 +251,9 @@ async function main() {
     }
 
     return resumo;
+  }, {
+    maxWait: 10000,
+    timeout: 60000,
   });
 
   console.dir(
