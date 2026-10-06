@@ -270,6 +270,49 @@ e só deverão ser habilitadas futuramente mediante nova validação explícita.
 
 ---
 
+## Etapa 5 — Usuários, acessos e permissões
+
+**Status: concluída e publicada em produção em 06/10/2026.**
+
+A quinta etapa consolidou a separação entre identidade, autenticação
+e autorização dentro do MGU.
+
+A plataforma passou a utilizar uma identidade de acesso comum associada
+à pessoa, permitindo que diferentes relacionamentos com o MGU coexistam
+sem que um único tipo de conta determine toda a experiência.
+
+Entre as principais evoluções estão:
+
+- consolidação da autenticação em uma estrutura comum de usuário;
+- separação entre identidade e os diferentes contextos de acesso;
+- generalização das permissões administrativas;
+- diferenciação entre administrador e parceiro com acesso limitado;
+- preservação do acesso do aluno por meio de seu relacionamento
+  educacional;
+- suporte a uma mesma pessoa possuir mais de um contexto dentro da
+  plataforma;
+- navegação entre os contextos disponíveis para a mesma identidade;
+- autorização dos módulos administrativos de acordo com as permissões
+  efetivamente concedidas.
+
+O ADMIN continua possuindo acesso completo ao ambiente administrativo.
+
+O PARCEIRO utiliza o mesmo ambiente administrativo, mas visualiza e acessa
+somente os módulos para os quais recebeu autorização.
+
+O acesso do aluno permanece independente das permissões administrativas
+e continua associado ao relacionamento educacional existente na
+plataforma.
+
+A publicação em produção foi realizada de forma controlada, com
+preservação dos dados existentes e validação dos principais cenários
+administrativos e de permissão.
+
+As capacidades operacionais mais sensíveis permanecem sob controle e
+não foram habilitadas automaticamente pela conclusão desta etapa.
+
+---
+
 ## Próximas evoluções
 
 A plataforma continuará sendo desenvolvida de forma incremental.
