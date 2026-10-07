@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { prisma } from '@/lib/prisma';
+import { garantirIdentidadeLeadCapturado } from '@/lib/garantir-identidade-lead';
 import { PRODUTO_SLUGS, nomeProduto } from '@/lib/jornada-produtos';
 import { JORNADA_FLAGS } from '@/lib/jornada-config';
 import { emailFormatoValido } from '@/lib/validacoes';
@@ -228,54 +229,80 @@ export async function POST(request) {
       }
     }
 
-    const lead = await prisma.lead.upsert({
-      where: { email },
-      update: {
-        nome,
-        whatsapp,
-      },
-      create: {
-        nome,
-        email,
-        whatsapp,
-        utmSource: texto(utms.utm_source, 160) || null,
-        utmMedium: texto(utms.utm_medium, 160) || null,
-        utmCampaign: texto(utms.utm_campaign, 160) || null,
-        utmContent: texto(utms.utm_content, 160) || null,
-        utmTerm: texto(utms.utm_term, 160) || null,
-      },
-    });
+    const { lead, contribuicao } = await prisma.$transaction(
+      async (tx) => {
+        const leadCapturado = await tx.lead.upsert({
+          where: { email },
+          update: {
+            nome,
+            whatsapp,
+          },
+          create: {
+            nome,
+            email,
+            whatsapp,
+            utmSource: texto(utms.utm_source, 160) || null,
+            utmMedium: texto(utms.utm_medium, 160) || null,
+            utmCampaign: texto(utms.utm_campaign, 160) || null,
+            utmContent: texto(utms.utm_content, 160) || null,
+            utmTerm: texto(utms.utm_term, 160) || null,
+          },
+        });
 
-    const contribuicao = await prisma.jornadaContribuicao.create({
-      data: {
-        leadId: lead.id,
-        idempotencyKey,
-        formVersion: texto(body.formVersion, 20) || '1.0',
-        caminho,
-        respostas: {
-          ...respostas,
-          resumo,
-        },
-        produtosDeclarados: produtos,
-        nomeInformado: nome,
-        emailInformado: email,
-        whatsappInformado: whatsapp,
-        cidadeEstado: texto(body.cidadeEstado, 160) || null,
-        tempoMentoria: texto(body.tempoMentoria, 80) || null,
-        dataCompraAproximada: texto(body.dataCompraAproximada, 80) || null,
-        interesseEntrevista: texto(body.interesseEntrevista, 80) || null,
-        consentimentoEntrevista: body.consentimentoEntrevista === true,
-        consentimentoConteudo: body.consentimentoConteudo === true,
-        melhorCanal: texto(body.melhorCanal, 40) || null,
-        contatoPreferencial: texto(body.contatoPreferencial, 160) || null,
-        utmSource: texto(utms.utm_source, 160) || null,
-        utmMedium: texto(utms.utm_medium, 160) || null,
-        utmCampaign: texto(utms.utm_campaign, 160) || null,
-        utmContent: texto(utms.utm_content, 160) || null,
-        utmTerm: texto(utms.utm_term, 160) || null,
-      },
-    });
+        const lead =
+          await garantirIdentidadeLeadCapturado(
+            tx,
+            leadCapturado,
+          );
 
+        const contribuicao =
+          await tx.jornadaContribuicao.create({
+            data: {
+              leadId: lead.id,
+              idempotencyKey,
+              formVersion: texto(body.formVersion, 20) || '1.0',
+              caminho,
+              respostas: {
+                ...respostas,
+                resumo,
+              },
+              produtosDeclarados: produtos,
+              nomeInformado: nome,
+              emailInformado: email,
+              whatsappInformado: whatsapp,
+              cidadeEstado: texto(body.cidadeEstado, 160) || null,
+              tempoMentoria: texto(body.tempoMentoria, 80) || null,
+              dataCompraAproximada:
+                texto(body.dataCompraAproximada, 80) || null,
+              interesseEntrevista:
+                texto(body.interesseEntrevista, 80) || null,
+              consentimentoEntrevista:
+                body.consentimentoEntrevista === true,
+              consentimentoConteudo:
+                body.consentimentoConteudo === true,
+              melhorCanal:
+                texto(body.melhorCanal, 40) || null,
+              contatoPreferencial:
+                texto(body.contatoPreferencial, 160) || null,
+              utmSource:
+                texto(utms.utm_source, 160) || null,
+              utmMedium:
+                texto(utms.utm_medium, 160) || null,
+              utmCampaign:
+                texto(utms.utm_campaign, 160) || null,
+              utmContent:
+                texto(utms.utm_content, 160) || null,
+              utmTerm:
+                texto(utms.utm_term, 160) || null,
+            },
+          });
+
+        return {
+          lead,
+          contribuicao,
+        };
+      },
+    );
     const integracoes = await Promise.allSettled([
       enviarAlertaInterno({ contribuicao, produtos }),
       sincronizarBrevo({ email, nome, produtos, caminho }),

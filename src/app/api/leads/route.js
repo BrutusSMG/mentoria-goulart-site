@@ -1,5 +1,6 @@
 // src/app/api/leads/route.js
 import { emailValido, normalizarEmail } from '@/lib/validacoes';
+import { garantirIdentidadeLeadCapturado } from '@/lib/garantir-identidade-lead';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,34 +59,40 @@ export async function POST(request) {
 
     const nomeSeguro = escaparHtml(nome.trim());
 
-    // 1. Salva ou Atualiza o Lead no Banco de Dados
-    const lead = await prisma.lead.upsert({
-      where: { email: emailNormalizado },
-      update: {
-        nome: nome,
-        // Só sobrescreve o WhatsApp se um novo valor foi informado
-        ...(whatsapp ? { whatsapp } : {}),
-        // Se ele se cadastrou de novo, resetamos o status para false
-        baixouEbook: false,
-        utmSource: origemParaPainel,
-        utmMedium: utms.utm_medium || null,
-        utmCampaign: campanhaParaPainel,
-        utmTerm: utms.utm_term || null,
-        utmContent: utms.utm_content || null
-      },
-      create: {
-        nome,
-        email: emailNormalizado,
-        whatsapp: whatsapp || '',   // campo é obrigatório no schema; vazio quando não informado
-        baixouEbook: false,
-        utmSource: origemParaPainel,
-        utmMedium: utms.utm_medium || null,
-        utmCampaign: campanhaParaPainel,
-        utmTerm: utms.utm_term || null,
-        utmContent: utms.utm_content || null
-      }
-    });
+    // 1. Salva/atualiza o Lead e consolida sua Pessoa na mesma transação.
+    const lead = await prisma.$transaction(async (tx) => {
+      const leadCapturado = await tx.lead.upsert({
+        where: { email: emailNormalizado },
+        update: {
+          nome: nome,
+          // Só sobrescreve o WhatsApp se um novo valor foi informado
+          ...(whatsapp ? { whatsapp } : {}),
+          // Comportamento legado preservado até a E6.3.
+          baixouEbook: false,
+          utmSource: origemParaPainel,
+          utmMedium: utms.utm_medium || null,
+          utmCampaign: campanhaParaPainel,
+          utmTerm: utms.utm_term || null,
+          utmContent: utms.utm_content || null
+        },
+        create: {
+          nome,
+          email: emailNormalizado,
+          whatsapp: whatsapp || '',
+          baixouEbook: false,
+          utmSource: origemParaPainel,
+          utmMedium: utms.utm_medium || null,
+          utmCampaign: campanhaParaPainel,
+          utmTerm: utms.utm_term || null,
+          utmContent: utms.utm_content || null
+        }
+      });
 
+      return garantirIdentidadeLeadCapturado(
+        tx,
+        leadCapturado,
+      );
+    });
     // 2. Cria o link exclusivo com o ID do lead
     // Em produção, isso será o seu domínio oficial
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.mentoriagarimpourbano.com.br';
