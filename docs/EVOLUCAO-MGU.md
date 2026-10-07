@@ -276,46 +276,46 @@ e só deverão ser habilitadas futuramente mediante nova validação explícita.
 
 ## Etapa 5 — Usuários, acessos e permissões
 
-**Status: concluída em homologação.**
+**Status: concluída e publicada em produção em 06/10/2026.**
 
-A quinta etapa consolidou a separação entre identidade, autenticação e
-autorização dentro do MGU.
+A quinta etapa consolidou a separação entre identidade, autenticação
+e autorização dentro do MGU.
 
-A plataforma passou a utilizar uma estrutura de usuário associada à
-identidade central, permitindo que os diferentes relacionamentos de uma
-mesma pessoa com o MGU coexistam sem que um único tipo de conta defina
-toda a experiência.
+A plataforma passou a utilizar uma identidade de acesso comum associada
+à pessoa, permitindo que diferentes relacionamentos com o MGU coexistam
+sem que um único tipo de conta determine toda a experiência.
 
 Entre as principais evoluções estão:
 
-- consolidação da autenticação em uma identidade de acesso comum;
-- separação entre identidade da pessoa e seus diferentes contextos de uso;
+- consolidação da autenticação em uma estrutura comum de usuário;
+- separação entre identidade e os diferentes contextos de acesso;
 - generalização das permissões administrativas;
 - diferenciação entre administrador e parceiro com acesso limitado;
-- preservação da Área do Aluno por meio do relacionamento educacional;
-- suporte a uma mesma pessoa possuir simultaneamente contexto de aluno e
-  contexto administrativo;
-- navegação entre os contextos disponíveis para a mesma conta;
+- preservação do acesso do aluno por meio de seu relacionamento
+  educacional;
+- suporte a uma mesma pessoa possuir mais de um contexto dentro da
+  plataforma;
+- navegação entre os contextos disponíveis para a mesma identidade;
 - autorização dos módulos administrativos de acordo com as permissões
-  efetivamente concedidas;
-- remoção da dependência de um tipo único de conta para autenticação e
-  autorização.
+  efetivamente concedidas.
 
-O ADMIN mantém acesso completo ao ambiente administrativo.
+O ADMIN continua possuindo acesso completo ao ambiente administrativo.
 
 O PARCEIRO utiliza o mesmo ambiente administrativo, mas visualiza e acessa
-somente os módulos para os quais possui autorização.
+somente os módulos para os quais recebeu autorização.
 
-O acesso do aluno continua independente das permissões administrativas e
-permanece vinculado ao seu relacionamento com o MGU.
+O acesso do aluno permanece independente das permissões administrativas
+e continua associado ao relacionamento educacional existente na
+plataforma.
 
-Quando uma mesma pessoa possui mais de um contexto, a plataforma permite
-navegar entre as áreas correspondentes sem duplicar sua identidade.
+A publicação em produção foi realizada de forma controlada, com
+preservação dos dados existentes e validação dos principais cenários
+administrativos e de permissão.
 
-A etapa foi validada em homologação por testes automatizados e por
-validação funcional dos principais cenários de acesso, incluindo aluno,
-administrador, parceiro e conta com múltiplos contextos.
+As capacidades operacionais mais sensíveis permanecem sob controle e
+não foram habilitadas automaticamente pela conclusão desta etapa.
 
+---
 
 ## Próximas evoluções
 
@@ -323,7 +323,6 @@ A plataforma continuará sendo desenvolvida de forma incremental.
 
 Entre as direções previstas estão:
 
-- evolução da identidade, usuários, acessos e permissões;
 - expansão do Ecossistema MGU;
 - evolução da experiência dos alunos;
 - ampliação dos recursos administrativos;
