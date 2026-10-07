@@ -317,6 +317,40 @@ não foram habilitadas automaticamente pela conclusão desta etapa.
 
 ---
 
+## Etapa 6 — Lead, Aluno, Produto e histórico de marketing
+
+**Status: em desenvolvimento — auditoria e planejamento concluídos em homologação em 07/10/2026.**
+
+A sexta etapa iniciou a consolidação dos domínios de relacionamento e
+histórico construídos nas etapas anteriores.
+
+Antes de qualquer alteração estrutural foi realizada uma auditoria do
+estado atual de Leads, alunos, produtos, transações e informações de
+origem de marketing.
+
+A auditoria confirmou como direções principais:
+
+- utilizar Pessoa como identidade central também nos fluxos de Lead;
+- preservar Lead como relacionamento comercial e de marketing;
+- criar histórico próprio para as interações e origens de marketing;
+- manter Aluno concentrado no relacionamento educacional;
+- separar o nome utilizado na comunidade da identidade principal da pessoa;
+- consolidar gradualmente as referências ao catálogo interno de Produtos;
+- preservar dados e identificadores históricos durante toda a transição.
+
+A migração continuará sendo não destrutiva.
+
+Campos e estruturas legadas permanecerão disponíveis enquanto existirem
+dependências, e dados históricos não serão reconstruídos ou reinterpretados
+quando não houver informação suficiente para isso.
+
+A implementação será realizada de forma incremental, começando pela
+fundação do histórico de interações de marketing e seguindo pelas
+consolidações de Lead, Aluno e Produto.
+
+Nenhuma estrutura de Organização ou Fornecedor faz parte desta etapa.
+
+---
 ## Próximas evoluções
 
 A plataforma continuará sendo desenvolvida de forma incremental.
