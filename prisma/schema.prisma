@@ -389,10 +389,10 @@ model Usuario {
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 
-  pessoa                Pessoa                 @relation(fields: [pessoaId], references: [id], onDelete: Restrict)
-  acessoAdministrativo  AcessoAdministrativo?
-  permissoes            UsuarioPermissao[]     @relation("UsuarioPermissoes")
-  permissoesConcedidas  UsuarioPermissao[]     @relation("PermissaoConcedidaPor")
+  pessoa               Pessoa                @relation(fields: [pessoaId], references: [id], onDelete: Restrict)
+  acessoAdministrativo AcessoAdministrativo?
+  permissoes           UsuarioPermissao[]    @relation("UsuarioPermissoes")
+  permissoesConcedidas UsuarioPermissao[]    @relation("PermissaoConcedidaPor")
 
   @@index([status])
   @@index([createdAt])
@@ -434,9 +434,9 @@ model UsuarioPermissao {
   concedidaPorUsuarioId String?
   concedidaEm           DateTime @default(now())
 
-  usuario      Usuario  @relation("UsuarioPermissoes", fields: [usuarioId], references: [id], onDelete: Restrict)
+  usuario      Usuario   @relation("UsuarioPermissoes", fields: [usuarioId], references: [id], onDelete: Restrict)
   permissao    Permissao @relation(fields: [permissaoId], references: [id], onDelete: Restrict)
-  concedidaPor Usuario? @relation("PermissaoConcedidaPor", fields: [concedidaPorUsuarioId], references: [id], onDelete: SetNull)
+  concedidaPor Usuario?  @relation("PermissaoConcedidaPor", fields: [concedidaPorUsuarioId], references: [id], onDelete: SetNull)
 
   @@unique([usuarioId, permissaoId])
   @@index([usuarioId])
@@ -697,8 +697,29 @@ model Pessoa {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  lead      Lead?
-  aluno     Aluno?
-  adminUser AdminUser?
-  usuario   Usuario?
+  lead                Lead?
+  aluno               Aluno?
+  adminUser           AdminUser?
+  usuario             Usuario?
+  interacoesMarketing InteracaoMarketing[]
+}
+
+model InteracaoMarketing {
+  id          String   @id @default(cuid())
+  pessoaId    String
+  tipo        String
+  origem      String?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmTerm     String?
+  utmContent  String?
+  pagina      String?
+  createdAt   DateTime @default(now())
+
+  pessoa Pessoa @relation(fields: [pessoaId], references: [id], onDelete: Restrict)
+
+  @@index([pessoaId, createdAt])
+  @@index([tipo, createdAt])
+  @@index([createdAt])
 }
