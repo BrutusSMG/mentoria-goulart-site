@@ -1,6 +1,10 @@
 // src/app/api/leads/route.js
 import { emailValido, normalizarEmail } from '@/lib/validacoes';
 import { garantirIdentidadeLeadCapturado } from '@/lib/garantir-identidade-lead';
+import {
+  registrarInteracaoMarketing,
+  TIPOS_INTERACAO_MARKETING,
+} from '@/lib/interacao-marketing';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,8 +71,7 @@ export async function POST(request) {
           nome: nome,
           // Só sobrescreve o WhatsApp se um novo valor foi informado
           ...(whatsapp ? { whatsapp } : {}),
-          // Comportamento legado preservado até a E6.3.
-          baixouEbook: false,
+
           utmSource: origemParaPainel,
           utmMedium: utms.utm_medium || null,
           utmCampaign: campanhaParaPainel,
@@ -88,10 +91,35 @@ export async function POST(request) {
         }
       });
 
-      return garantirIdentidadeLeadCapturado(
+      const leadConsolidado =
+        await garantirIdentidadeLeadCapturado(
+          tx,
+          leadCapturado,
+        );
+
+      await registrarInteracaoMarketing(
         tx,
-        leadCapturado,
+        {
+          pessoaId: leadConsolidado.pessoaId,
+          tipo:
+            TIPOS_INTERACAO_MARKETING
+              .EBOOK_SOLICITADO,
+          origem:
+            origem || 'Isca Digital - Ebook',
+          utmSource:
+            utms.utm_source || null,
+          utmMedium:
+            utms.utm_medium || null,
+          utmCampaign:
+            utms.utm_campaign || null,
+          utmTerm:
+            utms.utm_term || null,
+          utmContent:
+            utms.utm_content || null,
+        },
       );
+
+      return leadConsolidado;
     });
     // 2. Cria o link exclusivo com o ID do lead
     // Em produção, isso será o seu domínio oficial

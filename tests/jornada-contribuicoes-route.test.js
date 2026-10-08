@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   leadUpsert: vi.fn(),
   contribuicaoCreate: vi.fn(),
   garantirIdentidadeLead: vi.fn(),
+  registrarInteracaoMarketing: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({
@@ -26,6 +27,17 @@ vi.mock('@/lib/prisma', () => ({
 vi.mock('@/lib/garantir-identidade-lead', () => ({
   garantirIdentidadeLeadCapturado:
     mocks.garantirIdentidadeLead,
+}));
+
+vi.mock('@/lib/interacao-marketing', () => ({
+  TIPOS_INTERACAO_MARKETING: {
+    EBOOK_SOLICITADO: 'EBOOK_SOLICITADO',
+    EBOOK_DOWNLOAD: 'EBOOK_DOWNLOAD',
+    JORNADA_CONTRIBUICAO:
+      'JORNADA_CONTRIBUICAO',
+  },
+  registrarInteracaoMarketing:
+    mocks.registrarInteracaoMarketing,
 }));
 
 vi.mock('@/lib/jornada-config', () => ({
@@ -68,11 +80,15 @@ function requisicaoJornada(
           'curso-garimpo-urbano-com-mentoria',
         ],
         respostas: {
-          resumo: 'Minha experiência com o Garimpo Urbano.',
+          resumo:
+            'Minha experiência com o Garimpo Urbano.',
         },
         utms: {
           utm_source: 'teste',
+          utm_medium: 'social',
           utm_campaign: 'e6',
+          utm_term: 'garimpo',
+          utm_content: 'jornada-1',
         },
         ...sobrescritas,
       }),
@@ -105,6 +121,11 @@ beforeEach(() => {
     leadId: 'lead-jornada-1',
   });
 
+  mocks.registrarInteracaoMarketing
+    .mockResolvedValue({
+      id: 'interacao-jornada-1',
+    });
+
   mocks.transaction.mockImplementation(
     async (callback) => callback({
       lead: {
@@ -117,8 +138,8 @@ beforeEach(() => {
   );
 });
 
-describe('POST /api/jornada/contribuicoes — identidade do Lead', () => {
-  it('consolida Pessoa e contribuição na mesma transação', async () => {
+describe('POST /api/jornada/contribuicoes — identidade e histórico', () => {
+  it('persiste contribuição e JORNADA_CONTRIBUICAO na mesma transação', async () => {
     const resposta = await POST(
       requisicaoJornada(),
     );
@@ -126,7 +147,6 @@ describe('POST /api/jornada/contribuicoes — identidade do Lead', () => {
     expect(resposta.status).toBe(201);
 
     expect(mocks.transaction).toHaveBeenCalledOnce();
-    expect(mocks.leadUpsert).toHaveBeenCalledOnce();
 
     expect(
       mocks.garantirIdentidadeLead,
@@ -134,6 +154,10 @@ describe('POST /api/jornada/contribuicoes — identidade do Lead', () => {
 
     expect(
       mocks.contribuicaoCreate,
+    ).toHaveBeenCalledOnce();
+
+    expect(
+      mocks.registrarInteracaoMarketing,
     ).toHaveBeenCalledOnce();
 
     expect(mocks.leadUpsert).toHaveBeenCalledWith(
@@ -155,6 +179,25 @@ describe('POST /api/jornada/contribuicoes — identidade do Lead', () => {
       }),
     );
 
+    const [
+      ,
+      dadosInteracao,
+    ] =
+      mocks.registrarInteracaoMarketing
+        .mock.calls[0];
+
+    expect(dadosInteracao).toEqual({
+      pessoaId: 'pessoa-jornada-1',
+      tipo: 'JORNADA_CONTRIBUICAO',
+      origem: 'Jornada do Aluno',
+      utmSource: 'teste',
+      utmMedium: 'social',
+      utmCampaign: 'e6',
+      utmTerm: 'garimpo',
+      utmContent: 'jornada-1',
+      pagina: '/jornada-do-aluno',
+    });
+
     const body = await resposta.json();
 
     expect(body).toEqual({
@@ -164,7 +207,7 @@ describe('POST /api/jornada/contribuicoes — identidade do Lead', () => {
     });
   });
 
-  it('mantém o comportamento idempotente sem abrir nova transação', async () => {
+  it('mantém idempotência sem gerar nova interação de marketing', async () => {
     mocks.findUnique.mockResolvedValue({
       id: 'contribuicao-existente',
       leadId: 'lead-existente',
@@ -186,12 +229,17 @@ describe('POST /api/jornada/contribuicoes — identidade do Lead', () => {
       mocks.contribuicaoCreate,
     ).not.toHaveBeenCalled();
 
+    expect(
+      mocks.registrarInteracaoMarketing,
+    ).not.toHaveBeenCalled();
+
     const body = await resposta.json();
 
     expect(body).toEqual({
       success: true,
       duplicate: true,
-      contributionId: 'contribuicao-existente',
+      contributionId:
+        'contribuicao-existente',
       leadId: 'lead-existente',
     });
   });

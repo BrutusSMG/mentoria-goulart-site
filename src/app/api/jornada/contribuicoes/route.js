@@ -3,6 +3,10 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { prisma } from '@/lib/prisma';
 import { garantirIdentidadeLeadCapturado } from '@/lib/garantir-identidade-lead';
+import {
+  registrarInteracaoMarketing,
+  TIPOS_INTERACAO_MARKETING,
+} from '@/lib/interacao-marketing';
 import { PRODUTO_SLUGS, nomeProduto } from '@/lib/jornada-produtos';
 import { JORNADA_FLAGS } from '@/lib/jornada-config';
 import { emailFormatoValido } from '@/lib/validacoes';
@@ -296,6 +300,28 @@ export async function POST(request) {
                 texto(utms.utm_term, 160) || null,
             },
           });
+
+        await registrarInteracaoMarketing(
+          tx,
+          {
+            pessoaId: lead.pessoaId,
+            tipo:
+              TIPOS_INTERACAO_MARKETING
+                .JORNADA_CONTRIBUICAO,
+            origem: 'Jornada do Aluno',
+            utmSource:
+              texto(utms.utm_source, 160) || null,
+            utmMedium:
+              texto(utms.utm_medium, 160) || null,
+            utmCampaign:
+              texto(utms.utm_campaign, 160) || null,
+            utmTerm:
+              texto(utms.utm_term, 160) || null,
+            utmContent:
+              texto(utms.utm_content, 160) || null,
+            pagina: '/jornada-do-aluno',
+          },
+        );
 
         return {
           lead,
