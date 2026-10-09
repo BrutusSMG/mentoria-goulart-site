@@ -319,7 +319,7 @@ não foram habilitadas automaticamente pela conclusão desta etapa.
 
 ## Etapa 6 — Lead, Aluno, Produto e histórico de marketing
 
-**Status: em desenvolvimento — E6.0, E6.1 e E6.2 concluídas em homologação em 07/10/2026.**
+**Status: em desenvolvimento — E6.0, E6.1, E6.2 e E6.3 concluídas em homologação.**
 
 A sexta etapa iniciou a consolidação dos domínios de relacionamento e
 histórico construídos nas etapas anteriores.
@@ -362,7 +362,28 @@ Os registros históricos existentes permanecem preservados e serão
 tratados posteriormente por migração controlada, sem vinculação
 automática baseada apenas em coincidência de dados antigos.
 
-As próximas evoluções tratarão o histórico efetivo de marketing, Aluno e
+Também foi concluída a evolução dos fluxos de marketing.
+
+As novas capturas e interações relevantes passam a produzir histórico
+associado à identidade central, preservando as diferentes origens ao
+longo do relacionamento.
+
+O download do e-book passou a ser tratado como um fato cumulativo, de
+forma que uma nova captura do mesmo contato não apague um download já
+realizado.
+
+A Jornada do Aluno também passou a integrar esse histórico, preservando
+a origem das novas interações e evitando duplicidades em submissões
+repetidas.
+
+O painel administrativo de Leads foi ampliado para apresentar a primeira
+atribuição conhecida, a atribuição mais recente e a última interação,
+mantendo compatibilidade com os registros históricos anteriores.
+
+A implementação foi validada em homologação com testes automatizados,
+build de produção e validação funcional no ambiente de Preview.
+
+As próximas evoluções tratarão a consolidação de Aluno, PerfilAluno e
 Produto sobre essa arquitetura.
 
 Nenhuma estrutura de Organização ou Fornecedor faz parte desta etapa.
