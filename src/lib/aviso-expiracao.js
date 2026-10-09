@@ -89,6 +89,12 @@ export async function buscarVigenciasParaAviso(
             select: {
               nome: true,
               email: true,
+              pessoa: {
+                select: {
+                  nome: true,
+                  emailPrincipal: true,
+                },
+              },
             },
           },
         },
@@ -120,15 +126,22 @@ export function criarEmailAvisoExpiracao(vigencia) {
   const aluno = vigencia?.matricula?.aluno;
   const produtoNome = vigencia?.matricula?.produtoNome;
 
+  const pessoa = aluno?.pessoa || null;
+
+  const nomeIdentidade =
+    pessoa?.nome || aluno?.nome;
+
+  const emailIdentidade =
+    pessoa?.emailPrincipal || aluno?.email;
   if (
     !vigencia?.id ||
     !(vigencia?.expiraEm instanceof Date) ||
-    !aluno?.email
+    !emailIdentidade
   ) {
     throw new Error('Dados insuficientes para aviso de expiração.');
   }
 
-  const nome = escaparHtml(aluno.nome || 'Aluno');
+  const nome = escaparHtml(nomeIdentidade || 'Aluno');
   const produto = escaparHtml(produtoNome || 'seu acesso');
 
   const dataExpiracao = new Intl.DateTimeFormat('pt-BR', {
@@ -140,7 +153,7 @@ export function criarEmailAvisoExpiracao(vigencia) {
 
   return {
     from: 'Prof. Goulart <contato@mentoriagarimpourbano.com.br>',
-    to: aluno.email,
+    to: emailIdentidade,
     subject: `Seu acesso ao ${produtoNome || 'Garimpo Urbano'} está próximo do vencimento`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a0a;color:#fff;padding:32px;border-radius:16px">

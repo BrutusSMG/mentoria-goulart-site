@@ -36,6 +36,13 @@ export async function GET(_req, { params }) {
         nome: true,
         email: true,
         whatsapp: true,
+        pessoa: {
+          select: {
+            nome: true,
+            emailPrincipal: true,
+            telefonePrincipal: true,
+          },
+        },
         status: true,
         origem: true,
         senhaHash: true,
@@ -145,12 +152,26 @@ export async function GET(_req, { params }) {
     const {
       senhaHash: _senhaHash,
       controleConviteLegado: controleConvite,
+      pessoa,
       ...alunoPublico
     } = aluno;
 
+    const nomeIdentidade =
+      pessoa?.nome || aluno.nome;
+
+    const emailIdentidade =
+      pessoa?.emailPrincipal || aluno.email;
+
+    const whatsappIdentidade =
+      pessoa
+        ? pessoa.telefonePrincipal
+        : aluno.whatsapp;
     return respostaPrivada({
       item: {
         ...alunoPublico,
+        nome: nomeIdentidade,
+        email: emailIdentidade,
+        whatsapp: whatsappIdentidade,
         estadoConviteLegado: obterEstadoConviteLegado(aluno),
 
         // Expor somente os dados de auditoria necessários

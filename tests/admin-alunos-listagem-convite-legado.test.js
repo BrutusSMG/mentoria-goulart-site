@@ -195,12 +195,35 @@ describe('GET /api/admin/alunos — convite legado', () => {
       totalPages: 1,
     });
 
-    expect(mocks.alunoFindMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        skip: 10,
-        take: 10,
-        where: {
+    const filtroIdentidade = {
+      OR: [
+        {
+          pessoa: {
+            is: {
+              nome: {
+                contains: 'Teste',
+                mode: 'insensitive',
+              },
+            },
+          },
+        },
+        {
+          pessoa: {
+            is: {
+              emailPrincipal: {
+                contains: 'Teste',
+                mode: 'insensitive',
+              },
+            },
+          },
+        },
+        {
           AND: [
+            {
+              pessoa: {
+                is: null,
+              },
+            },
             {
               OR: [
                 {
@@ -217,10 +240,160 @@ describe('GET /api/admin/alunos — convite legado', () => {
                 },
               ],
             },
+          ],
+        },
+      ],
+    };
+
+    expect(mocks.alunoFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skip: 10,
+        take: 10,
+        where: {
+          AND: [
+            filtroIdentidade,
             { status: 'ATIVO' },
           ],
         },
       }),
     );
   });
+  it(
+    'usa Pessoa como identidade exibida na listagem administrativa',
+    async () => {
+      mocks.alunoCount.mockResolvedValue(1);
+
+      mocks.alunoFindMany.mockResolvedValue([
+        {
+          ...alunoFicticio({
+            id: 'aluno-identidade',
+            origem: 'HOTMART',
+            statusControle: null,
+          }),
+          nome: 'Nome legado',
+          email: 'legado@example.test',
+          whatsapp: '11911111111',
+          pessoa: {
+            nome: 'Pessoa Oficial',
+            emailPrincipal: 'oficial@example.test',
+            telefonePrincipal: '11999999999',
+          },
+        },
+      ]);
+
+      const resposta = await GET(requisicao());
+      const corpo = await resposta.json();
+
+      expect(resposta.status).toBe(200);
+
+      expect(corpo.items[0]).toMatchObject({
+        id: 'aluno-identidade',
+        nome: 'Pessoa Oficial',
+        email: 'oficial@example.test',
+        whatsapp: '11999999999',
+      });
+
+      expect(corpo.items[0]).not.toHaveProperty('pessoa');
+
+      expect(
+        mocks.alunoFindMany,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          select: expect.objectContaining({
+            pessoa: {
+              select: {
+                nome: true,
+                emailPrincipal: true,
+                telefonePrincipal: true,
+              },
+            },
+          }),
+        }),
+      );
+    },
+  );
+
+  it(
+    'busca pela identidade de Pessoa e usa legado somente sem Pessoa',
+    async () => {
+      mocks.alunoCount.mockResolvedValue(0);
+      mocks.alunoFindMany.mockResolvedValue([]);
+
+      await GET(
+        requisicao('?q=Fabio'),
+      );
+
+      const filtroIdentidade = {
+        OR: [
+          {
+            pessoa: {
+              is: {
+                nome: {
+                  contains: 'Fabio',
+                  mode: 'insensitive',
+                },
+              },
+            },
+          },
+          {
+            pessoa: {
+              is: {
+                emailPrincipal: {
+                  contains: 'Fabio',
+                  mode: 'insensitive',
+                },
+              },
+            },
+          },
+          {
+            AND: [
+              {
+                pessoa: {
+                  is: null,
+                },
+              },
+              {
+                OR: [
+                  {
+                    nome: {
+                      contains: 'Fabio',
+                      mode: 'insensitive',
+                    },
+                  },
+                  {
+                    email: {
+                      contains: 'Fabio',
+                      mode: 'insensitive',
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      expect(
+        mocks.alunoFindMany,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            AND: [
+              filtroIdentidade,
+            ],
+          },
+        }),
+      );
+
+      expect(
+        mocks.alunoCount,
+      ).toHaveBeenCalledWith({
+        where: {
+          AND: [
+            filtroIdentidade,
+          ],
+        },
+      });
+    },
+  );
 });

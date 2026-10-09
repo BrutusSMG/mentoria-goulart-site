@@ -34,6 +34,7 @@ export const authOptions = {
               },
               select: {
                 id: true,
+                nome: true,
                 emailPrincipal: true,
                 usuario: {
                   select: {
@@ -105,7 +106,7 @@ export const authOptions = {
               // A identidade da sessao agora e Usuario.id.
               id: usuarioPortal.id,
               email: pessoa.emailPrincipal,
-              name: aluno.nome,
+              name: pessoa.nome,
               alunoId: aluno.id,
               usuarioId: usuarioPortal.id,
               pessoaId: pessoa.id,

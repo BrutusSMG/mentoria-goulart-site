@@ -45,8 +45,6 @@ export async function garantirContaHotmart(tx, {
   const aluno = await tx.aluno.upsert({
     where: { email: emailNormalizado },
     update: {
-      nome: nome || alunoExistente?.nome || 'Aluno',
-      ...(whatsapp ? { whatsapp } : {}),
       ...(alunoExistente?.leadId || leadId
         ? { leadId: alunoExistente?.leadId || leadId }
         : {}),

@@ -183,7 +183,12 @@ describe('buscarVigenciasParaAviso', () => {
               select: {
                 nome: true,
                 email: true,
-              },
+                pessoa: {
+                  select: {
+                    nome: true,
+                    emailPrincipal: true,
+                  },
+                },              },
             },
           },
         },
@@ -265,6 +270,44 @@ describe('criarEmailAvisoExpiracao', () => {
   });
 });
 
+
+  it('usa Pessoa como identidade no aviso de expiracao', () => {
+    const vigencia = {
+      id: 'vigencia-identidade',
+      expiraEm: new Date('2026-10-09T12:00:00.000Z'),
+      matricula: {
+        produtoNome: 'Curso Garimpo Urbano',
+        aluno: {
+          nome: 'Nome legado',
+          email: 'legado@example.com',
+          pessoa: {
+            nome: 'Pessoa Oficial',
+            emailPrincipal: 'oficial@example.com',
+          },
+        },
+      },
+    };
+
+    const email = criarEmailAvisoExpiracao(
+      vigencia,
+    );
+
+    expect(email.to).toBe(
+      'oficial@example.com',
+    );
+
+    expect(email.html).toContain(
+      'Olá, Pessoa Oficial.',
+    );
+
+    expect(email.html).not.toContain(
+      'Nome legado',
+    );
+
+    expect(email.to).not.toBe(
+      'legado@example.com',
+    );
+  });
 describe('enviarAvisoExpiracao', () => {
   const agora = new Date('2026-09-09T12:00:00.000Z');
 

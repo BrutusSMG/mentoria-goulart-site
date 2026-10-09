@@ -52,6 +52,7 @@ describe("autenticação do aluno via Usuario", () => {
     async () => {
       pessoaFindUniqueMock.mockResolvedValue({
         id: "pessoa-1",
+        nome: "Aluno Teste",
         emailPrincipal: "aluno@example.com",
 
         usuario: {
@@ -84,6 +85,7 @@ describe("autenticação do aluno via Usuario", () => {
         },
         select: {
           id: true,
+          nome: true,
           emailPrincipal: true,
           usuario: {
             select: {
@@ -451,4 +453,47 @@ describe("autenticação do aluno via Usuario", () => {
     },
   );
 
+
+  it(
+    "usa Pessoa.nome como identidade na sessao do aluno",
+    async () => {
+      pessoaFindUniqueMock.mockResolvedValue({
+        id: "pessoa-divergente",
+        nome: "Fabio Martins",
+        emailPrincipal: "fsousam@example.com",
+
+        usuario: {
+          id: "usuario-divergente",
+          senhaHash: "hash-canonico",
+          status: "ATIVO",
+          mustChangePassword: false,
+          acessoAdministrativo: null,
+        },
+
+        adminUser: null,
+
+        aluno: {
+          id: "aluno-divergente",
+          nome: "Fabio Teste",
+          status: "ATIVO",
+        },
+      });
+
+      bcryptCompareMock.mockResolvedValue(true);
+
+      const usuario = await authorize({
+        email: "fsousam@example.com",
+        password: "Senha123!",
+        area: "aluno",
+      });
+
+      expect(usuario).toMatchObject({
+        id: "usuario-divergente",
+        pessoaId: "pessoa-divergente",
+        alunoId: "aluno-divergente",
+        email: "fsousam@example.com",
+        name: "Fabio Martins",
+      });
+    },
+  );
 });

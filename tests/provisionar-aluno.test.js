@@ -68,13 +68,10 @@ describe('garantirContaHotmart', () => {
         email: 'ebook@example.com',
       },
       update: {
-        nome: 'Comprador Ebook',
-        whatsapp: '41999999999',
         leadId: 'lead-ebook',
         status: 'ATIVO',
         origem: 'HOTMART',
-      },
-      create: {
+      },      create: {
         leadId: 'lead-ebook',
         nome: 'Comprador Ebook',
         email: 'ebook@example.com',
@@ -100,6 +97,62 @@ describe('garantirContaHotmart', () => {
     expect(tx.alunoAccessToken.create).not.toHaveBeenCalled();
   });
 
+
+  it(
+    'nao sobrescreve identidade existente com dados de nova compra Hotmart',
+    async () => {
+      const tx = {
+        aluno: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'aluno-existente',
+            nome: 'Nome legado preservado',
+            leadId: null,
+            senhaHash: 'hash-existente',
+            status: 'ATIVO',
+          }),
+
+          upsert: vi.fn().mockResolvedValue({
+            id: 'aluno-existente',
+            nome: 'Nome legado preservado',
+            email: 'aluno@example.com',
+            whatsapp: '11911111111',
+            status: 'ATIVO',
+          }),
+        },
+      };
+
+      await garantirContaHotmart(tx, {
+        email: 'aluno@example.com',
+        nome: 'Nome vindo do checkout',
+        whatsapp: '11999999999',
+      });
+
+      expect(
+        tx.aluno.upsert,
+      ).toHaveBeenCalledTimes(1);
+
+      const chamada =
+        tx.aluno.upsert.mock.calls[0][0];
+
+      expect(chamada.update).not.toHaveProperty(
+        'nome',
+      );
+
+      expect(chamada.update).not.toHaveProperty(
+        'whatsapp',
+      );
+
+      expect(chamada.update).toMatchObject({
+        status: 'ATIVO',
+        origem: 'HOTMART',
+      });
+
+      expect(chamada.create).toMatchObject({
+        nome: 'Nome vindo do checkout',
+        whatsapp: '11999999999',
+      });
+    },
+  );
   it('preserva conta suspensa em nova compra', async () => {
     const tx = {
       aluno: {
