@@ -319,7 +319,7 @@ não foram habilitadas automaticamente pela conclusão desta etapa.
 
 ## Etapa 6 — Lead, Aluno, Produto e histórico de marketing
 
-**Status: em desenvolvimento — E6.0, E6.1, E6.2 e E6.3 concluídas em homologação.**
+**Status: em desenvolvimento — E6.0, E6.1, E6.2, E6.3 e E6.4 concluídas em homologação.**
 
 A sexta etapa iniciou a consolidação dos domínios de relacionamento e
 histórico construídos nas etapas anteriores.
@@ -383,8 +383,45 @@ mantendo compatibilidade com os registros históricos anteriores.
 A implementação foi validada em homologação com testes automatizados,
 build de produção e validação funcional no ambiente de Preview.
 
-As próximas evoluções tratarão a consolidação de Aluno, PerfilAluno e
-Produto sobre essa arquitetura.
+Também foi concluída a consolidação da identidade dos alunos sobre Pessoa.
+
+A evolução passou a separar de forma mais clara a identidade principal,
+o relacionamento educacional e as informações utilizadas para apresentação
+na comunidade.
+
+Pessoa passou a ser utilizada como fonte principal da identidade nas áreas
+em que isso é arquiteturalmente adequado, enquanto Aluno permanece
+representando o relacionamento educacional.
+
+O nome de exibição da comunidade foi desacoplado da identidade principal,
+permitindo que o aluno escolha como deseja ser apresentado sem alterar
+automaticamente seus dados centrais.
+
+A listagem, o detalhe e a busca administrativa de alunos também foram
+alinhados à identidade central.
+
+A busca permite localizar alunos por parte do nome, nome completo ou
+e-mail principal.
+
+Fluxos como recuperação de senha e avisos relacionados ao acesso também
+passaram a utilizar a identidade central da pessoa.
+
+O provisionamento de novas compras foi ajustado para preservar a identidade
+já existente de alunos cadastrados, evitando que novas informações de uma
+compra substituam automaticamente dados já consolidados.
+
+A transição continua sendo não destrutiva.
+
+Campos históricos ainda necessários permanecem disponíveis enquanto houver
+dependências, e divergências antigas não são reinterpretadas automaticamente
+quando não existem evidências suficientes para determinar sua origem.
+
+A E6.4 foi validada com testes automatizados, lint, build de produção e
+validação funcional no ambiente de Preview.
+
+As próximas evoluções tratarão a consolidação dos demais relacionamentos e
+referências da Etapa 6, incluindo a continuidade da evolução de Produto
+sobre a arquitetura central.
 
 Nenhuma estrutura de Organização ou Fornecedor faz parte desta etapa.
 
