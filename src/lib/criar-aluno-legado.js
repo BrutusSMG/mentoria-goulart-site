@@ -161,6 +161,7 @@ export async function criarAlunoLegado(tx, dados, agora = new Date()) {
         data: {
           alunoId: aluno.id,
           produtoId: produto.id,
+          produtoCatalogoId: produto.id,
           produtoNome: produto.nome,
           origem: 'LEGADO',
           status,

@@ -401,6 +401,7 @@ export async function POST(req) {
             nome: nomeDoAluno,
             whatsapp: whatsappDoAluno,
             produtoId,
+            produtoCatalogoId,
             produtoUcode: produto.ucode ? String(produto.ucode) : null,
             produtoNome,
             transacaoOrigemId: transacao.id,

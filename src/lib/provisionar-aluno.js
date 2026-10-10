@@ -130,6 +130,7 @@ export async function provisionarAlunoHotmart(tx, {
   nome,
   whatsapp = null,
   produtoId,
+  produtoCatalogoId,
   produtoUcode = null,
   produtoNome,
   transacaoOrigemId,
@@ -137,9 +138,18 @@ export async function provisionarAlunoHotmart(tx, {
 }) {
   const emailNormalizado = normalizarEmail(email);
   const produtoIdNormalizado = String(produtoId || '').trim();
+  const produtoCatalogoIdNormalizado = String(
+    produtoCatalogoId || '',
+  ).trim();
 
   if (!emailNormalizado || !produtoIdNormalizado) {
     return null;
+  }
+
+  if (!produtoCatalogoIdNormalizado) {
+    throw new TypeError(
+      'Produto interno é obrigatório para matrícula Hotmart.',
+    );
   }
 
   const transacaoOrigemIdNormalizado = String(
@@ -189,6 +199,29 @@ export async function provisionarAlunoHotmart(tx, {
     whatsapp,
   });
 
+  const matriculaExistente = await tx.matricula.findUnique({
+    where: {
+      alunoId_produtoId: {
+        alunoId: aluno.id,
+        produtoId: produtoIdNormalizado,
+      },
+    },
+    select: {
+      id: true,
+      produtoCatalogoId: true,
+    },
+  });
+
+  if (
+    matriculaExistente?.produtoCatalogoId &&
+    matriculaExistente.produtoCatalogoId !==
+      produtoCatalogoIdNormalizado
+  ) {
+    throw new Error(
+      'Matrícula possui referência interna de produto incompatível.',
+    );
+  }
+
   const matricula = await tx.matricula.upsert({
     where: {
       alunoId_produtoId: {
@@ -197,6 +230,7 @@ export async function provisionarAlunoHotmart(tx, {
       },
     },
     update: {
+      produtoCatalogoId: produtoCatalogoIdNormalizado,
       produtoUcode: produtoUcode || null,
       produtoNome: produtoNome || 'Produto Hotmart',
       status: 'ATIVA',
@@ -206,6 +240,7 @@ export async function provisionarAlunoHotmart(tx, {
     create: {
       alunoId: aluno.id,
       produtoId: produtoIdNormalizado,
+      produtoCatalogoId: produtoCatalogoIdNormalizado,
       produtoUcode: produtoUcode || null,
       produtoNome: produtoNome || 'Produto Hotmart',
       origem: 'HOTMART',

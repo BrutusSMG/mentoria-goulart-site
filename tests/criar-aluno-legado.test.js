@@ -139,6 +139,16 @@ describe('criarAlunoLegado', () => {
       tx.direitoConcedido.create,
     ).toHaveBeenCalledTimes(1);
 
+    expect(tx.matricula.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        alunoId: 'aluno-1',
+        produtoId: 'curso-1',
+        produtoCatalogoId: 'curso-1',
+        produtoNome: 'Curso legado',
+        origem: 'LEGADO',
+      }),
+    });
+
     expect(resultado.convite).toBe('PENDENTE');
 
     expect(resultado.produtos[0].expiraEm).toEqual(
