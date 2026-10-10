@@ -274,26 +274,31 @@ model ControleConviteLegado {
 }
 
 model Matricula {
-  id           String          @id @default(cuid())
-  alunoId      String
-  produtoId    String
-  produtoUcode String?
-  produtoNome  String
-  origem       OrigemMatricula @default(HOTMART)
-  status       StatusMatricula @default(PENDENTE)
-  concedidaEm  DateTime?
-  suspensaEm   DateTime?
-  encerradaEm  DateTime?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  id                String          @id @default(cuid())
+  alunoId           String
+  // Campo legado/histórico. Pode conter identificador externo ou valor histórico.
+  produtoId         String
+  // Referência explícita à identidade comercial interna do MGU.
+  produtoCatalogoId String?
+  produtoUcode      String?
+  produtoNome       String
+  origem            OrigemMatricula @default(HOTMART)
+  status            StatusMatricula @default(PENDENTE)
+  concedidaEm       DateTime?
+  suspensaEm        DateTime?
+  encerradaEm       DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   aluno             Aluno                @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+  produtoCatalogo   Produto?             @relation(fields: [produtoCatalogoId], references: [id], onDelete: Restrict)
   transacoesHotmart HotmartTransaction[]
   vigencias         VigenciaMatricula[]
 
   @@unique([alunoId, produtoId])
   @@index([alunoId])
   @@index([produtoId])
+  @@index([produtoCatalogoId])
   @@index([status])
 }
 
@@ -512,6 +517,7 @@ model Produto {
 
   integracoes       ProdutoIntegracao[]
   transacoesHotmart HotmartTransaction[]
+  matriculas        Matricula[]
   direitos          ProdutoDireito[]
 
   @@index([tipo])
