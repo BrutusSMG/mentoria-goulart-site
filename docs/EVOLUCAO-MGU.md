@@ -319,7 +319,7 @@ não foram habilitadas automaticamente pela conclusão desta etapa.
 
 ## Etapa 6 — Lead, Aluno, Produto e histórico de marketing
 
-**Status: em desenvolvimento — E6.0, E6.1, E6.2, E6.3 e E6.4 concluídas em homologação.**
+**Status: em desenvolvimento — E6.0, E6.1, E6.2, E6.3, E6.4 e E6.5 concluídas em homologação.**
 
 A sexta etapa iniciou a consolidação dos domínios de relacionamento e
 histórico construídos nas etapas anteriores.
@@ -419,9 +419,37 @@ quando não existem evidências suficientes para determinar sua origem.
 A E6.4 foi validada com testes automatizados, lint, build de produção e
 validação funcional no ambiente de Preview.
 
-As próximas evoluções tratarão a consolidação dos demais relacionamentos e
-referências da Etapa 6, incluindo a continuidade da evolução de Produto
-sobre a arquitetura central.
+Também foi concluída a consolidação das referências de Produto utilizadas
+pelas matrículas.
+
+A plataforma passou a distinguir explicitamente a identificação histórica
+utilizada na origem da matrícula da referência ao Produto existente no
+catálogo interno do MGU.
+
+Novas matrículas criadas por fluxos em que o Produto interno é conhecido
+passam a registrar essa associação de forma explícita, sem substituir ou
+reinterpretar os identificadores históricos já preservados pela plataforma.
+
+A evolução também protege situações em que a associação comercial não pode
+ser determinada com segurança.
+
+Produtos não reconhecidos, dados históricos ambíguos e registros que não
+possuem evidência suficiente permanecem preservados sem associação
+automática baseada apenas em nomes ou suposições.
+
+A E6.5 foi implementada de forma aditiva e não destrutiva.
+
+Os registros históricos existentes não foram alterados em massa nesta
+subetapa.
+
+A implementação foi validada com testes automatizados, lint, build de
+produção e validação funcional no ambiente de Preview, incluindo o fluxo
+de uma nova compra associada ao catálogo interno.
+
+As próximas evoluções da Etapa 6 tratarão a migração controlada dos
+registros históricos cuja associação possa ser comprovada de forma
+determinística, seguida de validação integrada e regressão antes da
+publicação da etapa em produção.
 
 Nenhuma estrutura de Organização ou Fornecedor faz parte desta etapa.
 
