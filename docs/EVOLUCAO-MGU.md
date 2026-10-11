@@ -319,7 +319,7 @@ não foram habilitadas automaticamente pela conclusão desta etapa.
 
 ## Etapa 6 — Lead, Aluno, Produto e histórico de marketing
 
-**Status: em desenvolvimento — E6.0, E6.1, E6.2, E6.3, E6.4 e E6.5 concluídas em homologação.**
+**Status: em desenvolvimento — E6.0 a E6.6 concluídas em homologação.**
 
 A sexta etapa iniciou a consolidação dos domínios de relacionamento e
 histórico construídos nas etapas anteriores.
@@ -446,10 +446,38 @@ A implementação foi validada com testes automatizados, lint, build de
 produção e validação funcional no ambiente de Preview, incluindo o fluxo
 de uma nova compra associada ao catálogo interno.
 
-As próximas evoluções da Etapa 6 tratarão a migração controlada dos
-registros históricos cuja associação possa ser comprovada de forma
-determinística, seguida de validação integrada e regressão antes da
-publicação da etapa em produção.
+Também foi concluída a consolidação controlada dos registros históricos
+elegíveis.
+
+Os vínculos históricos entre Lead e Pessoa passaram a ser consolidados
+somente quando existiam evidências suficientes para determinar a associação
+com segurança.
+
+Da mesma forma, as matrículas históricas passaram a receber referência
+explícita ao Produto interno apenas quando essa relação pôde ser comprovada
+de forma determinística.
+
+Casos ambíguos ou sem associação comercial comprovada permaneceram
+preservados para revisão, sem criação automática de vínculos baseada apenas
+em coincidência de dados, nomes ou suposições.
+
+O processo foi desenvolvido de forma idempotente e não destrutiva.
+
+A validação confirmou a preservação de alunos, usuários, credenciais,
+matrículas, vigências, direitos e transações existentes.
+
+Também não foi criado histórico artificial de marketing para registros
+anteriores que não possuíam evidência suficiente.
+
+Após a consolidação, uma nova execução de análise reconhece os registros já
+tratados sem tentar repetir alterações.
+
+A E6.6 foi validada em homologação com testes específicos, regressão
+automatizada completa, lint, build de produção e validações de consistência.
+
+Com a consolidação histórica concluída, a próxima subetapa será dedicada à
+regressão integrada da Etapa 6, homologação final e preparação controlada da
+publicação em produção.
 
 Nenhuma estrutura de Organização ou Fornecedor faz parte desta etapa.
 
