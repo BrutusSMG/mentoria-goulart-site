@@ -1,4 +1,3 @@
-// src/app/api/admin/leads/route.js
 import { NextResponse } from "next/server";
 import {
   obterAcessoAdmin,
@@ -6,7 +5,9 @@ import {
   respostaAcessoNegado,
 } from "@/lib/admin-permissoes";
 import { inteiroLimitado } from "@/lib/validacoes";
-
+import {
+  resumirMarketingLead,
+} from "@/lib/resumo-marketing-lead";
 
 function respostaPrivada(data, status = 200) {
   return NextResponse.json(data, {
@@ -17,6 +18,18 @@ function respostaPrivada(data, status = 200) {
   });
 }
 
+const SELECAO_INTERACAO_MARKETING = {
+  tipo: true,
+  origem: true,
+  utmSource: true,
+  utmMedium: true,
+  utmCampaign: true,
+  utmTerm: true,
+  utmContent: true,
+  pagina: true,
+  createdAt: true,
+};
+
 export async function GET(req) {
   const acesso = await obterAcessoAdmin();
 
@@ -26,33 +39,98 @@ export async function GET(req) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const page = inteiroLimitado(searchParams.get("page"), 1, 1, 100000);
-    const pageSize = inteiroLimitado(searchParams.get("pageSize"), 20, 10, 100);
-    const q = searchParams.get("q")?.trim() || "";
-    const source = searchParams.get("source") || "all";
-    const ebook = searchParams.get("ebook") || "all";
+
+    const page = inteiroLimitado(
+      searchParams.get("page"),
+      1,
+      1,
+      100000,
+    );
+
+    const pageSize = inteiroLimitado(
+      searchParams.get("pageSize"),
+      20,
+      10,
+      100,
+    );
+
+    const q =
+      searchParams.get("q")?.trim() || "";
+
+    const source =
+      searchParams.get("source") || "all";
+
+    const ebook =
+      searchParams.get("ebook") || "all";
 
     const filtros = [];
 
     if (q) {
       filtros.push({
         OR: [
-          { nome: { contains: q, mode: "insensitive" } },
-          { email: { contains: q, mode: "insensitive" } },
-          { whatsapp: { contains: q, mode: "insensitive" } },
+          {
+            nome: {
+              contains: q,
+              mode: "insensitive",
+            },
+          },
+          {
+            email: {
+              contains: q,
+              mode: "insensitive",
+            },
+          },
+          {
+            whatsapp: {
+              contains: q,
+              mode: "insensitive",
+            },
+          },
         ],
       });
     }
 
-    if (source !== "all") filtros.push({ utmSource: source });
-    if (ebook === "downloaded") filtros.push({ baixouEbook: true });
-    if (ebook === "pending") filtros.push({ baixouEbook: false });
+    /*
+     * Compatibilidade temporária:
+     * o filtro continua operando sobre o snapshot de Lead.
+     * A migração do filtro para o histórico será decidida
+     * somente depois da validação do novo painel.
+     */
+    if (source !== "all") {
+      filtros.push({
+        utmSource: source,
+      });
+    }
 
-    const where = filtros.length > 0 ? { AND: filtros } : {};
-    const skip = (page - 1) * pageSize;
+    if (ebook === "downloaded") {
+      filtros.push({
+        baixouEbook: true,
+      });
+    }
 
-    const [total, leads, fontes] = await Promise.all([
-      prisma.lead.count({ where }),
+    if (ebook === "pending") {
+      filtros.push({
+        baixouEbook: false,
+      });
+    }
+
+    const where =
+      filtros.length > 0
+        ? { AND: filtros }
+        : {};
+
+    const skip =
+      (page - 1) * pageSize;
+
+    const [
+      total,
+      leads,
+      fontes,
+    ] = await Promise.all([
+      prisma.lead.count({
+        where,
+      }),
+
       prisma.lead.findMany({
         where,
         select: {
@@ -67,33 +145,82 @@ export async function GET(req) {
           utmContent: true,
           utmTerm: true,
           createdAt: true,
+          pessoaId: true,
+          pessoa: {
+            select: {
+              interacoesMarketing: {
+                select:
+                  SELECAO_INTERACAO_MARKETING,
+                orderBy: {
+                  createdAt: "asc",
+                },
+              },
+            },
+          },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: {
+          createdAt: "desc",
+        },
         skip,
         take: pageSize,
       }),
+
       prisma.lead.findMany({
-        where: { utmSource: { not: null } },
+        where: {
+          utmSource: {
+            not: null,
+          },
+        },
         distinct: ["utmSource"],
-        select: { utmSource: true },
-        orderBy: { utmSource: "asc" },
+        select: {
+          utmSource: true,
+        },
+        orderBy: {
+          utmSource: "asc",
+        },
       }),
     ]);
 
+    const items = leads.map(
+      ({
+        pessoa,
+        ...lead
+      }) => ({
+        ...lead,
+
+        marketing:
+          resumirMarketingLead(
+            pessoa?.interacoesMarketing || [],
+          ),
+      }),
+    );
+
     return respostaPrivada({
-      items: leads,
+      items,
       pagination: {
         page,
         pageSize,
         total,
-        totalPages: Math.max(1, Math.ceil(total / pageSize)),
+        totalPages: Math.max(
+          1,
+          Math.ceil(total / pageSize),
+        ),
       },
-      sources: fontes.map((item) => item.utmSource).filter(Boolean),
+      sources: fontes
+        .map((item) => item.utmSource)
+        .filter(Boolean),
     });
   } catch (error) {
-    console.error("Erro ao listar leads:", error);
+    console.error(
+      "Erro ao listar leads:",
+      error,
+    );
+
     return respostaPrivada(
-      { error: "Não foi possível carregar os leads." },
+      {
+        error:
+          "Não foi possível carregar os leads.",
+      },
       500,
     );
   }

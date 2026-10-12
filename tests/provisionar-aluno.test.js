@@ -68,13 +68,10 @@ describe('garantirContaHotmart', () => {
         email: 'ebook@example.com',
       },
       update: {
-        nome: 'Comprador Ebook',
-        whatsapp: '41999999999',
         leadId: 'lead-ebook',
         status: 'ATIVO',
         origem: 'HOTMART',
-      },
-      create: {
+      },      create: {
         leadId: 'lead-ebook',
         nome: 'Comprador Ebook',
         email: 'ebook@example.com',
@@ -100,6 +97,62 @@ describe('garantirContaHotmart', () => {
     expect(tx.alunoAccessToken.create).not.toHaveBeenCalled();
   });
 
+
+  it(
+    'nao sobrescreve identidade existente com dados de nova compra Hotmart',
+    async () => {
+      const tx = {
+        aluno: {
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'aluno-existente',
+            nome: 'Nome legado preservado',
+            leadId: null,
+            senhaHash: 'hash-existente',
+            status: 'ATIVO',
+          }),
+
+          upsert: vi.fn().mockResolvedValue({
+            id: 'aluno-existente',
+            nome: 'Nome legado preservado',
+            email: 'aluno@example.com',
+            whatsapp: '11911111111',
+            status: 'ATIVO',
+          }),
+        },
+      };
+
+      await garantirContaHotmart(tx, {
+        email: 'aluno@example.com',
+        nome: 'Nome vindo do checkout',
+        whatsapp: '11999999999',
+      });
+
+      expect(
+        tx.aluno.upsert,
+      ).toHaveBeenCalledTimes(1);
+
+      const chamada =
+        tx.aluno.upsert.mock.calls[0][0];
+
+      expect(chamada.update).not.toHaveProperty(
+        'nome',
+      );
+
+      expect(chamada.update).not.toHaveProperty(
+        'whatsapp',
+      );
+
+      expect(chamada.update).toMatchObject({
+        status: 'ATIVO',
+        origem: 'HOTMART',
+      });
+
+      expect(chamada.create).toMatchObject({
+        nome: 'Nome vindo do checkout',
+        whatsapp: '11999999999',
+      });
+    },
+  );
   it('preserva conta suspensa em nova compra', async () => {
     const tx = {
       aluno: {
@@ -156,6 +209,10 @@ describe('provisionarAlunoHotmart', () => {
       },
 
       matricula: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: 'matricula-existente',
+          produtoCatalogoId: null,
+        }),
         upsert: vi.fn().mockResolvedValue({
           id: 'matricula-existente',
         }),
@@ -187,6 +244,7 @@ describe('provisionarAlunoHotmart', () => {
       email: 'aluno@example.com',
       nome: 'Aluno Teste',
       produtoId: 'produto-1',
+      produtoCatalogoId: 'prod-curso-1',
       produtoNome: 'Curso Garimpo Urbano',
       transacaoOrigemId: 'transacao-renovacao',
       aprovadoEm,
@@ -200,6 +258,7 @@ describe('provisionarAlunoHotmart', () => {
         },
       },
       update: {
+        produtoCatalogoId: 'prod-curso-1',
         produtoUcode: null,
         produtoNome: 'Curso Garimpo Urbano',
         status: 'ATIVA',
@@ -209,6 +268,7 @@ describe('provisionarAlunoHotmart', () => {
       create: {
         alunoId: 'aluno-1',
         produtoId: 'produto-1',
+        produtoCatalogoId: 'prod-curso-1',
         produtoUcode: null,
         produtoNome: 'Curso Garimpo Urbano',
         origem: 'HOTMART',
@@ -277,6 +337,7 @@ describe('provisionarAlunoHotmart', () => {
       email: 'aluno@example.com',
       nome: 'Aluno Teste',
       produtoId: 'produto-1',
+      produtoCatalogoId: 'prod-curso-1',
       produtoNome: 'Curso Garimpo Urbano',
       transacaoOrigemId: 'transacao-ja-processada',
       aprovadoEm,
@@ -310,6 +371,7 @@ describe('provisionarAlunoHotmart', () => {
       },
 
       matricula: {
+        findUnique: vi.fn().mockResolvedValue(null),
         upsert: vi.fn().mockResolvedValue({
           id: 'matricula-nova',
         }),
@@ -339,6 +401,7 @@ describe('provisionarAlunoHotmart', () => {
       email: ' NOVO@example.com ',
       nome: 'Aluno Novo',
       produtoId: ' produto-1 ',
+      produtoCatalogoId: 'prod-curso-1',
       produtoNome: 'Curso Garimpo Urbano',
       transacaoOrigemId: 'transacao-primeira-compra',
       aprovadoEm,
@@ -400,5 +463,67 @@ describe('provisionarAlunoHotmart', () => {
     });
 
     expect(resultado.conviteToken).toEqual(expect.any(String));
+  });
+
+  it('recusa sobrescrever referência interna de produto incompatível', async () => {
+    const aprovadoEm = new Date('2027-02-10T12:00:00.000Z');
+
+    const tx = {
+      aluno: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: 'aluno-conflito',
+          nome: 'Aluno Conflito',
+          leadId: null,
+          senhaHash: 'hash',
+          status: 'ATIVO',
+        }),
+        upsert: vi.fn().mockResolvedValue({
+          id: 'aluno-conflito',
+          nome: 'Aluno Conflito',
+          status: 'ATIVO',
+        }),
+      },
+
+      matricula: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: 'matricula-conflito',
+          produtoCatalogoId: 'prod-antigo',
+        }),
+        upsert: vi.fn(),
+      },
+
+      vigenciaMatricula: {
+        findUnique: vi.fn().mockResolvedValue(null),
+        findFirst: vi.fn(),
+        create: vi.fn(),
+      },
+
+      perfilAluno: {
+        upsert: vi.fn(),
+      },
+
+      alunoAccessToken: {
+        findFirst: vi.fn(),
+        create: vi.fn(),
+      },
+    };
+
+    await expect(
+      provisionarAlunoHotmart(tx, {
+        email: 'conflito@example.com',
+        nome: 'Aluno Conflito',
+        produtoId: '123',
+        produtoCatalogoId: 'prod-novo',
+        produtoNome: 'Curso Teste',
+        transacaoOrigemId: 'transacao-conflito',
+        aprovadoEm,
+      }),
+    ).rejects.toThrow(
+      'Matrícula possui referência interna de produto incompatível.',
+    );
+
+    expect(tx.matricula.upsert).not.toHaveBeenCalled();
+    expect(tx.vigenciaMatricula.create).not.toHaveBeenCalled();
+    expect(tx.perfilAluno.upsert).not.toHaveBeenCalled();
   });
 });

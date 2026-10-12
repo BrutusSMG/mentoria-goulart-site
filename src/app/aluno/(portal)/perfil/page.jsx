@@ -55,21 +55,32 @@ export default function PerfilAlunoPage() {
     setErro('');
     setStatus('saving');
 
-    const response = await fetch('/api/alunos/meu-perfil', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(perfil),
-    });
-    const resultado = await response.json().catch(() => ({}));
+    try {
+      const response = await fetch('/api/alunos/meu-perfil', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(perfil),
+      });
 
-    if (!response.ok) {
-      setErro(resultado.erro || 'Não foi possível salvar o perfil.');
+      const resultado = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          resultado.erro || 'Não foi possível salvar o perfil.',
+        );
+      }
+
+      setMensagem('Perfil salvo com sucesso.');
+    } catch (error) {
+      const mensagemErro =
+        error instanceof TypeError
+          ? 'Não foi possível salvar o perfil. Verifique sua conexão e tente novamente.'
+          : error?.message || 'Não foi possível salvar o perfil.';
+
+      setErro(mensagemErro);
+    } finally {
       setStatus('ready');
-      return;
     }
-
-    setMensagem('Perfil salvo com sucesso.');
-    setStatus('ready');
   }
 
   if (status === 'loading') return <main className="min-h-screen bg-black p-8 text-white">Carregando perfil...</main>;

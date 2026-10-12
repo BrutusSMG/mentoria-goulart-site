@@ -397,6 +397,7 @@ describe('POST /api/webhooks/hotmart', () => {
         leadId: 'lead-1',
         email: 'aluno@example.com',
         produtoId: '123',
+        produtoCatalogoId: 'prod_garimpo_mentoria',
         produtoNome: 'Mentoria Garimpo Urbano',
         transacaoOrigemId: 'transacao-1',
         aprovadoEm,

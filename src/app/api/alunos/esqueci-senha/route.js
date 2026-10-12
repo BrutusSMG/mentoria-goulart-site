@@ -55,6 +55,7 @@ export async function POST(request) {
         },
       },
       select: {
+        nome: true,
         emailPrincipal: true,
         usuario: {
           select: {
@@ -130,8 +131,8 @@ export async function POST(request) {
 
       const resend = new Resend(apiKey);
 
-      const saudacao = aluno.nome
-        ? `Olá, ${escaparHtml(aluno.nome)}.`
+      const saudacao = pessoa.nome
+        ? `Olá, ${escaparHtml(pessoa.nome)}.`
         : 'Olá.';
 
       try {

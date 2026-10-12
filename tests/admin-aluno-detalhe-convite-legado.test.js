@@ -204,4 +204,51 @@ describe('GET /api/admin/alunos/[id] — convite legado', () => {
     );
     expect(corpo.item.controleConviteLegado).toBeNull();
   });
+
+  it(
+    'usa Pessoa como identidade exibida no detalhe administrativo',
+    async () => {
+      mocks.alunoFindUnique.mockResolvedValue({
+        ...alunoFicticio(),
+        nome: 'Nome legado',
+        email: 'legado@example.test',
+        whatsapp: '11911111111',
+        pessoa: {
+          nome: 'Pessoa Oficial',
+          emailPrincipal: 'oficial@example.test',
+          telefonePrincipal: '11999999999',
+        },
+      });
+
+      const resposta = await GET(null, contexto());
+      const corpo = await resposta.json();
+
+      expect(resposta.status).toBe(200);
+
+      expect(corpo.item).toMatchObject({
+        id: 'aluno-ficticio',
+        nome: 'Pessoa Oficial',
+        email: 'oficial@example.test',
+        whatsapp: '11999999999',
+      });
+
+      expect(corpo.item).not.toHaveProperty('pessoa');
+
+      expect(
+        mocks.alunoFindUnique,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          select: expect.objectContaining({
+            pessoa: {
+              select: {
+                nome: true,
+                emailPrincipal: true,
+                telefonePrincipal: true,
+              },
+            },
+          }),
+        }),
+      );
+    },
+  );
 });

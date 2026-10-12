@@ -177,6 +177,7 @@ describe('POST /api/alunos/esqueci-senha', () => {
         },
       },
       select: {
+        nome: true,
         emailPrincipal: true,
         usuario: {
           select: {
@@ -245,4 +246,47 @@ describe('POST /api/alunos/esqueci-senha', () => {
       '<h1>Olá, Aluno.</h1>',
     );
   });
+
+  it(
+    'usa Pessoa.nome na saudacao da recuperacao de senha',
+    async () => {
+      pessoaFindFirstMock.mockResolvedValue({
+        nome: 'Pessoa Oficial',
+        emailPrincipal: 'portal@example.com',
+        usuario: {
+          status: 'ATIVO',
+          senhaHash: 'hash-existente',
+        },
+        aluno: {
+          id: 'aluno-portal',
+          nome: 'Nome legado',
+        },
+      });
+
+      const resposta = await POST(
+        requisicao(),
+      );
+
+      expect(resposta.status).toBe(200);
+
+      expect(
+        sendMock,
+      ).toHaveBeenCalledTimes(1);
+
+      const mensagem =
+        sendMock.mock.calls[0][0];
+
+      expect(mensagem.to).toBe(
+        'portal@example.com',
+      );
+
+      expect(mensagem.html).toContain(
+        '<h1>Olá, Pessoa Oficial.</h1>',
+      );
+
+      expect(mensagem.html).not.toContain(
+        'Nome legado',
+      );
+    },
+  );
 });

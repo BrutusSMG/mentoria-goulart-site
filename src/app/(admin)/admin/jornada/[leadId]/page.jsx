@@ -295,15 +295,13 @@ function EditorContribuicao({ contribuicao, onSalvo }) {
 export default function JornadaDetalhePage() {
   const params = useParams();
   const leadId = params?.leadId;
-  const [contato, setContato] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState('');
+  const [resultado, setResultado] = useState({ leadId: null, contato: null, erro: '' });
+  const loading = resultado.leadId !== leadId;
+  const contato = loading ? null : resultado.contato;
+  const erro = loading ? '' : resultado.erro;
 
   async function carregarContato() {
     if (!leadId) return;
-
-    setLoading(true);
-    setErro('');
 
     try {
       const resposta = await fetch(`/api/admin/jornada/contatos/${leadId}`, {
@@ -315,18 +313,47 @@ export default function JornadaDetalhePage() {
         throw new Error(payload.error || 'Não foi possível carregar o histórico.');
       }
 
-      setContato(payload);
+      setResultado({ leadId, contato: payload, erro: '' });
     } catch (error) {
-      setErro(error.message || 'Não foi possível carregar o histórico.');
-    } finally {
-      setLoading(false);
+      setResultado({ leadId, contato: null, erro: error.message || 'Não foi possível carregar o histórico.' });
     }
   }
 
   useEffect(() => {
-    void carregarContato();
-    // A página precisa reagir somente à troca do parâmetro dinâmico.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let ativo = true;
+
+    async function carregarInicial() {
+      if (!leadId) return;
+
+      try {
+        const resposta = await fetch('/api/admin/jornada/contatos/' + leadId, {
+          cache: 'no-store',
+        });
+        const payload = await resposta.json();
+
+        if (!resposta.ok) {
+          throw new Error(payload.error || 'N?o foi poss?vel carregar o hist?rico.');
+        }
+
+        if (ativo) {
+          setResultado({ leadId, contato: payload, erro: '' });
+        }
+      } catch (error) {
+        if (ativo) {
+          setResultado({
+            leadId,
+            contato: null,
+            erro: error.message || 'N?o foi poss?vel carregar o hist?rico.',
+          });
+        }
+      }
+    }
+
+    void carregarInicial();
+
+    return () => {
+      ativo = false;
+    };
   }, [leadId]);
 
   const contribuicoes = useMemo(

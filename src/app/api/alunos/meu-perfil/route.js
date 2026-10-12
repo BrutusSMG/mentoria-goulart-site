@@ -94,16 +94,29 @@ function validarAtualizacao(body) {
 
 function formatoPerfil(aluno) {
   const perfil = aluno.perfil || {};
+  const pessoa = aluno.pessoa || null;
+
+  const nomeIdentidade =
+    pessoa?.nome || aluno.nome;
+
+  const emailIdentidade =
+    pessoa?.emailPrincipal || aluno.email;
+
+  const whatsappIdentidade =
+    pessoa
+      ? pessoa.telefonePrincipal
+      : aluno.whatsapp;
 
   return {
     ok: true,
     aluno: {
-      nome: aluno.nome,
-      email: aluno.email,
-      whatsapp: aluno.whatsapp,
+      nome: nomeIdentidade,
+      email: emailIdentidade,
+      whatsapp: whatsappIdentidade,
     },
     perfil: {
-      nomeExibicao: perfil.nomeExibicao || aluno.nome,
+      nomeExibicao:
+        perfil.nomeExibicao || nomeIdentidade,
       fotoUrl: perfil.fotoUrl || '',
       cidade: perfil.cidade || '',
       estado: perfil.estado || '',
@@ -140,10 +153,16 @@ export async function GET() {
       nome: true,
       email: true,
       whatsapp: true,
+      pessoa: {
+        select: {
+          nome: true,
+          emailPrincipal: true,
+          telefonePrincipal: true,
+        },
+      },
       perfil: true,
     },
   });
-
   if (!aluno) return respostaErro('Aluno não encontrado.', 404);
   return NextResponse.json(formatoPerfil(aluno));
 }
@@ -170,13 +189,6 @@ export async function PATCH(request) {
       update: dados,
       create: { alunoId, ...dados },
     });
-
-    if (Object.prototype.hasOwnProperty.call(body, 'nomeExibicao') && body.nomeExibicao) {
-      await prisma.aluno.update({
-        where: { id: alunoId },
-        data: { nome: textoSeguro(body.nomeExibicao, 255) },
-      });
-    }
 
     return NextResponse.json({ ok: true, perfil });
   } catch (error) {
