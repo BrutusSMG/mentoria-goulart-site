@@ -18,6 +18,7 @@ const AMBIENTE = argumentoAmbiente
 const AMBIENTES_VALIDOS = new Set([
   "homologacao",
   "production",
+  "preflight",
 ]);
 
 function normalizarEmail(valor) {
@@ -52,7 +53,7 @@ function validarArgumentos() {
 
   if (!AMBIENTE || !AMBIENTES_VALIDOS.has(AMBIENTE)) {
     throw new Error(
-      "Para aplicar, informe --ambiente=homologacao ou --ambiente=production.",
+      "Para aplicar, informe --ambiente=homologacao, production ou preflight.",
     );
   }
 
@@ -72,7 +73,7 @@ function validarArgumentos() {
     !AMBIENTES_VALIDOS.has(ambienteConfigurado)
   ) {
     throw new Error(
-      "Para aplicar, defina MGU_DATABASE_ENV=homologacao ou production.",
+      "Para aplicar, defina MGU_DATABASE_ENV=homologacao, production ou preflight.",
     );
   }
 
@@ -80,6 +81,20 @@ function validarArgumentos() {
     throw new Error(
       "MGU_DATABASE_ENV diverge do ambiente declarado.",
     );
+  }
+
+  if (AMBIENTE === "preflight") {
+    const hostEsperado = String(process.env.MGU_PREFLIGHT_DB_HOST || "")
+      .trim()
+      .toLowerCase();
+
+    const hostConexao = new URL(
+      String(process.env.DATABASE_URL || ""),
+    ).hostname.toLowerCase();
+
+    if (!hostEsperado || hostConexao !== hostEsperado) {
+      throw new Error("Host da conexao PREFLIGHT nao confirmado.");
+    }
   }
 
   const vercelEnv =
