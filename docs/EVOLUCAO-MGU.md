@@ -319,169 +319,57 @@ não foram habilitadas automaticamente pela conclusão desta etapa.
 
 ## Etapa 6 — Lead, Aluno, Produto e histórico de marketing
 
-**Status: em desenvolvimento — E6.0 a E6.6 concluídas em homologação.**
+**Status: concluída e publicada em produção em 12/10/2026.**
 
-A sexta etapa iniciou a consolidação dos domínios de relacionamento e
-histórico construídos nas etapas anteriores.
+A sexta etapa consolidou os relacionamentos de Lead e Aluno sobre a
+identidade central da plataforma e ampliou a preservação do histórico
+comercial e de marketing.
 
-Antes de qualquer alteração estrutural foi realizada uma auditoria do
-estado atual de Leads, alunos, produtos, transações e informações de
-origem de marketing.
+Entre as principais evoluções estão:
 
-A auditoria confirmou como direções principais:
+- consolidação da identidade de Leads com Pessoa;
+- preservação de Lead como relacionamento comercial e de marketing;
+- criação de histórico de interações e origens de marketing;
+- preservação das diferentes atribuições ao longo do relacionamento;
+- consolidação da identidade dos alunos sobre Pessoa;
+- preservação de Aluno como relacionamento educacional;
+- separação entre a identidade principal e o nome de exibição
+  utilizado na comunidade;
+- consolidação das referências ao catálogo interno de Produtos;
+- tratamento controlado dos registros históricos elegíveis;
+- preservação de dados ambíguos quando não existe evidência
+  suficiente para uma associação segura.
 
-- utilizar Pessoa como identidade central também nos fluxos de Lead;
-- preservar Lead como relacionamento comercial e de marketing;
-- criar histórico próprio para as interações e origens de marketing;
-- manter Aluno concentrado no relacionamento educacional;
-- separar o nome utilizado na comunidade da identidade principal da pessoa;
-- consolidar gradualmente as referências ao catálogo interno de Produtos;
-- preservar dados e identificadores históricos durante toda a transição.
+As novas interações de marketing passam a possuir histórico próprio,
+evitando que novas capturas apaguem informações anteriores conhecidas.
 
-A migração continuará sendo não destrutiva.
+O download do e-book também passou a ser tratado como um fato cumulativo,
+preservando a informação de que o contato já realizou o download mesmo
+quando ocorrem novas interações posteriormente.
 
-Campos e estruturas legadas permanecerão disponíveis enquanto existirem
-dependências, e dados históricos não serão reconstruídos ou reinterpretados
-quando não houver informação suficiente para isso.
+A identidade principal do aluno passou a ser utilizada de forma mais
+consistente nas áreas administrativas e no Portal, enquanto o nome de
+exibição da comunidade permanece independente dessa identidade.
 
-A implementação está sendo realizada de forma incremental.
+As matrículas também passaram a possuir associação explícita ao Produto
+interno quando essa relação pode ser determinada com segurança, sem
+reinterpretar ou apagar identificadores históricos.
 
-As primeiras evoluções estruturais da etapa já foram concluídas em
-homologação.
+A consolidação dos registros existentes foi realizada de forma controlada,
+idempotente e não destrutiva, preservando alunos, credenciais, matrículas,
+vigências, direitos e transações existentes.
 
-Foi criada a fundação de histórico de interações de marketing, associada
-à identidade central de Pessoa.
+A Etapa 6 foi publicada em produção após regressão integrada,
+homologação e validação dos principais fluxos da plataforma.
 
-Também foi concluída a consolidação dos novos fluxos de captura de Lead
-com Pessoa, preservando Lead como relacionamento comercial e de marketing.
+Algumas verificações operacionais posteriores à publicação permanecem
+em acompanhamento e não alteram o status de conclusão da etapa.
 
-As novas capturas passam a nascer associadas à identidade central sem
-criar automaticamente acesso de usuário, matrícula ou outros direitos.
-
-Os registros históricos existentes permanecem preservados e serão
-tratados posteriormente por migração controlada, sem vinculação
-automática baseada apenas em coincidência de dados antigos.
-
-Também foi concluída a evolução dos fluxos de marketing.
-
-As novas capturas e interações relevantes passam a produzir histórico
-associado à identidade central, preservando as diferentes origens ao
-longo do relacionamento.
-
-O download do e-book passou a ser tratado como um fato cumulativo, de
-forma que uma nova captura do mesmo contato não apague um download já
-realizado.
-
-A Jornada do Aluno também passou a integrar esse histórico, preservando
-a origem das novas interações e evitando duplicidades em submissões
-repetidas.
-
-O painel administrativo de Leads foi ampliado para apresentar a primeira
-atribuição conhecida, a atribuição mais recente e a última interação,
-mantendo compatibilidade com os registros históricos anteriores.
-
-A implementação foi validada em homologação com testes automatizados,
-build de produção e validação funcional no ambiente de Preview.
-
-Também foi concluída a consolidação da identidade dos alunos sobre Pessoa.
-
-A evolução passou a separar de forma mais clara a identidade principal,
-o relacionamento educacional e as informações utilizadas para apresentação
-na comunidade.
-
-Pessoa passou a ser utilizada como fonte principal da identidade nas áreas
-em que isso é arquiteturalmente adequado, enquanto Aluno permanece
-representando o relacionamento educacional.
-
-O nome de exibição da comunidade foi desacoplado da identidade principal,
-permitindo que o aluno escolha como deseja ser apresentado sem alterar
-automaticamente seus dados centrais.
-
-A listagem, o detalhe e a busca administrativa de alunos também foram
-alinhados à identidade central.
-
-A busca permite localizar alunos por parte do nome, nome completo ou
-e-mail principal.
-
-Fluxos como recuperação de senha e avisos relacionados ao acesso também
-passaram a utilizar a identidade central da pessoa.
-
-O provisionamento de novas compras foi ajustado para preservar a identidade
-já existente de alunos cadastrados, evitando que novas informações de uma
-compra substituam automaticamente dados já consolidados.
-
-A transição continua sendo não destrutiva.
-
-Campos históricos ainda necessários permanecem disponíveis enquanto houver
-dependências, e divergências antigas não são reinterpretadas automaticamente
-quando não existem evidências suficientes para determinar sua origem.
-
-A E6.4 foi validada com testes automatizados, lint, build de produção e
-validação funcional no ambiente de Preview.
-
-Também foi concluída a consolidação das referências de Produto utilizadas
-pelas matrículas.
-
-A plataforma passou a distinguir explicitamente a identificação histórica
-utilizada na origem da matrícula da referência ao Produto existente no
-catálogo interno do MGU.
-
-Novas matrículas criadas por fluxos em que o Produto interno é conhecido
-passam a registrar essa associação de forma explícita, sem substituir ou
-reinterpretar os identificadores históricos já preservados pela plataforma.
-
-A evolução também protege situações em que a associação comercial não pode
-ser determinada com segurança.
-
-Produtos não reconhecidos, dados históricos ambíguos e registros que não
-possuem evidência suficiente permanecem preservados sem associação
-automática baseada apenas em nomes ou suposições.
-
-A E6.5 foi implementada de forma aditiva e não destrutiva.
-
-Os registros históricos existentes não foram alterados em massa nesta
-subetapa.
-
-A implementação foi validada com testes automatizados, lint, build de
-produção e validação funcional no ambiente de Preview, incluindo o fluxo
-de uma nova compra associada ao catálogo interno.
-
-Também foi concluída a consolidação controlada dos registros históricos
-elegíveis.
-
-Os vínculos históricos entre Lead e Pessoa passaram a ser consolidados
-somente quando existiam evidências suficientes para determinar a associação
-com segurança.
-
-Da mesma forma, as matrículas históricas passaram a receber referência
-explícita ao Produto interno apenas quando essa relação pôde ser comprovada
-de forma determinística.
-
-Casos ambíguos ou sem associação comercial comprovada permaneceram
-preservados para revisão, sem criação automática de vínculos baseada apenas
-em coincidência de dados, nomes ou suposições.
-
-O processo foi desenvolvido de forma idempotente e não destrutiva.
-
-A validação confirmou a preservação de alunos, usuários, credenciais,
-matrículas, vigências, direitos e transações existentes.
-
-Também não foi criado histórico artificial de marketing para registros
-anteriores que não possuíam evidência suficiente.
-
-Após a consolidação, uma nova execução de análise reconhece os registros já
-tratados sem tentar repetir alterações.
-
-A E6.6 foi validada em homologação com testes específicos, regressão
-automatizada completa, lint, build de produção e validações de consistência.
-
-Com a consolidação histórica concluída, a próxima subetapa será dedicada à
-regressão integrada da Etapa 6, homologação final e preparação controlada da
-publicação em produção.
-
-Nenhuma estrutura de Organização ou Fornecedor faz parte desta etapa.
+Nenhuma estrutura de Organização ou Fornecedor foi introduzida nesta
+etapa.
 
 ---
+
 ## Próximas evoluções
 
 A plataforma continuará sendo desenvolvida de forma incremental.
