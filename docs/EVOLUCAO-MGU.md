@@ -313,6 +313,59 @@ não foram habilitadas automaticamente pela conclusão desta etapa.
 
 ---
 
+## Etapa 6 — Lead, Aluno, Produto e histórico de marketing
+
+**Status: concluída e publicada em produção em 12/10/2026.**
+
+A sexta etapa consolidou os relacionamentos de Lead e Aluno sobre a
+identidade central da plataforma e ampliou a preservação do histórico
+comercial e de marketing.
+
+Entre as principais evoluções estão:
+
+- consolidação da identidade de Leads com Pessoa;
+- preservação de Lead como relacionamento comercial e de marketing;
+- criação de histórico de interações e origens de marketing;
+- preservação das diferentes atribuições ao longo do relacionamento;
+- consolidação da identidade dos alunos sobre Pessoa;
+- preservação de Aluno como relacionamento educacional;
+- separação entre a identidade principal e o nome de exibição
+  utilizado na comunidade;
+- consolidação das referências ao catálogo interno de Produtos;
+- tratamento controlado dos registros históricos elegíveis;
+- preservação de dados ambíguos quando não existe evidência
+  suficiente para uma associação segura.
+
+As novas interações de marketing passam a possuir histórico próprio,
+evitando que novas capturas apaguem informações anteriores conhecidas.
+
+O download do e-book também passou a ser tratado como um fato cumulativo,
+preservando a informação de que o contato já realizou o download mesmo
+quando ocorrem novas interações posteriormente.
+
+A identidade principal do aluno passou a ser utilizada de forma mais
+consistente nas áreas administrativas e no Portal, enquanto o nome de
+exibição da comunidade permanece independente dessa identidade.
+
+As matrículas também passaram a possuir associação explícita ao Produto
+interno quando essa relação pode ser determinada com segurança, sem
+reinterpretar ou apagar identificadores históricos.
+
+A consolidação dos registros existentes foi realizada de forma controlada,
+idempotente e não destrutiva, preservando alunos, credenciais, matrículas,
+vigências, direitos e transações existentes.
+
+A Etapa 6 foi publicada em produção após regressão integrada,
+homologação e validação dos principais fluxos da plataforma.
+
+Algumas verificações operacionais posteriores à publicação permanecem
+em acompanhamento e não alteram o status de conclusão da etapa.
+
+Nenhuma estrutura de Organização ou Fornecedor foi introduzida nesta
+etapa.
+
+---
+
 ## Próximas evoluções
 
 A plataforma continuará sendo desenvolvida de forma incremental.
