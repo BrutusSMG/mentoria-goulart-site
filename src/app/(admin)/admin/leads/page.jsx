@@ -24,6 +24,31 @@ function csvSeguro(valor) {
   return `"${texto}"`;
 }
 
+function rotuloInteracao(tipo) {
+  const rotulos = {
+    EBOOK_SOLICITADO: "E-book solicitado",
+    EBOOK_DOWNLOAD: "E-book baixado",
+    JORNADA_CONTRIBUICAO: "Contribuição na Jornada",
+  };
+
+  return rotulos[tipo] || tipo || "Não informado";
+}
+
+function origemAtribuicao(atribuicao) {
+  return (
+    atribuicao?.utmSource ||
+    atribuicao?.origem ||
+    "Não informado"
+  );
+}
+
+function campanhaAtribuicao(atribuicao) {
+  return (
+    atribuicao?.utmCampaign ||
+    "Sem campanha"
+  );
+}
+
 export default function LeadsPage() {
   const [dados, setDados] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -102,26 +127,53 @@ export default function LeadsPage() {
       "E-mail",
       "WhatsApp",
       "Baixou e-book",
-      "Origem",
-      "Mídia",
-      "Campanha",
-      "Conteúdo",
-      "Termo",
+      "Origem snapshot",
+      "Mídia snapshot",
+      "Campanha snapshot",
+      "Conteúdo snapshot",
+      "Termo snapshot",
+      "Histórico disponível",
+      "Primeira origem histórica",
+      "Primeira campanha histórica",
+      "Última origem histórica",
+      "Última campanha histórica",
+      "Última interação",
+      "Última interação em",
+      "Total de interações",
       "Cadastro",
     ];
 
-    const linhas = dados.items.map((lead) => [
-      lead.nome,
-      lead.email,
-      lead.whatsapp,
-      lead.baixouEbook ? "Sim" : "Não",
-      lead.utmSource || "Não informado",
-      lead.utmMedium || "Não informado",
-      lead.utmCampaign || "Não informado",
-      lead.utmContent || "Não informado",
-      lead.utmTerm || "Não informado",
-      formatarData(lead.createdAt),
-    ]);
+    const linhas = dados.items.map((lead) => {
+      const marketing = lead.marketing || {};
+      const primeira = marketing.primeiraAtribuicao;
+      const ultima = marketing.ultimaAtribuicao;
+      const ultimaInteracao = marketing.ultimaInteracao;
+
+      return [
+        lead.nome,
+        lead.email,
+        lead.whatsapp,
+        lead.baixouEbook ? "Sim" : "Não",
+        lead.utmSource || "Não informado",
+        lead.utmMedium || "Não informado",
+        lead.utmCampaign || "Não informado",
+        lead.utmContent || "Não informado",
+        lead.utmTerm || "Não informado",
+        marketing.historicoDisponivel ? "Sim" : "Não",
+        primeira ? origemAtribuicao(primeira) : "",
+        primeira ? campanhaAtribuicao(primeira) : "",
+        ultima ? origemAtribuicao(ultima) : "",
+        ultima ? campanhaAtribuicao(ultima) : "",
+        ultimaInteracao
+          ? rotuloInteracao(ultimaInteracao.tipo)
+          : "",
+        ultimaInteracao
+          ? formatarData(ultimaInteracao.createdAt)
+          : "",
+        marketing.totalInteracoes || 0,
+        formatarData(lead.createdAt),
+      ];
+    });
 
     const csv = [cabecalho, ...linhas]
       .map((linha) => linha.map(csvSeguro).join(";"))
@@ -146,7 +198,7 @@ export default function LeadsPage() {
         <div>
           <p className="text-[#d89900] uppercase tracking-wider font-bold text-xs">Base de contatos</p>
           <h2 className="text-3xl font-black text-white mt-2">Leads</h2>
-          <p className="text-zinc-500 text-sm mt-2">Consulte origem, status do e-book e data de cadastro de cada contato.</p>
+          <p className="text-zinc-500 text-sm mt-2">Consulte origem, histórico de marketing, status do e-book e data de cadastro de cada contato.</p>
         </div>
         <button
           type="button"
@@ -226,7 +278,8 @@ export default function LeadsPage() {
                 <tr>
                   <th className="p-4 font-semibold">Contato</th>
                   <th className="p-4 font-semibold">WhatsApp</th>
-                  <th className="p-4 font-semibold">Origem / Campanha</th>
+                  <th className="p-4 font-semibold">Origem / atribuição</th>
+                  <th className="p-4 font-semibold">Última interação</th>
                   <th className="p-4 font-semibold text-center">E-book</th>
                   <th className="p-4 font-semibold">Cadastro</th>
                 </tr>
@@ -234,33 +287,146 @@ export default function LeadsPage() {
               <tbody className="divide-y divide-zinc-800">
                 {loading ? (
                   <tr>
-                    <td colSpan={5} className="p-12 text-center">
+                    <td colSpan={6} className="p-12 text-center">
                       <Loader2 className="w-6 h-6 text-[#d89900] animate-spin mx-auto" />
                     </td>
                   </tr>
                 ) : dados?.items?.length ? (
-                  dados.items.map((lead) => (
-                    <tr key={lead.id} className="hover:bg-zinc-800/40 transition-colors">
-                      <td className="p-4">
-                        <p className="font-medium text-white">{lead.nome || "Sem nome"}</p>
-                        <p className="text-sm text-zinc-500 mt-1">{lead.email}</p>
-                      </td>
-                      <td className="p-4 text-sm text-zinc-400">{lead.whatsapp || "Não informado"}</td>
-                      <td className="p-4">
-                        <p className="text-sm text-zinc-300">{lead.utmSource || "Não informado"}</p>
-                        <p className="text-xs text-zinc-600 mt-1">{lead.utmCampaign || "Sem campanha"}</p>
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${lead.baixouEbook ? "bg-green-500/15 text-green-400" : "bg-zinc-800 text-zinc-400"}`}>
-                          {lead.baixouEbook ? "Baixado" : "Pendente"}
-                        </span>
-                      </td>
-                      <td className="p-4 text-sm text-zinc-500 whitespace-nowrap">{formatarData(lead.createdAt)}</td>
-                    </tr>
-                  ))
+                  dados.items.map((lead) => {
+                    const marketing = lead.marketing || {};
+                    const primeira =
+                      marketing.primeiraAtribuicao;
+                    const ultima =
+                      marketing.ultimaAtribuicao;
+                    const ultimaInteracao =
+                      marketing.ultimaInteracao;
+
+                    return (
+                      <tr
+                        key={lead.id}
+                        className="hover:bg-zinc-800/40 transition-colors"
+                      >
+                        <td className="p-4">
+                          <p className="font-medium text-white">
+                            {lead.nome || "Sem nome"}
+                          </p>
+                          <p className="text-sm text-zinc-500 mt-1">
+                            {lead.email}
+                          </p>
+                        </td>
+
+                        <td className="p-4 text-sm text-zinc-400">
+                          {lead.whatsapp || "Não informado"}
+                        </td>
+
+                        <td className="p-4 min-w-[15rem]">
+                          {marketing.historicoDisponivel ? (
+                            <div className="space-y-2">
+                              <div>
+                                <p className="text-[10px] uppercase tracking-wide text-zinc-600">
+                                  Primeira
+                                </p>
+
+                                <p className="text-sm text-zinc-300">
+                                  {primeira
+                                    ? origemAtribuicao(primeira)
+                                    : "Não informada"}
+                                </p>
+
+                                {primeira ? (
+                                  <p className="text-xs text-zinc-600">
+                                    {campanhaAtribuicao(primeira)}
+                                  </p>
+                                ) : null}
+                              </div>
+
+                              <div>
+                                <p className="text-[10px] uppercase tracking-wide text-zinc-600">
+                                  Última
+                                </p>
+
+                                <p className="text-sm text-zinc-300">
+                                  {ultima
+                                    ? origemAtribuicao(ultima)
+                                    : "Não informada"}
+                                </p>
+
+                                {ultima ? (
+                                  <p className="text-xs text-zinc-600">
+                                    {campanhaAtribuicao(ultima)}
+                                  </p>
+                                ) : null}
+                              </div>
+
+                              <p className="text-[10px] text-zinc-600">
+                                {marketing.totalInteracoes || 0}{" "}
+                                {marketing.totalInteracoes === 1
+                                  ? "interação registrada"
+                                  : "interações registradas"}
+                              </p>
+                            </div>
+                          ) : (
+                            <div>
+                              <span className="inline-flex rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-300">
+                                Snapshot legado
+                              </span>
+
+                              <p className="text-sm text-zinc-300 mt-2">
+                                {lead.utmSource || "Não informado"}
+                              </p>
+
+                              <p className="text-xs text-zinc-600 mt-1">
+                                {lead.utmCampaign || "Sem campanha"}
+                              </p>
+                            </div>
+                          )}
+                        </td>
+
+                        <td className="p-4 min-w-[11rem]">
+                          {ultimaInteracao ? (
+                            <>
+                              <p className="text-sm text-zinc-300">
+                                {rotuloInteracao(
+                                  ultimaInteracao.tipo,
+                                )}
+                              </p>
+
+                              <p className="text-xs text-zinc-600 mt-1">
+                                {formatarData(
+                                  ultimaInteracao.createdAt,
+                                )}
+                              </p>
+                            </>
+                          ) : (
+                            <p className="text-sm text-zinc-600">
+                              Sem histórico
+                            </p>
+                          )}
+                        </td>
+
+                        <td className="p-4 text-center">
+                          <span
+                            className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${
+                              lead.baixouEbook
+                                ? "bg-green-500/15 text-green-400"
+                                : "bg-zinc-800 text-zinc-400"
+                            }`}
+                          >
+                            {lead.baixouEbook
+                              ? "Baixado"
+                              : "Pendente"}
+                          </span>
+                        </td>
+
+                        <td className="p-4 text-sm text-zinc-500 whitespace-nowrap">
+                          {formatarData(lead.createdAt)}
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
-                    <td colSpan={5} className="p-12 text-center text-sm text-zinc-500">Nenhum lead encontrado com os filtros atuais.</td>
+                    <td colSpan={6} className="p-12 text-center text-sm text-zinc-500">Nenhum lead encontrado com os filtros atuais.</td>
                   </tr>
                 )}
               </tbody>

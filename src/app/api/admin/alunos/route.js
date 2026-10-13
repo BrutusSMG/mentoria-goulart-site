@@ -47,12 +47,54 @@ export async function GET(req) {
     if (busca) {
       filtros.push({
         OR: [
-          { nome: { contains: busca, mode: "insensitive" } },
-          { email: { contains: busca, mode: "insensitive" } },
+          {
+            pessoa: {
+              is: {
+                nome: {
+                  contains: busca,
+                  mode: "insensitive",
+                },
+              },
+            },
+          },
+          {
+            pessoa: {
+              is: {
+                emailPrincipal: {
+                  contains: busca,
+                  mode: "insensitive",
+                },
+              },
+            },
+          },
+          {
+            AND: [
+              {
+                pessoa: {
+                  is: null,
+                },
+              },
+              {
+                OR: [
+                  {
+                    nome: {
+                      contains: busca,
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    email: {
+                      contains: busca,
+                      mode: "insensitive",
+                    },
+                  },
+                ],
+              },
+            ],
+          },
         ],
       });
     }
-
     if (status !== "all" && STATUS_VALIDOS.has(status)) {
       filtros.push({ status });
     }
@@ -69,6 +111,13 @@ export async function GET(req) {
           nome: true,
           email: true,
           whatsapp: true,
+          pessoa: {
+            select: {
+              nome: true,
+              emailPrincipal: true,
+              telefonePrincipal: true,
+            },
+          },
           status: true,
           origem: true,
           senhaHash: true,
@@ -112,11 +161,26 @@ export async function GET(req) {
         emailVerificadoEm: _emailVerificadoEm,
         conviteLegadoEnviadoEm: _conviteLegadoEnviadoEm,
         controleConviteLegado: _controleConviteLegado,
+        pessoa,
         ...alunoPublico
       } = aluno;
 
+      const nomeIdentidade =
+        pessoa?.nome || aluno.nome;
+
+      const emailIdentidade =
+        pessoa?.emailPrincipal || aluno.email;
+
+      const whatsappIdentidade =
+        pessoa
+          ? pessoa.telefonePrincipal
+          : aluno.whatsapp;
+
       return {
         ...alunoPublico,
+        nome: nomeIdentidade,
+        email: emailIdentidade,
+        whatsapp: whatsappIdentidade,
         estadoConviteLegado:
           obterEstadoConviteLegado(aluno),
         statusRotulo: rotuloStatus(aluno.status),
@@ -125,7 +189,6 @@ export async function GET(req) {
         ),
       };
     });
-
     return respostaPrivada({
       items,
       statusDisponiveis: Array.from(STATUS_VALIDOS).map((valor) => ({

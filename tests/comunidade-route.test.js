@@ -106,4 +106,98 @@ describe('GET /api/alunos/comunidade', () => {
       alunoTemAcessoComunidadeMock,
     ).not.toHaveBeenCalled();
   });
+
+  it(
+    'usa Pessoa como identidade e preserva nomeExibicao da comunidade',
+    async () => {
+      getServerSessionMock.mockResolvedValue({
+        user: {
+          alunoId: 'aluno-comunidade',
+        },
+      });
+
+      alunoTemAcessoComunidadeMock.mockResolvedValue(true);
+
+      perfilFindManyMock.mockResolvedValue([
+        {
+          alunoId: 'aluno-apelido',
+          nomeExibicao: 'Garimpeiro Urbano',
+          fotoUrl: null,
+          cidade: null,
+          estado: null,
+          bio: null,
+          experiencia: null,
+          objetivos: null,
+          mostrarFoto: false,
+          mostrarLocalizacao: false,
+          mostrarBio: false,
+          mostrarExperiencia: false,
+          mostrarObjetivos: false,
+          mostrarWhatsapp: true,
+          aluno: {
+            nome: 'Nome legado alterado',
+            whatsapp: '11911111111',
+            pessoa: {
+              nome: 'Nome Oficial',
+              telefonePrincipal: '11999999999',
+            },
+          },
+        },
+        {
+          alunoId: 'aluno-sem-apelido',
+          nomeExibicao: null,
+          fotoUrl: null,
+          cidade: null,
+          estado: null,
+          bio: null,
+          experiencia: null,
+          objetivos: null,
+          mostrarFoto: false,
+          mostrarLocalizacao: false,
+          mostrarBio: false,
+          mostrarExperiencia: false,
+          mostrarObjetivos: false,
+          mostrarWhatsapp: true,
+          aluno: {
+            nome: 'Outro nome legado',
+            whatsapp: '11811111111',
+            pessoa: {
+              nome: 'Outra Pessoa',
+              telefonePrincipal: '11888888888',
+            },
+          },
+        },
+      ]);
+
+      const resposta = await GET();
+      const corpo = await resposta.json();
+
+      expect(resposta.status).toBe(200);
+
+      expect(corpo.alunos).toEqual([
+        {
+          id: 'aluno-apelido',
+          nome: 'Garimpeiro Urbano',
+          fotoUrl: null,
+          cidade: null,
+          estado: null,
+          bio: null,
+          experiencia: null,
+          objetivos: null,
+          whatsapp: '11999999999',
+        },
+        {
+          id: 'aluno-sem-apelido',
+          nome: 'Outra Pessoa',
+          fotoUrl: null,
+          cidade: null,
+          estado: null,
+          bio: null,
+          experiencia: null,
+          objetivos: null,
+          whatsapp: '11888888888',
+        },
+      ]);
+    },
+  );
 });
