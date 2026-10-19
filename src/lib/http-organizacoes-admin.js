@@ -80,7 +80,7 @@ function checarPaginacao(params) {
 export function origemMutacaoPermitida(req) {
   const origem = req.headers.get("origin");
   const site = req.headers.get("sec-fetch-site");
-  if (!origem || origem === "null" || site === "cross-site") return false;
+  if (!origem || origem === "null" || (site && !["same-origin", "none"].includes(site))) return false;
 
   const configuracao = process.env.MGU_E72_ADMIN_ORIGINS || "";
   const origens = configuracao.split(",").map((valor) => valor.trim()).filter(Boolean);
@@ -131,7 +131,9 @@ async function lerJson(req) {
       texto += decodificador.decode(value, { stream: true });
     }
     texto += decodificador.decode();
-    return JSON.parse(texto);
+    const valor = JSON.parse(texto);
+    if (!valor || typeof valor !== "object" || Array.isArray(valor)) erro("ENTRADA_INVALIDA");
+    return valor;
   } catch (e) {
     if (e instanceof ErroDominioOrganizacao) throw e;
     erro("ENTRADA_INVALIDA");
@@ -158,8 +160,8 @@ export async function executarOperacaoOrganizacoes(req, operacao, context = {}) 
     }
     // defesa adicional: o serviço D2 exige a mesma identidade canônica.
     if (acesso.ehAdmin !== true || acesso.conta?.role !== "ADMIN"
-      || acesso.conta?.mustChangePassword
-      || !acesso.conta?.usuarioId) {
+      || acesso.conta?.ativo !== true || acesso.conta?.mustChangePassword
+      || typeof acesso.conta?.usuarioId !== "string" || !ID.test(acesso.conta.usuarioId)) {
       return respostaAcessoNegado({ status: 403, motivo: "Acesso restrito a administradores." });
     }
     if (!ROTAS_LEITURA.has(operacao) && !origemMutacaoPermitida(req)) {
