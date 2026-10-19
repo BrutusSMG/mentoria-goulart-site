@@ -52,7 +52,7 @@ const rota = (metodo, path = "", body, extras = {}) => {
 const contexto = { params: Promise.resolve({ id: "org_1", vinculoId: "vin_1" }) };
 const admin = () => ({
   permitido: true, ehAdmin: true,
-  conta: { role: "ADMIN", usuarioId: "usuario_canonico", mustChangePassword: false },
+  conta: { role: "ADMIN", ativo: true, usuarioId: "usuario_canonico", mustChangePassword: false },
 });
 const operacoes = [
   ["GET", listar, "", undefined, "organizacao"],
@@ -172,5 +172,131 @@ describe("E7.2 D3: contrato das doze operações HTTP", () => {
     const res = await listar(new Request(BASE), contexto);
     expect(res.status).toBe(500);
     expect(await res.json()).toEqual({ error: "Erro interno.", code: "ERRO_INTERNO" });
+  });
+});
+
+describe("E7.2 D3: rodada complementar de segurança", () => {
+  const confirmarSemBanco = () => {
+    expect(mock.construir).not.toHaveBeenCalled();
+    expect(mock.prisma.organizacao.count).not.toHaveBeenCalled();
+    expect(mock.prisma.organizacao.findUnique).not.toHaveBeenCalled();
+    expect(mock.prisma.pessoaOrganizacao.count).not.toHaveBeenCalled();
+  };
+
+  it.each([
+    ["ALUNO", { role: "ALUNO" }],
+    ["PARCEIRO", { role: "PARCEIRO" }],
+    ["conta inativa", { ativo: false }],
+    ["senha pendente", { mustChangePassword: true }],
+    ["usuário canônico ausente", { usuarioId: "" }],
+    ["identidade inválida", { usuarioId: " invalido " }],
+  ])("nega %s mesmo quando receber permitido=true", async (_nome, campos) => {
+    mock.acesso.mockResolvedValue({
+      ...admin(), conta: { ...admin().conta, ...campos },
+    });
+    const res = await listar(new Request(BASE), contexto);
+    expect(res.status).toBe(403);
+    expect(res.headers.get("cache-control")).toBe("private, no-store, max-age=0");
+    confirmarSemBanco();
+  });
+
+  it.each([401, 403])("respeita revogação de acesso (%s) antes de escrita", async (status) => {
+    mock.acesso.mockResolvedValue({ permitido: false, status, motivo: "Revogado." });
+    const res = await criar(rota("POST", "", { nomeFantasia: "Empresa" }), contexto);
+    expect(res.status).toBe(status);
+    confirmarSemBanco();
+  });
+
+  it.each([
+    ["sem Origin", { origin: "" }],
+    ["Origin nulo", { origin: "null" }],
+    ["Origin externo", { origin: "https://invasor.example" }],
+    ["Sec-Fetch-Site cross-site", { "sec-fetch-site": "cross-site" }],
+    ["Sec-Fetch-Site same-site", { "sec-fetch-site": "same-site" }],
+    ["Sec-Fetch-Site inválido", { "sec-fetch-site": "estranho" }],
+  ])("recusa origem insegura: %s", async (_nome, headers) => {
+    const res = await criar(rota("POST", "", { nomeFantasia: "Empresa" }, headers), contexto);
+    expect(res.status).toBe(403);
+    expect((await res.json()).code).toBe("ORIGEM_NAO_AUTORIZADA");
+    confirmarSemBanco();
+  });
+
+  it("permite apenas Origin exata para hosts MGU explicitamente configurados", () => {
+    const urls = [
+      "https://admin.mentoriagarimpourbano.com.br",
+      "https://mentoriagarimpourbano.com.br",
+      "https://alunos.mentoriagarimpourbano.com.br",
+      "https://ebook.mentoriagarimpourbano.com.br",
+    ];
+    process.env.MGU_E72_ADMIN_ORIGINS = urls[0];
+    for (const url of urls) {
+      const req = new Request(url + "/api/admin/organizacoes", {
+        method: "POST", headers: { origin: url, "sec-fetch-site": "same-origin" },
+        body: "{}",
+      });
+      expect(origemMutacaoPermitida(req)).toBe(url === urls[0]);
+    }
+    expect(origemMutacaoPermitida(new Request(urls[0] + "/api/admin/organizacoes", {
+      method: "POST", headers: { origin: urls[0], "sec-fetch-site": "same-site" },
+      body: "{}",
+    }))).toBe(false);
+  });
+
+  it.each(["null", "[]", "42", "true", '"texto"', "{invalido"])(
+    "rejeita body JSON inválido ou não objeto: %s", async (texto) => {
+      const req = new Request(BASE, {
+        method: "POST",
+        headers: { origin: "http://localhost:3000", "content-type": "application/json" },
+        body: texto,
+      });
+      const res = await criar(req, contexto);
+      expect(res.status).toBe(400);
+      expect(mock.servicos.criar).not.toHaveBeenCalled();
+    },
+  );
+
+  it("não aceita tipo de conteúdo diverso de JSON", async () => {
+    const req = new Request(BASE, {
+      method: "POST",
+      headers: { origin: "http://localhost:3000", "content-type": "text/plain" },
+      body: "{}",
+    });
+    expect((await criar(req, contexto)).status).toBe(400);
+    expect(mock.servicos.criar).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["RECONFIRMACAO_OBRIGATORIA", 409],
+    ["CONFIRMACAO_INAPLICAVEL", 400],
+    ["NAO_ENCONTRADO", 404],
+    ["CNPJ_EM_USO", 409],
+    ["TRANSICAO_INVALIDA", 409],
+    ["ORGANIZACAO_INATIVA", 409],
+  ])("retorna erro de domínio sem vazamento: %s", async (codigo, status) => {
+    const { ErroDominioOrganizacao } = await import("../src/lib/servicos-organizacao.js");
+    mock.servicos.editar.mockRejectedValueOnce(new ErroDominioOrganizacao(codigo, status));
+    const res = await editar(rota("PATCH", "/org_1", { nomeFantasia: "Mudança" }), contexto);
+    expect(res.status).toBe(status);
+    expect(await res.json()).toEqual({ error: codigo, code: codigo });
+    expect(res.headers.get("cache-control")).toBe("private, no-store, max-age=0");
+  });
+
+  it("não converte falha Prisma desconhecida em 409 nem vaza detalhes", async () => {
+    mock.servicos.criar.mockRejectedValueOnce({ code: "P1001", message: "Neon indisponível, segredo" });
+    const res = await criar(rota("POST", "", { nomeFantasia: "Empresa" }), contexto);
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: "Erro interno.", code: "ERRO_INTERNO" });
+  });
+
+  it("não reescreve resultados de no-op de principal", async () => {
+    mock.servicos.definirPrincipal.mockResolvedValueOnce({
+      organizacaoId: "org_1", vinculoId: "vin_1", alterado: false,
+      campoInterno: "não expor",
+    });
+    const res = await principal(rota("PUT", "/org_1/principal", { vinculoId: "vin_1" }), contexto);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      item: { organizacaoId: "org_1", vinculoId: "vin_1", alterado: false },
+    });
   });
 });
