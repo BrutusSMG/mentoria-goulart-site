@@ -57,7 +57,7 @@ Essa etapa tornou o processo de entrada do aluno mais consistente e preparou a p
 
 ## Etapa 3 — Produtos, acessos, preços, cotações e administração
 
-**Status: em desenvolvimento.**
+**Status: concluída e publicada em produção em 20/09/2026.**
 
 A terceira etapa amplia a capacidade comercial e administrativa do MGU e
 prepara a plataforma para diferentes tipos de produtos e formas de acesso.
@@ -149,9 +149,27 @@ A evolução incluiu:
 O ródio permanece indicado como indisponível até que seja integrada
 uma fonte de dados adequada.
 
-A E3.4 foi validada funcionalmente em homologação. A publicação em
-produção será realizada posteriormente, mediante preparação e
-validação da migração do banco de dados.
+A E3.4 foi validada funcionalmente em homologação e posteriormente publicada em produção em 20/09/2026.
+
+### E3.5 — Integração, homologação e publicação
+
+Em 20/09/2026, as entregas da Etapa 3 foram
+integradas e publicadas em produção, incluindo
+catálogo de produtos, direitos de acesso,
+administração de preços e cotações.
+
+A publicação ocorreu após validações em
+homologação e verificações funcionais.
+
+A primeira coleta consolidada foi realizada
+para ouro, prata, platina e paládio.
+
+O ródio permaneceu indisponível, aguardando
+uma fonte de dados adequada.
+
+A rotina automática de atualização das
+cotações permaneceu em acompanhamento
+operacional após a publicação.
 
 ---
 

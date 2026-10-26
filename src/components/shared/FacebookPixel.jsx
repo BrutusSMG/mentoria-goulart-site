@@ -7,6 +7,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 
 const FB_PIXEL_ID = process.env.NEXT_PUBLIC_FB_PIXEL_ID || '715929685674529';
+const PIXEL_DESATIVADO = process.env.NEXT_PUBLIC_FB_PIXEL_ENABLED === 'false';
 
 const FacebookPixel = () => {
   const pathname = usePathname();
@@ -17,10 +18,13 @@ const FacebookPixel = () => {
   // PageView, evitando a contagem duplicada.
   useEffect(() => {
     captureUtms();
+    if (PIXEL_DESATIVADO) return;
     if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'PageView');
     }
   }, [pathname, searchParams]);
+
+  if (PIXEL_DESATIVADO) return null;
 
   return (
     <Script
