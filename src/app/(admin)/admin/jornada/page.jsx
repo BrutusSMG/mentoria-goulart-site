@@ -72,9 +72,7 @@ function StatusBadge({ mapa, valor }) {
 }
 
 export default function JornadaAdminPage() {
-  const [dados, setDados] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState('');
+  const [resultado, setResultado] = useState({ query: null, dados: null, erro: '' });
   const [busca, setBusca] = useState('');
   const [buscaAplicada, setBuscaAplicada] = useState('');
   const [statusVinculo, setStatusVinculo] = useState('');
@@ -96,12 +94,15 @@ export default function JornadaAdminPage() {
     return params.toString();
   }, [page, buscaAplicada, statusVinculo, statusOperacional, caminho]);
 
+  const loading = resultado.query !== queryString;
+  const dados = resultado.dados;
+  const erro = loading ? '' : resultado.erro;
+
   useEffect(() => {
     let ativo = true;
 
     async function carregarContatos() {
       try {
-        setErro('');
         const resposta = await fetch(`/api/admin/jornada/contatos?${queryString}`, {
           cache: 'no-store',
         });
@@ -111,15 +112,12 @@ export default function JornadaAdminPage() {
           throw new Error(payload.error || 'Não foi possível carregar a Jornada.');
         }
 
-        if (ativo) setDados(payload);
+        if (ativo) setResultado({ query: queryString, dados: payload, erro: '' });
       } catch (error) {
-        if (ativo) setErro(error.message || 'Não foi possível carregar a Jornada.');
-      } finally {
-        if (ativo) setLoading(false);
+        if (ativo) setResultado({ query: queryString, dados: null, erro: error.message || 'Não foi possível carregar a Jornada.' });
       }
     }
 
-    setLoading(true);
     void carregarContatos();
 
     return () => {
