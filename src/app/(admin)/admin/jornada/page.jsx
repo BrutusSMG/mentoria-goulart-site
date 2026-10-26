@@ -95,7 +95,7 @@ export default function JornadaAdminPage() {
   }, [page, buscaAplicada, statusVinculo, statusOperacional, caminho]);
 
   const loading = resultado.query !== queryString;
-  const dados = resultado.dados;
+  const dados = loading ? null : resultado.dados;
   const erro = loading ? '' : resultado.erro;
 
   useEffect(() => {
