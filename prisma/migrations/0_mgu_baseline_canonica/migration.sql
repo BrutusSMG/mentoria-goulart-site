@@ -1,4 +1,10 @@
 -- CreateEnum
+CREATE TYPE "MetalCotacao" AS ENUM ('OURO', 'PRATA', 'PLATINA', 'PALADIO', 'RODIO');
+
+-- CreateEnum
+CREATE TYPE "StatusCotacaoMetal" AS ENUM ('SUCESSO', 'PARCIAL', 'INDISPONIVEL', 'ERRO');
+
+-- CreateEnum
 CREATE TYPE "StatusAluno" AS ENUM ('PENDENTE_ACESSO', 'ATIVO', 'SUSPENSO', 'INATIVO');
 
 -- CreateEnum
@@ -41,6 +47,15 @@ CREATE TYPE "OrigemDireitoConcedido" AS ENUM ('HOTMART', 'LEGADO', 'MANUAL');
 CREATE TYPE "StatusDireitoConcedido" AS ENUM ('ATIVO', 'REVOGADO', 'EXPIRADO');
 
 -- CreateEnum
+CREATE TYPE "StatusConviteLegado" AS ENUM ('PENDENTE', 'EM_ANDAMENTO', 'ENVIADO', 'FALHA', 'INDETERMINADO');
+
+-- CreateEnum
+CREATE TYPE "StatusUsuario" AS ENUM ('PENDENTE_ATIVACAO', 'ATIVO', 'BLOQUEADO');
+
+-- CreateEnum
+CREATE TYPE "PapelAdministrativo" AS ENUM ('ADMIN', 'PARCEIRO');
+
+-- CreateEnum
 CREATE TYPE "Role" AS ENUM ('ADMIN', 'PARCEIRO', 'FORNECEDOR');
 
 -- CreateTable
@@ -55,6 +70,27 @@ CREATE TABLE "CotacaoHistorico" (
     "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "CotacaoHistorico_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CotacaoMetal" (
+    "id" TEXT NOT NULL,
+    "coletaId" TEXT NOT NULL,
+    "metal" "MetalCotacao" NOT NULL,
+    "valorOriginal" DECIMAL(18,6),
+    "unidadeOriginal" TEXT,
+    "moedaOriginal" TEXT,
+    "dolarBrl" DECIMAL(12,6),
+    "valorBrlGrama" DECIMAL(18,6),
+    "fonte" TEXT NOT NULL,
+    "fonteDolar" TEXT,
+    "referenciaEm" TIMESTAMP(3),
+    "coletadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "status" "StatusCotacaoMetal" NOT NULL,
+    "erro" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "CotacaoMetal_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -73,6 +109,7 @@ CREATE TABLE "Lead" (
     "utmTerm" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "pessoaId" TEXT,
 
     CONSTRAINT "Lead_pkey" PRIMARY KEY ("id")
 );
@@ -125,11 +162,29 @@ CREATE TABLE "Aluno" (
     "status" "StatusAluno" NOT NULL DEFAULT 'PENDENTE_ACESSO',
     "origem" "OrigemAluno" NOT NULL DEFAULT 'HOTMART',
     "emailVerificadoEm" TIMESTAMP(3),
+    "conviteLegadoEnviadoEm" TIMESTAMP(3),
     "ultimoLoginEm" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "pessoaId" TEXT,
 
     CONSTRAINT "Aluno_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ControleConviteLegado" (
+    "id" TEXT NOT NULL,
+    "alunoId" TEXT NOT NULL,
+    "status" "StatusConviteLegado" NOT NULL DEFAULT 'PENDENTE',
+    "tentativas" INTEGER NOT NULL DEFAULT 0,
+    "tentativaIniciadaEm" TIMESTAMP(3),
+    "tentativaEncerradaEm" TIMESTAMP(3),
+    "ultimoErro" TEXT,
+    "mensagemProvedorId" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ControleConviteLegado_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -137,6 +192,7 @@ CREATE TABLE "Matricula" (
     "id" TEXT NOT NULL,
     "alunoId" TEXT NOT NULL,
     "produtoId" TEXT NOT NULL,
+    "produtoCatalogoId" TEXT,
     "produtoUcode" TEXT,
     "produtoNome" TEXT NOT NULL,
     "origem" "OrigemMatricula" NOT NULL DEFAULT 'HOTMART',
@@ -210,6 +266,57 @@ CREATE TABLE "PerfilAluno" (
 );
 
 -- CreateTable
+CREATE TABLE "Usuario" (
+    "id" TEXT NOT NULL,
+    "pessoaId" TEXT NOT NULL,
+    "senhaHash" TEXT,
+    "status" "StatusUsuario" NOT NULL DEFAULT 'PENDENTE_ATIVACAO',
+    "mustChangePassword" BOOLEAN NOT NULL DEFAULT false,
+    "passwordChangedAt" TIMESTAMP(3),
+    "ultimoLoginEm" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Usuario_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AcessoAdministrativo" (
+    "id" TEXT NOT NULL,
+    "usuarioId" TEXT NOT NULL,
+    "papel" "PapelAdministrativo" NOT NULL,
+    "ativo" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "AcessoAdministrativo_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Permissao" (
+    "id" TEXT NOT NULL,
+    "codigo" TEXT NOT NULL,
+    "modulo" TEXT NOT NULL,
+    "descricao" TEXT,
+    "ativo" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Permissao_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UsuarioPermissao" (
+    "id" TEXT NOT NULL,
+    "usuarioId" TEXT NOT NULL,
+    "permissaoId" TEXT NOT NULL,
+    "concedidaPorUsuarioId" TEXT,
+    "concedidaEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "UsuarioPermissao_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "AdminUser" (
     "id" TEXT NOT NULL,
     "nome" TEXT NOT NULL,
@@ -224,6 +331,7 @@ CREATE TABLE "AdminUser" (
     "passwordChangedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "pessoaId" TEXT,
 
     CONSTRAINT "AdminUser_pkey" PRIMARY KEY ("id")
 );
@@ -391,8 +499,56 @@ CREATE TABLE "HotmartTransaction" (
     CONSTRAINT "HotmartTransaction_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Pessoa" (
+    "id" TEXT NOT NULL,
+    "nome" TEXT NOT NULL,
+    "emailPrincipal" TEXT NOT NULL,
+    "telefonePrincipal" TEXT,
+    "ativo" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Pessoa_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "InteracaoMarketing" (
+    "id" TEXT NOT NULL,
+    "pessoaId" TEXT NOT NULL,
+    "tipo" TEXT NOT NULL,
+    "origem" TEXT,
+    "utmSource" TEXT,
+    "utmMedium" TEXT,
+    "utmCampaign" TEXT,
+    "utmTerm" TEXT,
+    "utmContent" TEXT,
+    "pagina" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "InteracaoMarketing_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE INDEX "CotacaoMetal_coletaId_idx" ON "CotacaoMetal"("coletaId");
+
+-- CreateIndex
+CREATE INDEX "CotacaoMetal_metal_coletadoEm_idx" ON "CotacaoMetal"("metal", "coletadoEm");
+
+-- CreateIndex
+CREATE INDEX "CotacaoMetal_status_idx" ON "CotacaoMetal"("status");
+
+-- CreateIndex
+CREATE INDEX "CotacaoMetal_coletadoEm_idx" ON "CotacaoMetal"("coletadoEm");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "CotacaoMetal_coletaId_metal_key" ON "CotacaoMetal"("coletaId", "metal");
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Lead_email_key" ON "Lead"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Lead_pessoaId_key" ON "Lead"("pessoaId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "JornadaContribuicao_idempotencyKey_key" ON "JornadaContribuicao"("idempotencyKey");
@@ -416,6 +572,9 @@ CREATE UNIQUE INDEX "Aluno_leadId_key" ON "Aluno"("leadId");
 CREATE UNIQUE INDEX "Aluno_email_key" ON "Aluno"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Aluno_pessoaId_key" ON "Aluno"("pessoaId");
+
+-- CreateIndex
 CREATE INDEX "Aluno_status_idx" ON "Aluno"("status");
 
 -- CreateIndex
@@ -425,10 +584,16 @@ CREATE INDEX "Aluno_origem_idx" ON "Aluno"("origem");
 CREATE INDEX "Aluno_createdAt_idx" ON "Aluno"("createdAt");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ControleConviteLegado_alunoId_key" ON "ControleConviteLegado"("alunoId");
+
+-- CreateIndex
 CREATE INDEX "Matricula_alunoId_idx" ON "Matricula"("alunoId");
 
 -- CreateIndex
 CREATE INDEX "Matricula_produtoId_idx" ON "Matricula"("produtoId");
+
+-- CreateIndex
+CREATE INDEX "Matricula_produtoCatalogoId_idx" ON "Matricula"("produtoCatalogoId");
 
 -- CreateIndex
 CREATE INDEX "Matricula_status_idx" ON "Matricula"("status");
@@ -467,7 +632,49 @@ CREATE INDEX "AlunoAccessToken_expiraEm_idx" ON "AlunoAccessToken"("expiraEm");
 CREATE UNIQUE INDEX "PerfilAluno_alunoId_key" ON "PerfilAluno"("alunoId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Usuario_pessoaId_key" ON "Usuario"("pessoaId");
+
+-- CreateIndex
+CREATE INDEX "Usuario_status_idx" ON "Usuario"("status");
+
+-- CreateIndex
+CREATE INDEX "Usuario_createdAt_idx" ON "Usuario"("createdAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AcessoAdministrativo_usuarioId_key" ON "AcessoAdministrativo"("usuarioId");
+
+-- CreateIndex
+CREATE INDEX "AcessoAdministrativo_papel_idx" ON "AcessoAdministrativo"("papel");
+
+-- CreateIndex
+CREATE INDEX "AcessoAdministrativo_ativo_idx" ON "AcessoAdministrativo"("ativo");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Permissao_codigo_key" ON "Permissao"("codigo");
+
+-- CreateIndex
+CREATE INDEX "Permissao_modulo_idx" ON "Permissao"("modulo");
+
+-- CreateIndex
+CREATE INDEX "Permissao_ativo_idx" ON "Permissao"("ativo");
+
+-- CreateIndex
+CREATE INDEX "UsuarioPermissao_usuarioId_idx" ON "UsuarioPermissao"("usuarioId");
+
+-- CreateIndex
+CREATE INDEX "UsuarioPermissao_permissaoId_idx" ON "UsuarioPermissao"("permissaoId");
+
+-- CreateIndex
+CREATE INDEX "UsuarioPermissao_concedidaPorUsuarioId_idx" ON "UsuarioPermissao"("concedidaPorUsuarioId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UsuarioPermissao_usuarioId_permissaoId_key" ON "UsuarioPermissao"("usuarioId", "permissaoId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "AdminUser_email_key" ON "AdminUser"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AdminUser_pessoaId_key" ON "AdminUser"("pessoaId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Produto_slug_key" ON "Produto"("slug");
@@ -574,6 +781,21 @@ CREATE INDEX "HotmartTransaction_status_idx" ON "HotmartTransaction"("status");
 -- CreateIndex
 CREATE INDEX "HotmartTransaction_criadoEm_idx" ON "HotmartTransaction"("criadoEm");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Pessoa_emailPrincipal_key" ON "Pessoa"("emailPrincipal");
+
+-- CreateIndex
+CREATE INDEX "InteracaoMarketing_pessoaId_createdAt_idx" ON "InteracaoMarketing"("pessoaId", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "InteracaoMarketing_tipo_createdAt_idx" ON "InteracaoMarketing"("tipo", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "InteracaoMarketing_createdAt_idx" ON "InteracaoMarketing"("createdAt");
+
+-- AddForeignKey
+ALTER TABLE "Lead" ADD CONSTRAINT "Lead_pessoaId_fkey" FOREIGN KEY ("pessoaId") REFERENCES "Pessoa"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
 -- AddForeignKey
 ALTER TABLE "JornadaContribuicao" ADD CONSTRAINT "JornadaContribuicao_leadId_fkey" FOREIGN KEY ("leadId") REFERENCES "Lead"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -581,7 +803,16 @@ ALTER TABLE "JornadaContribuicao" ADD CONSTRAINT "JornadaContribuicao_leadId_fke
 ALTER TABLE "Aluno" ADD CONSTRAINT "Aluno_leadId_fkey" FOREIGN KEY ("leadId") REFERENCES "Lead"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Aluno" ADD CONSTRAINT "Aluno_pessoaId_fkey" FOREIGN KEY ("pessoaId") REFERENCES "Pessoa"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ControleConviteLegado" ADD CONSTRAINT "ControleConviteLegado_alunoId_fkey" FOREIGN KEY ("alunoId") REFERENCES "Aluno"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Matricula" ADD CONSTRAINT "Matricula_alunoId_fkey" FOREIGN KEY ("alunoId") REFERENCES "Aluno"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Matricula" ADD CONSTRAINT "Matricula_produtoCatalogoId_fkey" FOREIGN KEY ("produtoCatalogoId") REFERENCES "Produto"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "VigenciaMatricula" ADD CONSTRAINT "VigenciaMatricula_matriculaId_fkey" FOREIGN KEY ("matriculaId") REFERENCES "Matricula"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -594,6 +825,24 @@ ALTER TABLE "AlunoAccessToken" ADD CONSTRAINT "AlunoAccessToken_alunoId_fkey" FO
 
 -- AddForeignKey
 ALTER TABLE "PerfilAluno" ADD CONSTRAINT "PerfilAluno_alunoId_fkey" FOREIGN KEY ("alunoId") REFERENCES "Aluno"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Usuario" ADD CONSTRAINT "Usuario_pessoaId_fkey" FOREIGN KEY ("pessoaId") REFERENCES "Pessoa"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AcessoAdministrativo" ADD CONSTRAINT "AcessoAdministrativo_usuarioId_fkey" FOREIGN KEY ("usuarioId") REFERENCES "Usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UsuarioPermissao" ADD CONSTRAINT "UsuarioPermissao_usuarioId_fkey" FOREIGN KEY ("usuarioId") REFERENCES "Usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UsuarioPermissao" ADD CONSTRAINT "UsuarioPermissao_permissaoId_fkey" FOREIGN KEY ("permissaoId") REFERENCES "Permissao"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "UsuarioPermissao" ADD CONSTRAINT "UsuarioPermissao_concedidaPorUsuarioId_fkey" FOREIGN KEY ("concedidaPorUsuarioId") REFERENCES "Usuario"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AdminUser" ADD CONSTRAINT "AdminUser_pessoaId_fkey" FOREIGN KEY ("pessoaId") REFERENCES "Pessoa"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ProdutoIntegracao" ADD CONSTRAINT "ProdutoIntegracao_produtoId_fkey" FOREIGN KEY ("produtoId") REFERENCES "Produto"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -625,375 +874,5 @@ ALTER TABLE "HotmartTransaction" ADD CONSTRAINT "HotmartTransaction_matriculaId_
 -- AddForeignKey
 ALTER TABLE "HotmartTransaction" ADD CONSTRAINT "HotmartTransaction_produtoCatalogoId_fkey" FOREIGN KEY ("produtoCatalogoId") REFERENCES "Produto"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
--- ===================================================================
--- DADOS ESTRUTURAIS DO MGU PRESERVADOS DO HISTORICO
--- ===================================================================
-
-INSERT INTO "Produto" (
-    "id",
-    "nome",
-    "slug",
-    "descricao",
-    "tipo",
-    "ativo",
-    "preco",
-    "precoPromocional",
-    "moeda",
-    "createdAt",
-    "updatedAt"
-)
-VALUES
-(
-    'prod_garimpo_mentoria',
-    'Curso Garimpo Urbano com Mentoria',
-    'curso-garimpo-urbano-com-mentoria',
-    NULL,
-    'CURSO',
-    true,
-    2497.00,
-    NULL,
-    'BRL',
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-),
-(
-    'prod_garimpo_sem_mentoria',
-    'Curso Garimpo Urbano (Sem Mentoria)',
-    'curso-garimpo-urbano-sem-mentoria',
-    NULL,
-    'CURSO',
-    true,
-    997.00,
-    NULL,
-    'BRL',
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-),
-(
-    'prod_curso_eletrodeposicao',
-    'Curso de Eletrodeposição em Joias e Semi-Joias',
-    'curso-eletrodeposicao-joias-semi-joias',
-    NULL,
-    'CURSO',
-    true,
-    147.00,
-    NULL,
-    'BRL',
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-),
-(
-    'prod_guia_definitivo',
-    'Guia Definitivo do Garimpo Urbano',
-    'guia-definitivo-garimpo-urbano',
-    NULL,
-    'EBOOK',
-    true,
-    198.00,
-    NULL,
-    'BRL',
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-),
-(
-    'prod_recuperacao_metais',
-    'Recuperação de Metais Preciosos de Resíduos de Oficinas',
-    'recuperacao-metais-preciosos-residuos-oficinas',
-    NULL,
-    'EBOOK',
-    true,
-    198.00,
-    NULL,
-    'BRL',
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-),
-(
-    'prod_tesouros_escondidos',
-    'TESOUROS ESCONDIDOS — Extração e Refino de Ouro e Prata',
-    'tesouros-escondidos-extracao-refino-ouro-prata',
-    NULL,
-    'EBOOK',
-    true,
-    49.70,
-    NULL,
-    'BRL',
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-),
-(
-    'prod_ebook_eletrodeposicao',
-    'ELETRODEPOSIÇÃO — Galvanoplastia para a Indústria de Joias',
-    'eletrodeposicao-galvanoplastia-industria-joias',
-    NULL,
-    'EBOOK',
-    true,
-    47.00,
-    NULL,
-    'BRL',
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-);
-
--- -------------------------------------------------------------------
--- Integrações Hotmart
--- -------------------------------------------------------------------
-
-INSERT INTO "ProdutoIntegracao" (
-    "id",
-    "produtoId",
-    "provedor",
-    "externalId",
-    "ativo",
-    "createdAt",
-    "updatedAt"
-)
-VALUES
-(
-    'int_hotmart_962959',
-    'prod_garimpo_mentoria',
-    'HOTMART',
-    '962959',
-    true,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-),
-(
-    'int_hotmart_8343505',
-    'prod_garimpo_sem_mentoria',
-    'HOTMART',
-    '8343505',
-    true,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-),
-(
-    'int_hotmart_1280432',
-    'prod_curso_eletrodeposicao',
-    'HOTMART',
-    '1280432',
-    true,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-),
-(
-    'int_hotmart_7445377',
-    'prod_guia_definitivo',
-    'HOTMART',
-    '7445377',
-    true,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-),
-(
-    'int_hotmart_1357907',
-    'prod_guia_definitivo',
-    'HOTMART',
-    '1357907',
-    true,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-),
-(
-    'int_hotmart_2454217',
-    'prod_recuperacao_metais',
-    'HOTMART',
-    '2454217',
-    true,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-),
-(
-    'int_hotmart_3019817',
-    'prod_tesouros_escondidos',
-    'HOTMART',
-    '3019817',
-    true,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-),
-(
-    'int_hotmart_1641689',
-    'prod_ebook_eletrodeposicao',
-    'HOTMART',
-    '1641689',
-    true,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP
-);
-
--- -------------------------------------------------------------------
--- Backfill seguro das transações Hotmart históricas
---
--- produtoId continua preservado como identificador externo histórico.
--- Apenas transações com integração conhecida recebem produtoCatalogoId.
--- Produtos desconhecidos permanecem com produtoCatalogoId = NULL.
--- -------------------------------------------------------------------
-
-UPDATE "HotmartTransaction" AS ht
-SET "produtoCatalogoId" = pi."produtoId"
-FROM "ProdutoIntegracao" AS pi
-WHERE pi."provedor" = 'HOTMART'
-  AND pi."externalId" = ht."produtoId"
-  AND ht."produtoCatalogoId" IS NULL;
-
-INSERT INTO "ProdutoDireito"
-    ("id", "produtoId", "tipo", "nivel", "updatedAt")
-VALUES
-
--- Curso Garimpo Urbano com Mentoria
-('pdir_garimpo_mentoria_conteudo',
- 'prod_garimpo_mentoria',
- 'CONTEUDO_PRODUTO',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_garimpo_mentoria_area_aluno',
- 'prod_garimpo_mentoria',
- 'AREA_ALUNO',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_garimpo_mentoria_comunidade',
- 'prod_garimpo_mentoria',
- 'COMUNIDADE',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_garimpo_mentoria_mentoria',
- 'prod_garimpo_mentoria',
- 'MENTORIA',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_garimpo_mentoria_ecossistema',
- 'prod_garimpo_mentoria',
- 'ECOSSISTEMA',
- 'PREMIUM',
- CURRENT_TIMESTAMP),
-
--- Curso Garimpo Urbano sem Mentoria
-('pdir_garimpo_sem_mentoria_conteudo',
- 'prod_garimpo_sem_mentoria',
- 'CONTEUDO_PRODUTO',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_garimpo_sem_mentoria_area_aluno',
- 'prod_garimpo_sem_mentoria',
- 'AREA_ALUNO',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_garimpo_sem_mentoria_comunidade',
- 'prod_garimpo_sem_mentoria',
- 'COMUNIDADE',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_garimpo_sem_mentoria_ecossistema',
- 'prod_garimpo_sem_mentoria',
- 'ECOSSISTEMA',
- 'COMPLETO',
- CURRENT_TIMESTAMP),
-
--- Curso de Eletrodeposicao
-('pdir_curso_eletrodeposicao_conteudo',
- 'prod_curso_eletrodeposicao',
- 'CONTEUDO_PRODUTO',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_curso_eletrodeposicao_area_aluno',
- 'prod_curso_eletrodeposicao',
- 'AREA_ALUNO',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_curso_eletrodeposicao_comunidade',
- 'prod_curso_eletrodeposicao',
- 'COMUNIDADE',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_curso_eletrodeposicao_ecossistema',
- 'prod_curso_eletrodeposicao',
- 'ECOSSISTEMA',
- 'COMPLETO',
- CURRENT_TIMESTAMP),
-
--- Guia Definitivo do Garimpo Urbano
-('pdir_guia_definitivo_conteudo',
- 'prod_guia_definitivo',
- 'CONTEUDO_PRODUTO',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_guia_definitivo_comunidade',
- 'prod_guia_definitivo',
- 'COMUNIDADE',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_guia_definitivo_ecossistema',
- 'prod_guia_definitivo',
- 'ECOSSISTEMA',
- 'BASICO',
- CURRENT_TIMESTAMP),
-
--- Recuperacao de Metais Preciosos
-('pdir_recuperacao_metais_conteudo',
- 'prod_recuperacao_metais',
- 'CONTEUDO_PRODUTO',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_recuperacao_metais_comunidade',
- 'prod_recuperacao_metais',
- 'COMUNIDADE',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_recuperacao_metais_ecossistema',
- 'prod_recuperacao_metais',
- 'ECOSSISTEMA',
- 'BASICO',
- CURRENT_TIMESTAMP),
-
--- Tesouros Escondidos
-('pdir_tesouros_escondidos_conteudo',
- 'prod_tesouros_escondidos',
- 'CONTEUDO_PRODUTO',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_tesouros_escondidos_comunidade',
- 'prod_tesouros_escondidos',
- 'COMUNIDADE',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_tesouros_escondidos_ecossistema',
- 'prod_tesouros_escondidos',
- 'ECOSSISTEMA',
- 'BASICO',
- CURRENT_TIMESTAMP),
-
--- E-book Eletrodeposicao
-('pdir_ebook_eletrodeposicao_conteudo',
- 'prod_ebook_eletrodeposicao',
- 'CONTEUDO_PRODUTO',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_ebook_eletrodeposicao_comunidade',
- 'prod_ebook_eletrodeposicao',
- 'COMUNIDADE',
- NULL,
- CURRENT_TIMESTAMP),
-
-('pdir_ebook_eletrodeposicao_ecossistema',
- 'prod_ebook_eletrodeposicao',
- 'ECOSSISTEMA',
- 'BASICO',
- CURRENT_TIMESTAMP);
+-- AddForeignKey
+ALTER TABLE "InteracaoMarketing" ADD CONSTRAINT "InteracaoMarketing_pessoaId_fkey" FOREIGN KEY ("pessoaId") REFERENCES "Pessoa"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
