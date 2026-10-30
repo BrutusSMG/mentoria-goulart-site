@@ -1,2 +1,4 @@
 .gitattributes text eol=lf
 *.md text eol=lf
+prisma/migrations/0_mgu_baseline_canonica/migration.sql -text diff
+prisma/migrations/20261028200000_mgu_seed_catalogos/migration.sql -text diff whitespace=cr-at-eol
