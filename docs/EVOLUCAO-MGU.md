@@ -59,10 +59,10 @@ Essa etapa tornou o processo de entrada do aluno mais consistente e preparou a p
 
 **Status: concluída e publicada em produção em 20/09/2026.**
 
-A terceira etapa amplia a capacidade comercial e administrativa do MGU e
-prepara a plataforma para diferentes tipos de produtos e formas de acesso.
+A terceira etapa ampliou a capacidade comercial e administrativa do MGU e
+preparou a plataforma para diferentes tipos de produtos e formas de acesso.
 
-### Catálogo interno de produtos — concluído em homologação
+### E3.1 — Catálogo interno de produtos
 
 A primeira entrega da Etapa 3 estruturou um catálogo interno de produtos,
 separando a identidade dos produtos do MGU das integrações utilizadas pelas
@@ -78,12 +78,13 @@ Essa evolução permite:
 - preparar a plataforma para novas regras de acesso sem depender
   diretamente da matrícula do aluno.
 
-A implementação foi homologada antes da continuidade da etapa.
+A implementação foi homologada e posteriormente integrada à plataforma
+publicada em produção em 20/09/2026.
 
-### E3.2 — Direitos e acessos concluída em homologação
+### E3.2 — Direitos e acessos
 
 A separação entre produto adquirido, matrícula educacional e direitos de uso
-foi implementada e homologada.
+foi implementada, homologada e publicada em produção em 20/09/2026.
 
 A plataforma agora possui políticas de direitos por produto, concessões
 vinculadas à transação de origem, direitos binários independentes e níveis
@@ -108,7 +109,7 @@ A E3.2 foi encerrada em homologação com 188 testes automatizados aprovados,
 schema Prisma válido e build de produção concluído com 58/58 páginas.
 O fechamento técnico está registrado no commit `cc3d00a`.
 
-### E3.3 — Administração e preços concluída em homologação
+### E3.3 — Administração e preços
 
 O catálogo interno passou a ser utilizado como fonte dos preços correntes
 exibidos pelo MGU nas áreas definidas para esta etapa.
@@ -126,9 +127,9 @@ As condições de parcelamento continuam sendo informadas pelo checkout,
 evitando que a plataforma apresente valores de parcela não modelados no catálogo.
 
 A E3.3 foi validada funcionalmente em homologação e no Preview antes da
-continuidade da etapa.
+publicação em produção em 20/09/2026.
 
-### E3.4 — Consolidação das cotações concluída em homologação
+### E3.4 — Consolidação das cotações
 
 A plataforma passou a utilizar um modelo consolidado de cotações, com
 registro individual por metal e preservação da origem, unidade, moeda
