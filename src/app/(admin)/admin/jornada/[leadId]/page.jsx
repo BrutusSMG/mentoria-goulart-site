@@ -332,7 +332,7 @@ export default function JornadaDetalhePage() {
         const payload = await resposta.json();
 
         if (!resposta.ok) {
-          throw new Error(payload.error || 'N?o foi poss?vel carregar o hist?rico.');
+          throw new Error(payload.error || 'Não foi possível carregar o histórico.');
         }
 
         if (ativo) {
@@ -343,7 +343,7 @@ export default function JornadaDetalhePage() {
           setResultado({
             leadId,
             contato: null,
-            erro: error.message || 'N?o foi poss?vel carregar o hist?rico.',
+            erro: error.message || 'Não foi possível carregar o histórico.',
           });
         }
       }
