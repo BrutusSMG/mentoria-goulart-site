@@ -389,7 +389,7 @@ etapa.
 
 ---
 
-## Etapa prévia — Saneamento e consolidação da base técnica (P0.1 e P0.2)
+## Consolidação técnica — P0.1 e P0.2
 
 **Status: concluída, publicada em produção em 02/11/2026 e validada funcionalmente em 04/11/2026.**
 
