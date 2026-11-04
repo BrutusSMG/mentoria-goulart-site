@@ -389,6 +389,27 @@ etapa.
 
 ---
 
+## Consolidação técnica — P0.1 e P0.2
+
+**Status: concluída, publicada em produção em 02/11/2026 e validada funcionalmente em 04/11/2026.**
+
+Antes de iniciar novos módulos, o MGU concluiu uma etapa de organização da base técnica utilizada para evoluir a plataforma com segurança.
+
+As principais entregas foram:
+
+- alinhamento do processo de desenvolvimento, homologação e publicação;
+- consolidação do histórico de evolução do banco de dados em uma referência comum;
+- organização dos registros iniciais de configuração e catálogos;
+- validação de equivalência estrutural e preservação dos dados existentes;
+- confirmação da separação entre homologação e produção;
+- publicação controlada do código, seguida de verificação funcional no ambiente de produção.
+
+A entrega foi acompanhada por **457 testes automatizados aprovados** e por uma compilação de produção concluída com sucesso. A validação final abrangeu o site público, a Área do Aluno e a administração.
+
+Essa etapa preparou a fundação para novas funcionalidades sem exigir alterações nos produtos ou nas condições comerciais já disponibilizadas ao público.
+
+---
+
 ## Próximas evoluções
 
 A plataforma continuará sendo desenvolvida de forma incremental.
