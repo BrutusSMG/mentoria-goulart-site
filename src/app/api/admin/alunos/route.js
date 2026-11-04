@@ -191,6 +191,8 @@ export async function GET(req) {
     });
     return respostaPrivada({
       items,
+      cadastroLegadoHabilitado:
+        process.env.CADASTRO_LEGADO_ADMIN_HABILITADO === 'true',
       statusDisponiveis: Array.from(STATUS_VALIDOS).map((valor) => ({
         valor,
         rotulo: rotuloStatus(valor),

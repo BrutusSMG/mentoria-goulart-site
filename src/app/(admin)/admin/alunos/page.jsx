@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Loader2,
   Search,
+  UserPlus,
   UsersRound,
 } from "lucide-react";
 
@@ -139,14 +140,28 @@ export default function AlunosPage() {
 
   return (
     <div className="space-y-7">
-      <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-[#d89900]">
-          Gestão de alunos
-        </p>
-        <h2 className="mt-2 text-3xl font-black text-white">Alunos</h2>
-        <p className="mt-2 text-sm text-zinc-500">
-          Consulte alunos, matrículas, status de acesso e visibilidade na comunidade.
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-[#d89900]">
+            Gestão de alunos
+          </p>
+          <h2 className="mt-2 text-3xl font-black text-white">
+            Alunos
+          </h2>
+          <p className="mt-2 text-sm text-zinc-500">
+            Consulte alunos, matrículas, status de acesso e visibilidade na comunidade.
+          </p>
+        </div>
+
+        {dados?.cadastroLegadoHabilitado ? (
+          <Link
+            href="/admin/alunos/legados/novo"
+            className="inline-flex w-fit items-center gap-2 rounded-lg bg-[#d89900] px-4 py-2.5 text-sm font-bold text-black transition-colors hover:bg-[#F7FA83]"
+          >
+            <UserPlus className="h-4 w-4" />
+            Adicionar aluno legado
+          </Link>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -162,7 +177,7 @@ export default function AlunosPage() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5 sm:col-span-2">
           <p className="text-sm text-zinc-400">Uso da tela</p>
           <p className="mt-2 text-sm text-zinc-300">
-            Esta versão é somente consulta. Bloqueio, reativação e redefinição de senha serão adicionados após a validação da listagem.
+            Consulte os alunos e, quando habilitado, realize o cadastro controlado de alunos legados. Bloqueio, reativação e redefinição de senha permanecem fora desta tela.
           </p>
         </div>
       </div>
