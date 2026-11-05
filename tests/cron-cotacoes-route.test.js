@@ -49,6 +49,15 @@ describe('GET /api/cron/atualizar-cotacoes', () => {
       'segredo-cron-teste';
   });
 
+  it('rejeita Bearer undefined quando CRON_SECRET ausente', async () => {
+    delete process.env.CRON_SECRET;
+
+    const resposta = await GET(criarRequest('Bearer undefined'));
+
+    expect(resposta.status).toBe(401);
+    expect(coletarCotacoesMetaisMock).not.toHaveBeenCalled();
+  });
+
   it('rejeita chamada sem autenticação', async () => {
     const resposta = await GET(criarRequest());
 

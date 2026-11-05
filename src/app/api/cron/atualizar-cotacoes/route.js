@@ -17,9 +17,11 @@ function possuiCotacaoUtil(registros) {
 
 export async function GET(request) {
   const authHeader = request.headers.get('authorization');
+  const cronSecret = process.env.CRON_SECRET;
 
   if (
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
+    !cronSecret ||
+    authHeader !== `Bearer ${cronSecret}`
   ) {
     return new Response('Não autorizado', {
       status: 401,

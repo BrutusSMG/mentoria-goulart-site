@@ -57,12 +57,12 @@ Essa etapa tornou o processo de entrada do aluno mais consistente e preparou a p
 
 ## Etapa 3 — Produtos, acessos, preços, cotações e administração
 
-**Status: em desenvolvimento.**
+**Status: concluída e publicada em produção em 20/09/2026.**
 
-A terceira etapa amplia a capacidade comercial e administrativa do MGU e
-prepara a plataforma para diferentes tipos de produtos e formas de acesso.
+A terceira etapa ampliou a capacidade comercial e administrativa do MGU e
+preparou a plataforma para diferentes tipos de produtos e formas de acesso.
 
-### Catálogo interno de produtos — concluído em homologação
+### E3.1 — Catálogo interno de produtos
 
 A primeira entrega da Etapa 3 estruturou um catálogo interno de produtos,
 separando a identidade dos produtos do MGU das integrações utilizadas pelas
@@ -78,12 +78,13 @@ Essa evolução permite:
 - preparar a plataforma para novas regras de acesso sem depender
   diretamente da matrícula do aluno.
 
-A implementação foi homologada antes da continuidade da etapa.
+A implementação foi homologada e posteriormente integrada à plataforma
+publicada em produção em 20/09/2026.
 
-### E3.2 — Direitos e acessos concluída em homologação
+### E3.2 — Direitos e acessos
 
 A separação entre produto adquirido, matrícula educacional e direitos de uso
-foi implementada e homologada.
+foi implementada, homologada e publicada em produção em 20/09/2026.
 
 A plataforma agora possui políticas de direitos por produto, concessões
 vinculadas à transação de origem, direitos binários independentes e níveis
@@ -108,7 +109,7 @@ A E3.2 foi encerrada em homologação com 188 testes automatizados aprovados,
 schema Prisma válido e build de produção concluído com 58/58 páginas.
 O fechamento técnico está registrado no commit `cc3d00a`.
 
-### E3.3 — Administração e preços concluída em homologação
+### E3.3 — Administração e preços
 
 O catálogo interno passou a ser utilizado como fonte dos preços correntes
 exibidos pelo MGU nas áreas definidas para esta etapa.
@@ -126,9 +127,9 @@ As condições de parcelamento continuam sendo informadas pelo checkout,
 evitando que a plataforma apresente valores de parcela não modelados no catálogo.
 
 A E3.3 foi validada funcionalmente em homologação e no Preview antes da
-continuidade da etapa.
+publicação em produção em 20/09/2026.
 
-### E3.4 — Consolidação das cotações concluída em homologação
+### E3.4 — Consolidação das cotações
 
 A plataforma passou a utilizar um modelo consolidado de cotações, com
 registro individual por metal e preservação da origem, unidade, moeda
@@ -149,9 +150,27 @@ A evolução incluiu:
 O ródio permanece indicado como indisponível até que seja integrada
 uma fonte de dados adequada.
 
-A E3.4 foi validada funcionalmente em homologação. A publicação em
-produção será realizada posteriormente, mediante preparação e
-validação da migração do banco de dados.
+A E3.4 foi validada funcionalmente em homologação e posteriormente publicada em produção em 20/09/2026.
+
+### E3.5 — Integração, homologação e publicação
+
+Em 20/09/2026, as entregas da Etapa 3 foram
+integradas e publicadas em produção, incluindo
+catálogo de produtos, direitos de acesso,
+administração de preços e cotações.
+
+A publicação ocorreu após validações em
+homologação e verificações funcionais.
+
+A primeira coleta consolidada foi realizada
+para ouro, prata, platina e paládio.
+
+O ródio permaneceu indisponível, aguardando
+uma fonte de dados adequada.
+
+A rotina automática de atualização das
+cotações permaneceu em acompanhamento
+operacional após a publicação.
 
 ---
 
@@ -267,9 +286,13 @@ A evolução incorporou:
 A atualização de produção foi concluída preservando os dados existentes e
 com validação das principais áreas públicas e administrativas.
 
-As capacidades operacionais mais sensíveis relacionadas ao cadastro e ao
-envio de convites legados permanecem desabilitadas por decisão operacional
-e só deverão ser habilitadas futuramente mediante nova validação explícita.
+Em 04/11/2026, após nova validação explícita em Preview e homologação,
+o cadastro administrativo controlado de alunos legados foi habilitado em
+produção.
+
+O envio de convites de primeiro acesso permanece uma operação separada,
+protegida por controles próprios. A habilitação do cadastro legado não
+implica a habilitação automática do envio de convites.
 
 ---
 
@@ -367,6 +390,27 @@ em acompanhamento e não alteram o status de conclusão da etapa.
 
 Nenhuma estrutura de Organização ou Fornecedor foi introduzida nesta
 etapa.
+
+---
+
+## Consolidação técnica — P0.1 e P0.2
+
+**Status: concluída, publicada em produção em 02/11/2026 e validada funcionalmente em 04/11/2026.**
+
+Antes de iniciar novos módulos, o MGU concluiu uma etapa de organização da base técnica utilizada para evoluir a plataforma com segurança.
+
+As principais entregas foram:
+
+- alinhamento do processo de desenvolvimento, homologação e publicação;
+- consolidação do histórico de evolução do banco de dados em uma referência comum;
+- organização dos registros iniciais de configuração e catálogos;
+- validação de equivalência estrutural e preservação dos dados existentes;
+- confirmação da separação entre homologação e produção;
+- publicação controlada do código, seguida de verificação funcional no ambiente de produção.
+
+A entrega foi acompanhada por **457 testes automatizados aprovados** e por uma compilação de produção concluída com sucesso. A validação final abrangeu o site público, a Área do Aluno e a administração.
+
+Essa etapa preparou a fundação para novas funcionalidades sem exigir alterações nos produtos ou nas condições comerciais já disponibilizadas ao público.
 
 ---
 
