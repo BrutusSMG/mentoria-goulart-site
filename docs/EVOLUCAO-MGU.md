@@ -286,9 +286,13 @@ A evolução incorporou:
 A atualização de produção foi concluída preservando os dados existentes e
 com validação das principais áreas públicas e administrativas.
 
-As capacidades operacionais mais sensíveis relacionadas ao cadastro e ao
-envio de convites legados permanecem desabilitadas por decisão operacional
-e só deverão ser habilitadas futuramente mediante nova validação explícita.
+Em 04/11/2026, após nova validação explícita em Preview e homologação,
+o cadastro administrativo controlado de alunos legados foi habilitado em
+produção.
+
+O envio de convites de primeiro acesso permanece uma operação separada,
+protegida por controles próprios. A habilitação do cadastro legado não
+implica a habilitação automática do envio de convites.
 
 ---
 
