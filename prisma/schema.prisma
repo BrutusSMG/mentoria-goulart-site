@@ -394,10 +394,16 @@ model Usuario {
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 
-  pessoa               Pessoa                @relation(fields: [pessoaId], references: [id], onDelete: Restrict)
-  acessoAdministrativo AcessoAdministrativo?
-  permissoes           UsuarioPermissao[]    @relation("UsuarioPermissoes")
-  permissoesConcedidas UsuarioPermissao[]    @relation("PermissaoConcedidaPor")
+  pessoa                        Pessoa                @relation(fields: [pessoaId], references: [id], onDelete: Restrict)
+  acessoAdministrativo          AcessoAdministrativo?
+  permissoes                    UsuarioPermissao[]    @relation("UsuarioPermissoes")
+  permissoesConcedidas          UsuarioPermissao[]    @relation("PermissaoConcedidaPor")
+  organizacoesCriadas           Organizacao[]         @relation("OrganizacaoCriadaPor")
+  organizacoesAlteradas         Organizacao[]         @relation("OrganizacaoAlteradaPor")
+  organizacoesValidacaoDecidida Organizacao[]         @relation("OrganizacaoValidacaoPor")
+  vinculosOrganizacaoCriados    PessoaOrganizacao[]   @relation("VinculoOrganizacaoCriadoPor")
+  vinculosOrganizacaoAlterados  PessoaOrganizacao[]   @relation("VinculoOrganizacaoAlteradoPor")
+  vinculosOrganizacaoEncerrados PessoaOrganizacao[]   @relation("VinculoOrganizacaoEncerradoPor")
 
   @@index([status])
   @@index([createdAt])
@@ -708,6 +714,7 @@ model Pessoa {
   adminUser           AdminUser?
   usuario             Usuario?
   interacoesMarketing InteracaoMarketing[]
+  organizacoes        PessoaOrganizacao[]
 }
 
 model InteracaoMarketing {
@@ -728,4 +735,81 @@ model InteracaoMarketing {
   @@index([pessoaId, createdAt])
   @@index([tipo, createdAt])
   @@index([createdAt])
+}
+
+enum StatusValidacaoOrganizacao {
+  PRELIMINAR
+  VALIDADA
+  REJEITADA
+}
+
+enum StatusOperacionalOrganizacao {
+  ATIVA
+  INATIVA
+}
+
+enum StatusVinculoOrganizacao {
+  PENDENTE
+  ATIVO
+  ENCERRADO
+}
+
+model Organizacao {
+  id                            String                       @id @default(cuid())
+  pais                          String                       @default("BR") @db.VarChar(2)
+  nomeFantasia                  String?
+  razaoSocial                   String?
+  cnpj                          String?                      @unique @db.VarChar(14)
+  email                         String?
+  telefone                      String?
+  site                          String?
+  statusValidacao               StatusValidacaoOrganizacao   @default(PRELIMINAR)
+  statusOperacional             StatusOperacionalOrganizacao @default(ATIVA)
+  motivoUltimaRejeicao          String?                      @db.Text
+  createdAt                     DateTime                     @default(now())
+  updatedAt                     DateTime                     @updatedAt
+  criadoPorUsuarioId            String
+  alteradoPorUsuarioId          String?
+  validacaoDecididaPorUsuarioId String?
+  validacaoDecididaEm           DateTime?
+
+  pessoas              PessoaOrganizacao[]
+  criadoPor            Usuario             @relation("OrganizacaoCriadaPor", fields: [criadoPorUsuarioId], references: [id], onDelete: Restrict)
+  alteradoPor          Usuario?            @relation("OrganizacaoAlteradaPor", fields: [alteradoPorUsuarioId], references: [id], onDelete: Restrict)
+  validacaoDecididaPor Usuario?            @relation("OrganizacaoValidacaoPor", fields: [validacaoDecididaPorUsuarioId], references: [id], onDelete: Restrict)
+
+  @@index([pais, statusOperacional])
+  @@index([statusValidacao])
+  @@index([criadoPorUsuarioId])
+  @@index([alteradoPorUsuarioId])
+  @@index([validacaoDecididaPorUsuarioId])
+}
+
+model PessoaOrganizacao {
+  id                    String                   @id @default(cuid())
+  pessoaId              String
+  organizacaoId         String
+  funcao                String?
+  status                StatusVinculoOrganizacao @default(PENDENTE)
+  principal             Boolean                  @default(false)
+  inicioEm              DateTime?
+  fimEm                 DateTime?
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+  criadoPorUsuarioId    String
+  alteradoPorUsuarioId  String?
+  encerradoPorUsuarioId String?
+
+  pessoa       Pessoa      @relation(fields: [pessoaId], references: [id], onDelete: Restrict)
+  organizacao  Organizacao @relation(fields: [organizacaoId], references: [id], onDelete: Restrict)
+  criadoPor    Usuario     @relation("VinculoOrganizacaoCriadoPor", fields: [criadoPorUsuarioId], references: [id], onDelete: Restrict)
+  alteradoPor  Usuario?    @relation("VinculoOrganizacaoAlteradoPor", fields: [alteradoPorUsuarioId], references: [id], onDelete: Restrict)
+  encerradoPor Usuario?    @relation("VinculoOrganizacaoEncerradoPor", fields: [encerradoPorUsuarioId], references: [id], onDelete: Restrict)
+
+  @@index([pessoaId, status])
+  @@index([organizacaoId, status])
+  @@index([pessoaId, organizacaoId])
+  @@index([criadoPorUsuarioId])
+  @@index([alteradoPorUsuarioId])
+  @@index([encerradoPorUsuarioId])
 }
