@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, Loader2, X, Check } from "lucide-react";
+import ImagemSucata from "@/components/funil/ImagemSucata";
 
 export default function SucatasPage() {
   const [sucatas, setSucatas] = useState([]);
@@ -139,7 +140,7 @@ export default function SucatasPage() {
                     key={item.id}
                     className={`${idx < sucatas.length - 1 ? "border-b border-zinc-800" : ""} hover:bg-zinc-800/50 transition-colors`}
                   >
-                    <td className="p-4 font-medium text-white">{item.nome}</td>
+                    <td className="p-4 font-medium text-white"><div className="flex items-center gap-3"><ImagemSucata imagemUrl={item.imagemUrl} nome={item.nome} /><span>{item.nome}</span></div></td>
                     <td className="p-4 text-zinc-400 text-sm">{item.categoria}</td>
                     <td className="p-4 text-zinc-400 text-sm">{item.metais}</td>
                     <td className="p-4 text-right text-green-400 font-bold">
@@ -245,6 +246,7 @@ export default function SucatasPage() {
                   className="w-full bg-black border border-zinc-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#d89900]"
                   placeholder="https://..."
                 />
+                <div className="mt-3 flex items-center gap-3"><ImagemSucata imagemUrl={form.imagemUrl} nome={form.nome || "Material"} /><span className="text-xs text-zinc-500">Prévia da imagem cadastrada. Prefira imagens HTTPS ou arquivos da pasta public.</span></div>
               </div>
 
               <div className="flex items-center gap-3">
