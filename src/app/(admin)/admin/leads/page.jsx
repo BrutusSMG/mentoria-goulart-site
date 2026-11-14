@@ -58,6 +58,8 @@ export default function LeadsPage() {
   const [source, setSource] = useState("all");
   const [ebook, setEbook] = useState("all");
   const [page, setPage] = useState(1);
+  const [exportando, setExportando] = useState(false);
+  const [erroExportacao, setErroExportacao] = useState("");
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams({
@@ -119,8 +121,54 @@ export default function LeadsPage() {
     setPage(proximaPagina);
   }
 
-  function exportarPaginaAtual() {
-    if (!dados?.items?.length) return;
+  async function exportarTodosLeads() {
+    if (exportando || !dados?.items?.length) return;
+
+    setExportando(true);
+    setErroExportacao("");
+
+    try {
+      // A API administrativa permite consultar até 100 contatos por página.
+      // O filtro atual permanece aplicado em todas as consultas.
+      const todosLeads = [];
+      let paginaAtual = 1;
+      let paginasTotais = 1;
+
+      do {
+        const params = new URLSearchParams({
+          page: String(paginaAtual),
+          pageSize: "100",
+          q: buscaAplicada,
+          source,
+          ebook,
+        });
+
+        const resposta = await fetch("/api/admin/leads?" + params.toString(), {
+          cache: "no-store",
+        });
+
+        if (!resposta.ok) {
+          throw new Error("Falha ao consultar os leads para exportação.");
+        }
+
+        const payload = await resposta.json();
+
+        if (
+          !Array.isArray(payload.items) ||
+          !Number.isInteger(payload.pagination?.totalPages) ||
+          payload.pagination.totalPages < 1
+        ) {
+          throw new Error("Resposta inválida da consulta de leads.");
+        }
+
+        todosLeads.push(...payload.items);
+        paginasTotais = payload.pagination.totalPages;
+        paginaAtual += 1;
+      } while (paginaAtual <= paginasTotais);
+
+      if (!todosLeads.length) {
+        throw new Error("Não foram encontrados leads para exportar.");
+      }
 
     const cabecalho = [
       "Nome",
@@ -143,7 +191,7 @@ export default function LeadsPage() {
       "Cadastro",
     ];
 
-    const linhas = dados.items.map((lead) => {
+    const linhas = todosLeads.map((lead) => {
       const marketing = lead.marketing || {};
       const primeira = marketing.primeiraAtribuicao;
       const ultima = marketing.ultimaAtribuicao;
@@ -183,9 +231,16 @@ export default function LeadsPage() {
     const url = URL.createObjectURL(arquivo);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `leads-garimpo-urbano-pagina-${dados.pagination.page}.csv`;
+    link.download = "leads-garimpo-urbano-completo.csv";
     link.click();
     URL.revokeObjectURL(url);
+    } catch (error) {
+      setErroExportacao(
+        error?.message || "Não foi possível exportar todos os leads.",
+      );
+    } finally {
+      setExportando(false);
+    }
   }
 
   const total = dados?.pagination?.total ?? 0;
@@ -202,14 +257,18 @@ export default function LeadsPage() {
         </div>
         <button
           type="button"
-          onClick={exportarPaginaAtual}
-          disabled={!dados?.items?.length}
+          onClick={exportarTodosLeads}
+          disabled={exportando || !dados?.items?.length}
           className="inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2.5 text-sm font-bold text-zinc-200 transition-colors hover:border-[#d89900] hover:text-[#d89900] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Download className="w-4 h-4" />
-          Exportar página atual
+          {exportando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          {exportando ? "Exportando todos..." : "Exportar todos os filtrados"}
         </button>
       </div>
+
+      {erroExportacao ? (
+        <p role="alert" className="text-sm text-red-400">{erroExportacao}</p>
+      ) : null}
 
       <form onSubmit={aplicarBusca} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 grid grid-cols-1 md:grid-cols-[1fr_190px_190px_auto] gap-3">
         <label className="relative block">
