@@ -113,7 +113,46 @@ export default async function ValoresSucataPage({ searchParams }) {
             </p>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-zinc-800 bg-zinc-950">
+          {/* No celular, os itens aparecem em cartões para evitar rolagem horizontal. */}
+          <div className="space-y-3 md:hidden">
+            {sucatas.length === 0 ? (
+              <p className="rounded-2xl border border-zinc-800 bg-zinc-950 px-5 py-10 text-center text-zinc-400">
+                Tabela em revisão. Não há valores disponíveis neste momento.
+              </p>
+            ) : (
+              <ul className="space-y-3" aria-label="Sucatas e valores de referência">
+                {sucatas.map((item) => (
+                  <li key={item.id} className="min-w-0 rounded-2xl border border-zinc-800 bg-zinc-950 p-4">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <ImagemSucata imagemUrl={item.imagemUrl} nome={item.nome} />
+                      <h3 className="min-w-0 break-words text-base font-bold leading-snug text-white">
+                        {item.nome}
+                      </h3>
+                    </div>
+                    <div className="mt-4 border-t border-zinc-800 pt-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                        Metais presentes
+                      </p>
+                      <p className="mt-1 break-words text-sm leading-6 text-zinc-300">
+                        {item.metais}
+                      </p>
+                    </div>
+                    <div className="mt-3 flex min-w-0 flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                        Referência por kg
+                      </span>
+                      <strong className="text-lg font-bold tabular-nums text-emerald-300">
+                        {reaisKg.format(Number(item.valorKg))}
+                      </strong>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Tabela preservada para tablets e computadores. */}
+          <div className="hidden overflow-x-auto rounded-2xl border border-zinc-800 bg-zinc-950 md:block">
             <table className="w-full min-w-[620px] text-left">
               <thead className="bg-zinc-900 text-sm text-zinc-200">
                 <tr>
