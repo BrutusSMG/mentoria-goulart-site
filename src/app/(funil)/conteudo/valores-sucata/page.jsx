@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { BookOpen, CalendarClock, CircleHelp, ShieldCheck } from "lucide-react";
 import CotacoesResumo from "@/components/funil/CotacoesResumo";
 import LinkOfertaSucata from "@/components/funil/LinkOfertaSucata";
+import ImagemSucata from "@/components/funil/ImagemSucata";
 
 export const metadata = {
   title: "Tabela de Valores de Sucatas | Garimpo Urbano",
@@ -51,6 +52,7 @@ export default async function ValoresSucataPage({ searchParams }) {
     select: {
       id: true,
       nome: true,
+      imagemUrl: true,
       metais: true,
       valorKg: true,
       ultimaAtualizacao: true,
@@ -125,7 +127,12 @@ export default async function ValoresSucataPage({ searchParams }) {
                   <tr><td colSpan={3} className="px-5 py-10 text-center text-zinc-400">Tabela em revisão. Não há valores disponíveis neste momento.</td></tr>
                 ) : sucatas.map((item) => (
                   <tr key={item.id} className="transition-colors hover:bg-zinc-900/70">
-                    <th scope="row" className="px-5 py-4 text-sm font-medium text-white">{item.nome}</th>
+                    <th scope="row" className="px-5 py-4 text-sm font-medium text-white">
+                      <div className="flex items-center gap-3">
+                        <ImagemSucata imagemUrl={item.imagemUrl} nome={item.nome} />
+                        <span className="min-w-0">{item.nome}</span>
+                      </div>
+                    </th>
                     <td className="px-5 py-4 text-sm text-zinc-400">{item.metais}</td>
                     <td className="whitespace-nowrap px-5 py-4 text-right font-bold tabular-nums text-emerald-300">
                       {reaisKg.format(Number(item.valorKg))}
