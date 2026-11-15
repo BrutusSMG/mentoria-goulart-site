@@ -228,38 +228,72 @@ export default async function ProfessorPage({ searchParams }) {
 
         <section className="mt-20">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">Dentro da formação</p>
-            <h2 className="mt-4 text-3xl font-black md:text-4xl">O que você estudará</h2>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">Conteúdo real da formação</p>
+            <h2 className="mt-4 text-3xl font-black md:text-4xl">
+              Muito além de reconhecer uma sucata
+            </h2>
             <p className="mt-5 text-lg leading-relaxed text-zinc-300">
-              Uma visão do programa apresentado na mentoria, com conteúdo
-              técnico organizado para apoiar o desenvolvimento gradual.
+              A programação do curso reúne fundamentos científicos, estudos de
+              recuperação e refino, aplicações práticas e conhecimentos para
+              estruturar uma atividade com responsabilidade.
             </p>
           </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
+          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             <article className="rounded-2xl border border-zinc-800 bg-zinc-950 p-7">
               <BookOpen className="h-8 w-8 text-[#d89900]" />
-              <h3 className="mt-5 text-xl font-bold">Fundamentos e estrutura</h3>
+              <h3 className="mt-5 text-xl font-bold">Noções de química na metalurgia nobre</h3>
               <p className="mt-3 leading-relaxed text-zinc-400">
-                Metalurgia nobre, ligas, laboratório, coleta e preparo de materiais.
+                Estrutura da matéria, oxirredução, ácidos, bases, pH e princípios das reações
+                químicas envolvidas nos processos metalúrgicos.
               </p>
             </article>
             <article className="rounded-2xl border border-zinc-800 bg-zinc-950 p-7">
               <FlaskConical className="h-8 w-8 text-[#d89900]" />
-              <h3 className="mt-5 text-xl font-bold">Rotas de recuperação</h3>
+              <h3 className="mt-5 text-xl font-bold">Mão na massa: recuperação e refino</h3>
               <p className="mt-3 leading-relaxed text-zinc-400">
-                Estudos de rotas pirometalúrgicas e hidrometalúrgicas, refino de ligas,
-                eletrônicos, catalisadores e outros materiais previstos no programa.
+                Conteúdos sobre prata, ouro, ligas e resíduos de oficinas de joias,
+                rotas hidrometalúrgicas e pirometalúrgicas, eletrônicos e catalisadores.
+              </p>
+            </article>
+            <article className="rounded-2xl border border-zinc-800 bg-zinc-950 p-7">
+              <Cpu className="h-8 w-8 text-[#d89900]" />
+              <h3 className="mt-5 text-xl font-bold">Sucatas e fontes específicas</h3>
+              <p className="mt-3 leading-relaxed text-zinc-400">
+                Seleção de componentes eletrônicos, oportunidades com pouco investimento,
+                prata de radiografias e baterias de relógio, além de semijoias.
+              </p>
+            </article>
+            <article className="rounded-2xl border border-zinc-800 bg-zinc-950 p-7">
+              <ShieldCheck className="h-8 w-8 text-[#d89900]" />
+              <h3 className="mt-5 text-xl font-bold">Estrutura, saúde e meio ambiente</h3>
+              <p className="mt-3 leading-relaxed text-zinc-400">
+                Equipamentos, segurança no trabalho, coleta, transporte,
+                armazenamento e tratamento dos resíduos gerados nos processos.
+              </p>
+            </article>
+            <article className="rounded-2xl border border-zinc-800 bg-zinc-950 p-7">
+              <GraduationCap className="h-8 w-8 text-[#d89900]" />
+              <h3 className="mt-5 text-xl font-bold">Mentalidade e gestão do negócio</h3>
+              <p className="mt-3 leading-relaxed text-zinc-400">
+                Perfil empreendedor, gestão do tempo, planejamento de negócios,
+                inteligência financeira, marketing e vendas.
               </p>
             </article>
             <article className="rounded-2xl border border-zinc-800 bg-zinc-950 p-7">
               <Recycle className="h-8 w-8 text-[#d89900]" />
-              <h3 className="mt-5 text-xl font-bold">Segurança e resíduos</h3>
+              <h3 className="mt-5 text-xl font-bold">Materiais complementares</h3>
               <p className="mt-3 leading-relaxed text-zinc-400">
-                Saúde e segurança, controle de riscos e tratamento responsável dos
-                resíduos gerados durante o processamento.
+                A programação apresentada inclui registros de encontros em grupo
+                de turmas anteriores, livro digital, trabalho acadêmico do professor
+                e materiais de apoio.
               </p>
             </article>
           </div>
+          <p className="mx-auto mt-6 max-w-3xl text-center text-sm leading-relaxed text-zinc-500">
+            Esta é uma síntese da programação apresentada, não a lista completa de aulas.
+            A oferta vigente deve ser consultada para confirmar condições de acesso
+            e a realização de novos encontros.
+          </p>
         </section>
 
         <section className="mt-20 grid gap-6 rounded-3xl border border-zinc-800 bg-zinc-950 p-8 md:grid-cols-2 md:p-12">
