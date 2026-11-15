@@ -19,28 +19,46 @@ import {
 export const metadata = {
   title: "Conheça o Prof. Goulart | Garimpo Urbano",
   description:
-    "A experiência do Prof. Goulart e a filosofia de aprendizagem por trás do método Garimpo Urbano.",
+    "Conheça a trajetória de José Goulart Filho: das oficinas de joias em 1993 à pesquisa metalúrgica e à criação do Garimpo Urbano.",
   robots: "noindex, nofollow",
 };
 
 const marcos = [
   {
     numero: "1984",
-    titulo: "A pergunta que iniciou a jornada",
+    titulo: "A ideia de uma nova profissão",
     descricao:
-      "Aos 19 anos, a curiosidade sobre metais preciosos em equipamentos descartados levou o professor a buscar respostas sobre o valor que poderia existir nesses materiais.",
+      "Aos 19 anos, José Goulart Filho ouviu falar do Garimpo Urbano. Naquele momento, a possibilidade de trabalhar com recuperação de metais era um sonho, ainda não uma atividade que ele exercia.",
+  },
+  {
+    numero: "1993",
+    titulo: "O começo nas oficinas de joias",
+    descricao:
+      "Em 21 de abril, ele contratou sua primeira orientação e iniciou a trajetória prática recuperando ouro e prata de resíduos de oficinas de joias. O treinamento foi breve e ainda deixou muitas dúvidas técnicas.",
+  },
+  {
+    numero: "2001",
+    titulo: "Paládio, platina e novos desafios",
+    descricao:
+      "Buscou mais aprendizado para recuperar paládio e platina. Os métodos disponíveis continuavam caros, difíceis de aperfeiçoar e insuficientes para resolver outros desafios, como o ródio.",
   },
   {
     numero: "2011",
-    titulo: "A prática encontra o estudo",
+    titulo: "A decisão de voltar a estudar",
     descricao:
-      "Depois de décadas de experiência prática, o Prof. Goulart retomou os estudos para aprofundar a compreensão científica dos processos metalúrgicos.",
+      "Aos 46 anos, com o apoio da esposa e da filha, ingressou na graduação em Processos Metalúrgicos para compreender melhor as reações e os problemas encontrados na prática.",
   },
   {
-    numero: "Hoje",
-    titulo: "Experiência organizada para ensinar",
+    numero: "2014–2015",
+    titulo: "Pesquisa e aperfeiçoamento",
     descricao:
-      "O Garimpo Urbano reúne conhecimento técnico e vivência profissional em um caminho de aprendizagem, da base aos temas mais avançados.",
+      "Durante a graduação, realizou pesquisa com o apoio de uma professora doutora, buscando processos mais eficientes e menos onerosos. Concluiu a formação em 2015 e passou a compartilhar conteúdos gratuitos.",
+  },
+  {
+    numero: "2020",
+    titulo: "O nascimento do curso",
+    descricao:
+      "Depois de anos recebendo pedidos de pessoas que acompanhavam seus vídeos, lançou o curso Garimpo Urbano para organizar e transmitir o conhecimento acumulado em uma formação estruturada.",
   },
 ];
 
@@ -128,18 +146,20 @@ export default async function ProfessorPage({ searchParams }) {
               A trajetória por trás do método
             </span>
             <h1 className="mt-6 max-w-2xl text-4xl font-black leading-tight tracking-tight md:text-6xl">
-              Mais de 30 anos recuperando metais.
-              <span className="mt-2 block text-[#d89900]">Uma experiência que agora pode ser compartilhada.</span>
+              Das oficinas de joias ao método Garimpo Urbano.
+              <span className="mt-2 block text-[#d89900]">Uma história de mais de 30 anos.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-300">
-              O Prof. Goulart construiu sua trajetória na recuperação de metais
-              preciosos de materiais e resíduos. O Garimpo Urbano nasce do propósito
-              de transformar essa vivência em conhecimento estruturado para novos alunos.
+              José Goulart Filho conheceu a ideia do Garimpo Urbano em 1984.
+              Sua prática começou em 1993, com a recuperação de ouro e prata
+              presentes em resíduos de oficinas de joias. Foi ali que uma
+              possibilidade de trabalho se tornou uma trajetória profissional.
             </p>
             <p className="mt-4 max-w-xl leading-relaxed text-zinc-400">
-              Da recuperação da prata aos estudos sobre ouro e outros metais,
-              a proposta é aprender progressivamente, considerando técnica,
-              eficiência, segurança e responsabilidade ambiental.
+              Ao longo dos anos, ele buscou orientação, enfrentou prejuízos,
+              voltou à universidade e pesquisou como melhorar processos.
+              Hoje compartilha esse caminho de estudo e experiência com
+              quem deseja aprender recuperação de metais preciosos.
             </p>
             {lead.nome ? (
               <p className="mt-6 text-sm text-zinc-500">
@@ -169,29 +189,31 @@ export default async function ProfessorPage({ searchParams }) {
       <main className="mx-auto max-w-6xl px-4 py-16 md:py-24">
         <section className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">
-            A origem de uma pergunta
+            Onde tudo começou
           </p>
           <h2 className="mt-4 text-3xl font-black md:text-4xl">
-            Como pode existir valor naquilo que muitos enxergam como descarte?
+            O primeiro material não foi uma placa eletrônica.
+            Foram resíduos de oficinas de joias.
           </h2>
           <p className="mt-6 text-lg leading-relaxed text-zinc-300">
-            Essa curiosidade acompanha a história do professor. Com o tempo,
-            a busca por respostas exigiu prática, estudo e compreensão dos
-            processos que tornam possível recuperar metais de diferentes fontes.
+            Em 1984, aos 19 anos, o Prof. Goulart ouviu falar do Garimpo Urbano
+            e começou a imaginar a possibilidade de ter seu próprio negócio.
+            Mas só em 1993 encontrou alguém disposto a ensinar, ainda que
+            de maneira limitada, a recuperação de ouro e prata.
           </p>
           <p className="mt-4 leading-relaxed text-zinc-400">
-            Hoje, essa experiência fundamenta uma proposta de ensino:
-            ajudar o aluno a entender não apenas onde podem existir metais,
-            mas como estudar sua recuperação com critério.
+            O início prático aconteceu com resíduos de oficinas de joias.
+            Depois vieram outros metais, novas matérias-primas e perguntas
+            que a experiência sozinha não conseguia responder.
           </p>
         </section>
 
         <section className="mt-16 md:mt-20">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">A trajetória</p>
-            <h2 className="mt-4 text-3xl font-black md:text-4xl">Experiência construída ao longo do tempo</h2>
+            <h2 className="mt-4 text-3xl font-black md:text-4xl">Do primeiro sonho à criação do curso</h2>
           </div>
-          <div className="mt-9 grid gap-4 md:grid-cols-3">
+          <div className="mt-9 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {marcos.map((marco) => (
               <article key={marco.numero} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 md:p-7">
                 <p className="text-3xl font-black text-[#d89900]">{marco.numero}</p>
@@ -202,16 +224,63 @@ export default async function ProfessorPage({ searchParams }) {
           </div>
         </section>
 
+        <section className="mt-20 grid items-start gap-8 rounded-3xl border border-zinc-800 bg-zinc-950 p-7 md:grid-cols-[1fr_1fr] md:p-12">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">
+              A virada na trajetória
+            </p>
+            <h2 className="mt-4 text-3xl font-black leading-tight md:text-4xl">
+              O conhecimento técnico mudou a maneira de trabalhar.
+            </h2>
+            <p className="mt-5 leading-relaxed text-zinc-300">
+              Os primeiros aprendizados foram caros e incompletos.
+              Sem compreender algumas reações e contaminações, o professor
+              relata que perdeu metais, enfrentou custos elevados e trabalhou
+              com métodos que causavam problemas ambientais.
+            </p>
+            <p className="mt-4 leading-relaxed text-zinc-300">
+              Essas experiências motivaram a busca por conhecimento científico.
+              A graduação iniciada em 2011 e a pesquisa realizada entre
+              2014 e 2015 ajudaram a identificar erros, rever procedimentos
+              e aperfeiçoar processos.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-[#d89900]/30 bg-[#d89900]/10 p-6">
+              <h3 className="text-lg font-bold text-[#e4b35c]">
+                Da tentativa e erro ao estudo dos processos
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-zinc-300">
+                A lição central não é que recuperar metais seja fácil.
+                É que compreender os fundamentos permite avaliar riscos,
+                custos e resultados com mais critério.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-zinc-800 bg-black/50 p-6">
+              <h3 className="text-lg font-bold">De vídeos gratuitos ao Garimpo Urbano</h3>
+              <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+                Após concluir a graduação em 2015, o professor passou
+                a publicar conteúdos sobre recuperação de ouro e prata.
+                O interesse de quem acompanhava esse trabalho ajudou
+                a impulsionar a criação do curso em 2020.
+              </p>
+            </div>
+          </div>
+        </section>
+
         <section className="mt-20 rounded-3xl border border-[#d89900]/25 bg-gradient-to-br from-[#d89900]/10 via-zinc-950 to-zinc-950 p-7 md:p-12">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">A essência do método</p>
           <h2 className="mt-3 max-w-3xl text-3xl font-black md:text-4xl">
             Não basta encontrar um material. É preciso compreender o processo.
           </h2>
           <p className="mt-5 max-w-3xl leading-relaxed text-zinc-300">
-            O conteúdo do curso parte dos fundamentos e chega às aplicações práticas
-            em materiais como resíduos de oficinas de joalheria, sucatas eletrônicas,
-            catalisadores e outras fontes. Aqui, o foco é explicar o pensamento por
-            trás dessa jornada, não repetir a lista de aulas.
+            A experiência começou com resíduos de oficinas de joias
+            e se ampliou para diferentes materiais e metais.
+            Com o tempo, o objetivo deixou de ser apenas obter resultados
+            e passou a incluir a compreensão científica dos processos,
+            a redução de desperdícios e o tratamento responsável dos resíduos.
+            Aqui você conhece os princípios que orientam o método,
+            sem repetir o catálogo de módulos da mentoria.
           </p>
           <div className="mt-9 grid gap-4 md:grid-cols-2">
             {principios.map((item) => {
@@ -272,9 +341,11 @@ export default async function ProfessorPage({ searchParams }) {
             <h2 className="text-2xl font-black md:text-3xl">Recuperar metais com responsabilidade</h2>
           </div>
           <p className="mt-5 max-w-4xl leading-relaxed text-zinc-300">
-            O Garimpo Urbano também aborda proteção das pessoas, recolhimento
-            e armazenamento, tratamento dos resíduos e o planejamento de uma
-            atividade que considere custos e impactos ambientais.
+            O professor relata que os processos utilizados no início de sua
+            trajetória causaram perdas e problemas ambientais. Essa experiência
+            está entre as razões para valorizar o estudo das reações,
+            a proteção das pessoas, o planejamento do trabalho e
+            o tratamento adequado dos resíduos produzidos.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <span className="inline-flex items-center gap-2 rounded-full border border-zinc-700 px-4 py-2 text-sm text-zinc-300">
