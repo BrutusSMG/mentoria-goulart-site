@@ -23,45 +23,6 @@ export const metadata = {
   robots: "noindex, nofollow",
 };
 
-const marcos = [
-  {
-    numero: "1984",
-    titulo: "A ideia de uma nova profissão",
-    descricao:
-      "Aos 19 anos, José Goulart Filho ouviu falar do Garimpo Urbano. Naquele momento, a possibilidade de trabalhar com recuperação de metais era um sonho, ainda não uma atividade que ele exercia.",
-  },
-  {
-    numero: "1993",
-    titulo: "O começo nas oficinas de joias",
-    descricao:
-      "Em 21 de abril, ele contratou sua primeira orientação e iniciou a trajetória prática recuperando ouro e prata de resíduos de oficinas de joias. O treinamento foi breve e ainda deixou muitas dúvidas técnicas.",
-  },
-  {
-    numero: "2001",
-    titulo: "Paládio, platina e novos desafios",
-    descricao:
-      "Buscou mais aprendizado para recuperar paládio e platina. Os métodos disponíveis continuavam caros, difíceis de aperfeiçoar e insuficientes para resolver outros desafios, como o ródio.",
-  },
-  {
-    numero: "2011",
-    titulo: "A decisão de voltar a estudar",
-    descricao:
-      "Aos 46 anos, com o apoio da esposa e da filha, ingressou na graduação em Processos Metalúrgicos para compreender melhor as reações e os problemas encontrados na prática.",
-  },
-  {
-    numero: "2014–2015",
-    titulo: "Pesquisa e aperfeiçoamento",
-    descricao:
-      "Durante a graduação, realizou pesquisa com o apoio de uma professora doutora, buscando processos mais eficientes e menos onerosos. Concluiu a formação em 2015 e passou a compartilhar conteúdos gratuitos.",
-  },
-  {
-    numero: "2020",
-    titulo: "O nascimento do curso",
-    descricao:
-      "Depois de anos recebendo pedidos de pessoas que acompanhavam seus vídeos, lançou o curso Garimpo Urbano para organizar e transmitir o conhecimento acumulado em uma formação estruturada.",
-  },
-];
-
 const principios = [
   {
     icon: Lightbulb,
@@ -208,20 +169,51 @@ export default async function ProfessorPage({ searchParams }) {
           </p>
         </section>
 
-        <section className="mt-16 md:mt-20">
+        <section
+          id="mensagem-do-professor"
+          className="mt-16 scroll-mt-8 md:mt-20"
+          aria-labelledby="mensagem-do-professor-titulo"
+        >
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">A trajetória</p>
-            <h2 className="mt-4 text-3xl font-black md:text-4xl">Do primeiro sonho à criação do curso</h2>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">
+              Mensagem do professor
+            </p>
+            <h2
+              id="mensagem-do-professor-titulo"
+              className="mt-4 text-3xl font-black md:text-4xl"
+            >
+              Ouça essa história nas palavras do Prof. Goulart.
+            </h2>
+            <p className="mt-5 leading-relaxed text-zinc-300">
+              Em vez de uma linha do tempo, conheça diretamente do professor
+              os acontecimentos e aprendizados que o levaram à criação do
+              Garimpo Urbano.
+            </p>
           </div>
-          <div className="mt-9 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {marcos.map((marco) => (
-              <article key={marco.numero} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 md:p-7">
-                <p className="text-3xl font-black text-[#d89900]">{marco.numero}</p>
-                <h3 className="mt-4 text-lg font-bold">{marco.titulo}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-zinc-400">{marco.descricao}</p>
-              </article>
-            ))}
+          <div className="mx-auto mt-9 max-w-4xl overflow-hidden rounded-2xl border border-[#d89900]/35 bg-zinc-950 p-2 shadow-2xl shadow-black/50 md:p-3">
+            <div className="aspect-video overflow-hidden rounded-xl bg-black">
+              <iframe
+                src="https://www.youtube-nocookie.com/embed/eT0WrJJT9gw"
+                title="Mensagem do Prof. José Goulart Filho sobre sua trajetória no Garimpo Urbano"
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                className="h-full w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
           </div>
+          <p className="mt-4 text-center text-sm text-zinc-400">
+            Não conseguiu reproduzir o vídeo?{" "}
+            <a
+              href="https://youtu.be/eT0WrJJT9gw"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-[#d89900] underline underline-offset-4 hover:text-[#f1ca75]"
+            >
+              Assista diretamente no YouTube.
+            </a>
+          </p>
         </section>
 
         <section className="mt-20 grid items-start gap-8 rounded-3xl border border-zinc-800 bg-zinc-950 p-7 md:grid-cols-[1fr_1fr] md:p-12">
