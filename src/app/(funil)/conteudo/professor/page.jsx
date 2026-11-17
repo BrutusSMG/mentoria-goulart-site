@@ -23,45 +23,6 @@ export const metadata = {
   robots: "noindex, nofollow",
 };
 
-const marcos = [
-  {
-    numero: "1984",
-    titulo: "A ideia de uma nova profissão",
-    descricao:
-      "Aos 19 anos, José Goulart Filho ouviu falar do Garimpo Urbano. Naquele momento, a possibilidade de trabalhar com recuperação de metais era um sonho, ainda não uma atividade que ele exercia.",
-  },
-  {
-    numero: "1993",
-    titulo: "O começo nas oficinas de joias",
-    descricao:
-      "Em 21 de abril, ele contratou sua primeira orientação e iniciou a trajetória prática recuperando ouro e prata de resíduos de oficinas de joias. O treinamento foi breve e ainda deixou muitas dúvidas técnicas.",
-  },
-  {
-    numero: "2001",
-    titulo: "Paládio, platina e novos desafios",
-    descricao:
-      "Buscou mais aprendizado para recuperar paládio e platina. Os métodos disponíveis continuavam caros, difíceis de aperfeiçoar e insuficientes para resolver outros desafios, como o ródio.",
-  },
-  {
-    numero: "2011",
-    titulo: "A decisão de voltar a estudar",
-    descricao:
-      "Aos 46 anos, com o apoio da esposa e da filha, ingressou na graduação em Processos Metalúrgicos para compreender melhor as reações e os problemas encontrados na prática.",
-  },
-  {
-    numero: "2014–2015",
-    titulo: "Pesquisa e aperfeiçoamento",
-    descricao:
-      "Durante a graduação, realizou pesquisa com o apoio de uma professora doutora, buscando processos mais eficientes e menos onerosos. Concluiu a formação em 2015 e passou a compartilhar conteúdos gratuitos.",
-  },
-  {
-    numero: "2020",
-    titulo: "O nascimento do curso",
-    descricao:
-      "Depois de anos recebendo pedidos de pessoas que acompanhavam seus vídeos, lançou o curso Garimpo Urbano para organizar e transmitir o conhecimento acumulado em uma formação estruturada.",
-  },
-];
-
 const principios = [
   {
     icon: Lightbulb,
@@ -138,24 +99,58 @@ export default async function ProfessorPage({ searchParams }) {
       </header>
 
       <section className="relative overflow-hidden border-b border-zinc-900 bg-gradient-to-b from-zinc-950 via-black to-black px-4 py-14 md:py-20">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_20%,rgba(216,153,0,0.15),transparent_42%)]" />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-[1.15fr_0.85fr]">
-          <div>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(216,153,0,0.15),transparent_48%)]" />
+        <div className="relative mx-auto max-w-6xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-[#d89900]/40 bg-[#d89900]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.13em] text-[#d89900]">
               <GraduationCap className="h-4 w-4" />
               A trajetória por trás do método
             </span>
-            <h1 className="mt-6 max-w-2xl text-4xl font-black leading-tight tracking-tight md:text-6xl">
-              Das oficinas de joias ao método Garimpo Urbano.
-              <span className="mt-2 block text-[#d89900]">Uma história de mais de 30 anos.</span>
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-300">
+          <h1 className="mx-auto mt-6 max-w-5xl text-4xl font-black leading-tight tracking-tight md:text-5xl lg:text-6xl">
+            Das oficinas de joias ao método Garimpo Urbano.
+          </h1>
+          <p className="mx-auto mt-4 max-w-4xl text-2xl font-black leading-snug text-[#d89900] md:text-4xl">
+            Uma história de mais de 30 anos.
+          </p>
+          <div className="mx-auto mt-10 max-w-4xl text-left">
+          <div id="mensagem-do-professor" className="relative w-full scroll-mt-8">
+            <div className="absolute -inset-5 rounded-3xl bg-[#d89900]/10 blur-3xl" aria-hidden="true" />
+            <div className="relative overflow-hidden rounded-3xl border border-[#d89900]/35 bg-zinc-950 p-2 shadow-xl shadow-black/60">
+              <div className="aspect-video overflow-hidden rounded-2xl bg-black">
+                <iframe
+                  src="https://www.youtube-nocookie.com/embed/eT0WrJJT9gw"
+                  title="Mensagem do Prof. José Goulart Filho sobre sua trajetória no Garimpo Urbano"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+            <p className="relative mt-4 text-center text-sm font-semibold text-[#d89900]">
+              Assista à mensagem do Prof. Goulart
+            </p>
+            <p className="relative mt-2 text-center text-xs text-zinc-500">
+              Não conseguiu reproduzir?{" "}
+              <a
+                href="https://youtu.be/eT0WrJJT9gw"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-zinc-300 underline underline-offset-4 hover:text-[#d89900]"
+              >
+                Abrir no YouTube
+              </a>
+            </p>
+          </div>
+          </div>
+          <div className="mx-auto mt-10 max-w-3xl text-left">
+            <p className="text-lg leading-relaxed text-zinc-300">
               José Goulart Filho conheceu a ideia do Garimpo Urbano em 1984.
               Sua prática começou em 1993, com a recuperação de ouro e prata
               presentes em resíduos de oficinas de joias. Foi ali que uma
               possibilidade de trabalho se tornou uma trajetória profissional.
             </p>
-            <p className="mt-4 max-w-xl leading-relaxed text-zinc-400">
+            <p className="mt-4 leading-relaxed text-zinc-400">
               Ao longo dos anos, ele buscou orientação, enfrentou prejuízos,
               voltou à universidade e pesquisou como melhorar processos.
               Hoje compartilha esse caminho de estudo e experiência com
@@ -166,22 +161,6 @@ export default async function ProfessorPage({ searchParams }) {
                 Olá, {lead.nome}. Conheça a história por trás da formação.
               </p>
             ) : null}
-          </div>
-          <div className="relative mx-auto w-full max-w-sm">
-            <div className="absolute -inset-5 rounded-3xl bg-[#d89900]/10 blur-3xl" />
-            <div className="relative overflow-hidden rounded-3xl border border-[#d89900]/30 bg-zinc-900 p-2 shadow-xl shadow-black/60">
-              <Image
-                src="/ProfGoulart.webp"
-                alt="Fotografia do Professor Goulart"
-                width={720}
-                height={900}
-                priority
-                className="h-auto w-full rounded-2xl object-cover"
-              />
-            </div>
-            <p className="relative mt-4 text-center text-xs font-semibold uppercase tracking-[0.14em] text-[#d89900]">
-              Prof. Goulart
-            </p>
           </div>
         </div>
       </section>
@@ -206,22 +185,6 @@ export default async function ProfessorPage({ searchParams }) {
             Depois vieram outros metais, novas matérias-primas e perguntas
             que a experiência sozinha não conseguia responder.
           </p>
-        </section>
-
-        <section className="mt-16 md:mt-20">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">A trajetória</p>
-            <h2 className="mt-4 text-3xl font-black md:text-4xl">Do primeiro sonho à criação do curso</h2>
-          </div>
-          <div className="mt-9 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {marcos.map((marco) => (
-              <article key={marco.numero} className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 md:p-7">
-                <p className="text-3xl font-black text-[#d89900]">{marco.numero}</p>
-                <h3 className="mt-4 text-lg font-bold">{marco.titulo}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-zinc-400">{marco.descricao}</p>
-              </article>
-            ))}
-          </div>
         </section>
 
         <section className="mt-20 grid items-start gap-8 rounded-3xl border border-zinc-800 bg-zinc-950 p-7 md:grid-cols-[1fr_1fr] md:p-12">
