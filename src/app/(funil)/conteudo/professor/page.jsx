@@ -100,7 +100,7 @@ export default async function ProfessorPage({ searchParams }) {
 
       <section className="relative overflow-hidden border-b border-zinc-900 bg-gradient-to-b from-zinc-950 via-black to-black px-4 py-14 md:py-20">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_20%,rgba(216,153,0,0.15),transparent_42%)]" />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 md:grid-cols-[1.15fr_0.85fr]">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-[#d89900]/40 bg-[#d89900]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.13em] text-[#d89900]">
               <GraduationCap className="h-4 w-4" />
@@ -128,20 +128,34 @@ export default async function ProfessorPage({ searchParams }) {
               </p>
             ) : null}
           </div>
-          <div className="relative mx-auto w-full max-w-sm">
-            <div className="absolute -inset-5 rounded-3xl bg-[#d89900]/10 blur-3xl" />
-            <div className="relative overflow-hidden rounded-3xl border border-[#d89900]/30 bg-zinc-900 p-2 shadow-xl shadow-black/60">
-              <Image
-                src="/ProfGoulart.webp"
-                alt="Fotografia do Professor Goulart"
-                width={720}
-                height={900}
-                priority
-                className="h-auto w-full rounded-2xl object-cover"
-              />
+          <div id="mensagem-do-professor" className="relative w-full scroll-mt-8">
+            <div className="absolute -inset-5 rounded-3xl bg-[#d89900]/10 blur-3xl" aria-hidden="true" />
+            <div className="relative overflow-hidden rounded-3xl border border-[#d89900]/35 bg-zinc-950 p-2 shadow-xl shadow-black/60">
+              <div className="aspect-video overflow-hidden rounded-2xl bg-black">
+                <iframe
+                  src="https://www.youtube-nocookie.com/embed/eT0WrJJT9gw"
+                  title="Mensagem do Prof. José Goulart Filho sobre sua trajetória no Garimpo Urbano"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
             </div>
-            <p className="relative mt-4 text-center text-xs font-semibold uppercase tracking-[0.14em] text-[#d89900]">
-              Prof. Goulart
+            <p className="relative mt-4 text-center text-sm font-semibold text-[#d89900]">
+              Assista à mensagem do Prof. Goulart
+            </p>
+            <p className="relative mt-2 text-center text-xs text-zinc-500">
+              Não conseguiu reproduzir?{" "}
+              <a
+                href="https://youtu.be/eT0WrJJT9gw"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-zinc-300 underline underline-offset-4 hover:text-[#d89900]"
+              >
+                Abrir no YouTube
+              </a>
             </p>
           </div>
         </div>
@@ -166,53 +180,6 @@ export default async function ProfessorPage({ searchParams }) {
             O início prático aconteceu com resíduos de oficinas de joias.
             Depois vieram outros metais, novas matérias-primas e perguntas
             que a experiência sozinha não conseguia responder.
-          </p>
-        </section>
-
-        <section
-          id="mensagem-do-professor"
-          className="mt-16 scroll-mt-8 md:mt-20"
-          aria-labelledby="mensagem-do-professor-titulo"
-        >
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">
-              Mensagem do professor
-            </p>
-            <h2
-              id="mensagem-do-professor-titulo"
-              className="mt-4 text-3xl font-black md:text-4xl"
-            >
-              Ouça essa história nas palavras do Prof. Goulart.
-            </h2>
-            <p className="mt-5 leading-relaxed text-zinc-300">
-              Em vez de uma linha do tempo, conheça diretamente do professor
-              os acontecimentos e aprendizados que o levaram à criação do
-              Garimpo Urbano.
-            </p>
-          </div>
-          <div className="mx-auto mt-9 max-w-4xl overflow-hidden rounded-2xl border border-[#d89900]/35 bg-zinc-950 p-2 shadow-2xl shadow-black/50 md:p-3">
-            <div className="aspect-video overflow-hidden rounded-xl bg-black">
-              <iframe
-                src="https://www.youtube-nocookie.com/embed/eT0WrJJT9gw"
-                title="Mensagem do Prof. José Goulart Filho sobre sua trajetória no Garimpo Urbano"
-                loading="lazy"
-                referrerPolicy="strict-origin-when-cross-origin"
-                className="h-full w-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
-            </div>
-          </div>
-          <p className="mt-4 text-center text-sm text-zinc-400">
-            Não conseguiu reproduzir o vídeo?{" "}
-            <a
-              href="https://youtu.be/eT0WrJJT9gw"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-[#d89900] underline underline-offset-4 hover:text-[#f1ca75]"
-            >
-              Assista diretamente no YouTube.
-            </a>
           </p>
         </section>
 
