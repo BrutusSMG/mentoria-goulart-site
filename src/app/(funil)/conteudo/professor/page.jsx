@@ -99,35 +99,19 @@ export default async function ProfessorPage({ searchParams }) {
       </header>
 
       <section className="relative overflow-hidden border-b border-zinc-900 bg-gradient-to-b from-zinc-950 via-black to-black px-4 py-14 md:py-20">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_20%,rgba(216,153,0,0.15),transparent_42%)]" />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
-          <div>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(216,153,0,0.15),transparent_48%)]" />
+        <div className="relative mx-auto max-w-6xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-[#d89900]/40 bg-[#d89900]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.13em] text-[#d89900]">
               <GraduationCap className="h-4 w-4" />
               A trajetória por trás do método
             </span>
-            <h1 className="mt-6 max-w-2xl text-4xl font-black leading-tight tracking-tight md:text-6xl">
-              Das oficinas de joias ao método Garimpo Urbano.
-              <span className="mt-2 block text-[#d89900]">Uma história de mais de 30 anos.</span>
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-300">
-              José Goulart Filho conheceu a ideia do Garimpo Urbano em 1984.
-              Sua prática começou em 1993, com a recuperação de ouro e prata
-              presentes em resíduos de oficinas de joias. Foi ali que uma
-              possibilidade de trabalho se tornou uma trajetória profissional.
-            </p>
-            <p className="mt-4 max-w-xl leading-relaxed text-zinc-400">
-              Ao longo dos anos, ele buscou orientação, enfrentou prejuízos,
-              voltou à universidade e pesquisou como melhorar processos.
-              Hoje compartilha esse caminho de estudo e experiência com
-              quem deseja aprender recuperação de metais preciosos.
-            </p>
-            {lead.nome ? (
-              <p className="mt-6 text-sm text-zinc-500">
-                Olá, {lead.nome}. Conheça a história por trás da formação.
-              </p>
-            ) : null}
-          </div>
+          <h1 className="mx-auto mt-6 max-w-5xl text-4xl font-black leading-tight tracking-tight md:text-5xl lg:text-6xl">
+            Das oficinas de joias ao método Garimpo Urbano.
+          </h1>
+          <p className="mx-auto mt-4 max-w-4xl text-2xl font-black leading-snug text-[#d89900] md:text-4xl">
+            Uma história de mais de 30 anos.
+          </p>
+          <div className="mx-auto mt-10 max-w-4xl text-left">
           <div id="mensagem-do-professor" className="relative w-full scroll-mt-8">
             <div className="absolute -inset-5 rounded-3xl bg-[#d89900]/10 blur-3xl" aria-hidden="true" />
             <div className="relative overflow-hidden rounded-3xl border border-[#d89900]/35 bg-zinc-950 p-2 shadow-xl shadow-black/60">
@@ -157,6 +141,26 @@ export default async function ProfessorPage({ searchParams }) {
                 Abrir no YouTube
               </a>
             </p>
+          </div>
+          </div>
+          <div className="mx-auto mt-10 max-w-3xl text-left">
+            <p className="text-lg leading-relaxed text-zinc-300">
+              José Goulart Filho conheceu a ideia do Garimpo Urbano em 1984.
+              Sua prática começou em 1993, com a recuperação de ouro e prata
+              presentes em resíduos de oficinas de joias. Foi ali que uma
+              possibilidade de trabalho se tornou uma trajetória profissional.
+            </p>
+            <p className="mt-4 leading-relaxed text-zinc-400">
+              Ao longo dos anos, ele buscou orientação, enfrentou prejuízos,
+              voltou à universidade e pesquisou como melhorar processos.
+              Hoje compartilha esse caminho de estudo e experiência com
+              quem deseja aprender recuperação de metais preciosos.
+            </p>
+            {lead.nome ? (
+              <p className="mt-6 text-sm text-zinc-500">
+                Olá, {lead.nome}. Conheça a história por trás da formação.
+              </p>
+            ) : null}
           </div>
         </div>
       </section>
