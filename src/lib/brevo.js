@@ -32,9 +32,13 @@ export async function moverCompradorParaPosVenda(email) {
     throw new Error('IDs das listas Brevo não configurados.');
   }
 
-  // Primeiro, incluir na lista que dispara a saída da automação.
-  await requisicaoBrevo(`/contacts/lists/${listaClientes}/contacts/add`, {
-    emails: [emailNormalizado],
+  // Cria o contato quando a compra acontece fora do funil do e-book.
+  // updateEnabled torna o processo seguro também para contatos existentes.
+  // A associação à lista de clientes é feita na própria criação/atualização.
+  await requisicaoBrevo('/contacts', {
+    email: emailNormalizado,
+    listIds: [listaClientes],
+    updateEnabled: true,
   });
 
   // Depois, remover a associação com a lista de nutrição.
