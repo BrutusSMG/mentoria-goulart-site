@@ -430,6 +430,42 @@ describe('POST /api/webhooks/hotmart', () => {
     expect(moverCompradorParaPosVendaMock).not.toHaveBeenCalled();
   });
 
+  it('preserva preço existente quando PURCHASE_COMPLETE chega sem preço', async () => {
+    process.env.HOTMART_SYNC_BREVO = 'false';
+    const aprovadoEm = new Date('2026-09-12T01:00:00.000Z');
+    const completoEm = new Date('2026-09-15T01:00:00.000Z');
+    transactionFindUniqueMock.mockResolvedValue({
+      id: 'transacao-existente',
+      status: 'APPROVED',
+      ultimoEventoHotmartEm: aprovadoEm,
+      ultimoEventoHotmartId: 'evt-anterior',
+    });
+    transactionUpsertMock.mockResolvedValue({
+      id: 'transacao-existente',
+      status: 'COMPLETED',
+      aprovadoEm,
+    });
+    provisionarAlunoHotmartMock.mockResolvedValue({
+      alunoId: 'aluno-1', matriculaId: 'matricula-1',
+      conviteNovo: false, conviteToken: null,
+    });
+    const resposta = await POST(criarRequest({
+      id: 'evt-sem-preco',
+      event: 'PURCHASE_COMPLETE',
+      creation_date: completoEm.getTime(),
+      data: {
+        product: { id: 123, name: 'Mentoria Garimpo Urbano' },
+        purchase: { transaction: 'HP-TESTE-SEM-PRECO', status: 'COMPLETED',
+          approved_date: aprovadoEm.getTime() },
+        buyer: { email: 'aluno@example.com', name: 'Aluno Teste' },
+      },
+    }));
+    expect(resposta.status).toBe(200);
+    const atualizacao = transactionUpsertMock.mock.calls[0][0].update;
+    expect(atualizacao).not.toHaveProperty('valorBruto');
+    expect(atualizacao.status).toBe('COMPLETED');
+  });
+
   it('registra boleto sem conceder direito nem aceitar approved_date como aprovação', async () => {
     const momentoEvento = new Date('2026-09-12T01:30:00.000Z');
     const approvedDateSintetico = new Date('2026-09-12T01:00:00.000Z');
