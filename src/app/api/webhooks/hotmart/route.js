@@ -482,6 +482,7 @@ export async function POST(req) {
     if (
       podeGarantirDireito
       && emailComprador
+      && process.env.VERCEL_ENV === 'production'
       && process.env.HOTMART_SYNC_BREVO !== 'false'
     ) {
       try {
