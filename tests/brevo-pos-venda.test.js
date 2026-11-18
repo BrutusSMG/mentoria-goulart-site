@@ -11,6 +11,7 @@ describe('sincronização Hotmart → Brevo', () => {
     vi.stubEnv('BREVO_API_KEY', 'chave-de-teste');
     vi.stubEnv('BREVO_LIST_ID_EBOOK', '6');
     vi.stubEnv('BREVO_LIST_ID_CLIENTES_MENTORIA', '14');
+    vi.stubEnv('BREVO_LIST_ID_CLIENTES_AVULSOS', '9');
     enviar.mockResolvedValue({ ok: true });
   });
 
@@ -25,6 +26,16 @@ describe('sincronização Hotmart → Brevo', () => {
       updateEnabled: true,
     });
     expect(enviar.mock.calls[1][0]).toBe('https://api.brevo.com/v3/contacts/lists/6/contacts/remove');
+  });
+
+  it('classifica compra avulsa na lista 9 sem retirar da lista 6', async () => {
+    await moverCompradorParaPosVenda('avulso@exemplo.com', { ehMentoria: false });
+    expect(enviar).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(enviar.mock.calls[0][1].body)).toEqual({
+      email: 'avulso@exemplo.com',
+      listIds: [9],
+      updateEnabled: true,
+    });
   });
 
   it('não remove da lista 6 quando a inclusão na lista 14 falha', async () => {
