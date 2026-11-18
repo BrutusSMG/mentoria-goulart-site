@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { enviarConvitePrimeiroAcesso } from '@/lib/convite-primeiro-acesso';
 import { timingSafeEqual } from "crypto";
 import { moverCompradorParaPosVenda } from '@/lib/brevo';
+import { extrairValorBrutoHotmart } from '@/lib/hotmart-valor';
 import {
   garantirContaHotmart,
   garantirConvitePrimeiroAcesso,
@@ -180,8 +181,8 @@ export async function POST(req) {
   }
 
   const emailComprador = emailNormalizado(comprador.email);
-  const valorRecebido = compra?.full_price?.value ?? compra?.price?.value ?? 0;
-  const valorBruto = new Prisma.Decimal(String(valorRecebido));
+  const valorRecebido = extrairValorBrutoHotmart(compra);
+  const valorBruto = valorRecebido === null ? null : new Prisma.Decimal(valorRecebido);
   const nomeDoAluno = nomeDoComprador(comprador);
   const whatsappDoAluno = whatsappDoComprador(comprador);
   const traducaoEvento = traduzirEventoHotmart(evento);
@@ -269,6 +270,13 @@ export async function POST(req) {
         return;
       }
 
+      if (valorBruto === null && compraConfirmada && consolidacaoFinanceira.deveAtualizar) {
+        console.warn('Hotmart: valor bruto ausente ou inválido; verificar conciliação', {
+          transacaoCodigo,
+          evento,
+        });
+      }
+
       let transacao;
 
       if (transacaoAtual) {
@@ -283,7 +291,10 @@ export async function POST(req) {
               : {}),
             produtoUcode: produto.ucode ? String(produto.ucode) : null,
             produtoNome,
-            valorBruto,
+            // Eventos incompletos ou antigos não apagam valores válidos.
+            ...(consolidacaoFinanceira.deveAtualizar && valorBruto !== null
+              ? { valorBruto }
+              : {}),
             moeda: String(
               compra?.full_price?.currency_value ||
               compra?.price?.currency_value ||
@@ -329,7 +340,8 @@ export async function POST(req) {
               consolidacaoFinanceira.ultimoEventoHotmartEm,
             ultimoEventoHotmartId:
               consolidacaoFinanceira.ultimoEventoHotmartId,
-            valorBruto,
+            // Campo obrigatório no schema atual: zero provisório não comprova gratuidade.
+            valorBruto: valorBruto ?? new Prisma.Decimal(0),
             moeda: String(
               compra?.full_price?.currency_value ||
               compra?.price?.currency_value ||
