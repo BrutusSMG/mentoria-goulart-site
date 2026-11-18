@@ -332,6 +332,8 @@ describe('POST /api/webhooks/hotmart', () => {
   });
 
   it('mantém o provisionamento normal de compra aprovada sem evento terminal', async () => {
+    process.env.HOTMART_SYNC_BREVO = 'true';
+    process.env.VERCEL_ENV = 'preview';
     const aprovadoEm = new Date('2026-09-12T01:00:00.000Z');
 
     leadFindUniqueMock.mockResolvedValue({
@@ -425,6 +427,7 @@ describe('POST /api/webhooks/hotmart', () => {
     });
 
     expect(vigenciaUpdateManyMock).not.toHaveBeenCalled();
+    expect(moverCompradorParaPosVendaMock).not.toHaveBeenCalled();
   });
 
   it('registra boleto sem conceder direito nem aceitar approved_date como aprovação', async () => {

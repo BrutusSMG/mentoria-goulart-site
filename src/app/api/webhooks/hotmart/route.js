@@ -190,6 +190,7 @@ export async function POST(req) {
   const aprovadoEmDoEvento = compraConfirmada ? aprovadoEmRecebido : null;
   let conviteParaEnviar = null;
   let podeGarantirDireito = compraConfirmada;
+  let compradorEhMentoria = false;
   try {
     await prisma.$transaction(
       async (tx) => {
@@ -209,6 +210,7 @@ export async function POST(req) {
 
       const produtoEhMentoria =
         integracaoProduto?.produto?.id === 'prod_garimpo_mentoria';
+      compradorEhMentoria = produtoEhMentoria;
 
       const lead = emailComprador
         ? await tx.lead.findUnique({
@@ -480,10 +482,11 @@ export async function POST(req) {
     if (
       podeGarantirDireito
       && emailComprador
+      && process.env.VERCEL_ENV === 'production'
       && process.env.HOTMART_SYNC_BREVO !== 'false'
     ) {
       try {
-        await moverCompradorParaPosVenda(emailComprador);
+        await moverCompradorParaPosVenda(emailComprador, { ehMentoria: compradorEhMentoria });
 
         console.info('Comprador sincronizado no Brevo', {
           evento,

@@ -6,7 +6,7 @@ import {
   respostaAcessoNegado,
 } from "@/lib/admin-permissoes";
 
-const STATUS_VENDA_APROVADA = ["APPROVED", "COMPLETE"];
+const STATUS_VENDA_APROVADA = ["APPROVED", "COMPLETE", "COMPLETED"];
 const STATUS_REEMBOLSO = ["REFUNDED", "PARTIALLY_REFUNDED"];
 
 function respostaPrivada(data, status = 200) {

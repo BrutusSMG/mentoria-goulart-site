@@ -18,7 +18,7 @@ async function requisicaoBrevo(path, body ) {
   }
 }
 
-export async function moverCompradorParaPosVenda(email) {
+export async function moverCompradorParaPosVenda(email, { ehMentoria = true } = {}) {
   const emailNormalizado = String(email || '').trim().toLowerCase();
 
   if (!emailNormalizado) {
@@ -26,19 +26,26 @@ export async function moverCompradorParaPosVenda(email) {
   }
 
   const listaEbook = Number(process.env.BREVO_LIST_ID_EBOOK);
-  const listaClientes = Number(process.env.BREVO_LIST_ID_CLIENTES_MENTORIA);
+  const listaClientes = Number(ehMentoria
+    ? process.env.BREVO_LIST_ID_CLIENTES_MENTORIA
+    : process.env.BREVO_LIST_ID_CLIENTES_AVULSOS);
 
   if (!listaEbook || !listaClientes) {
     throw new Error('IDs das listas Brevo não configurados.');
   }
 
-  // Primeiro, incluir na lista que dispara a saída da automação.
-  await requisicaoBrevo(`/contacts/lists/${listaClientes}/contacts/add`, {
-    emails: [emailNormalizado],
+  // Cria o contato quando a compra acontece fora do funil do e-book.
+  // updateEnabled torna o processo seguro também para contatos existentes.
+  // A associação à lista de clientes é feita na própria criação/atualização.
+  await requisicaoBrevo('/contacts', {
+    email: emailNormalizado,
+    listIds: [listaClientes],
+    updateEnabled: true,
   });
 
-  // Depois, remover a associação com a lista de nutrição.
-  await requisicaoBrevo(`/contacts/lists/${listaEbook}/contacts/remove`, {
+  // Apenas quem comprou Mentoria sai da nutrição específica para Mentoria.
+  // Compradores avulsos continuam elegíveis a ofertas da Mentoria.
+  if (ehMentoria) await requisicaoBrevo(`/contacts/lists/${listaEbook}/contacts/remove`, {
     emails: [emailNormalizado],
   });
 }
