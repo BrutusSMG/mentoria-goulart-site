@@ -165,6 +165,57 @@ export default async function ProfessorPage({ searchParams }) {
         </div>
       </section>
 
+      {/* Mensagem em vídeo do professor: conteúdo permanente, sem oferta ou datas. */}
+      <section
+        id="mensagem-do-professor"
+        aria-labelledby="titulo-mensagem-professor"
+        className="border-b border-zinc-900 bg-[#080808] px-4 py-14 md:py-20"
+      >
+        <div className="mx-auto max-w-5xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">
+              Assista à mensagem
+            </p>
+            <h2
+              id="titulo-mensagem-professor"
+              className="mt-4 text-3xl font-black md:text-4xl"
+            >
+              Uma mensagem do Prof. José Goulart Filho
+            </h2>
+            <p className="mt-5 text-lg leading-relaxed text-zinc-300">
+              Conheça o professor também por suas próprias palavras,
+              antes de explorar os principais momentos de sua trajetória.
+            </p>
+          </div>
+
+          <div className="mx-auto mt-9 max-w-4xl overflow-hidden rounded-2xl border border-[#d89900]/35 bg-zinc-950 p-2 shadow-xl shadow-black/50 md:p-3">
+            <div className="aspect-video overflow-hidden rounded-xl bg-black">
+              <iframe
+                src="https://www.youtube-nocookie.com/embed/eT0WrJJT9gw"
+                title="Mensagem do Prof. José Goulart Filho"
+                className="h-full w-full"
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </div>
+
+          <p className="mt-4 text-center text-sm text-zinc-500">
+            Se não conseguir reproduzir aqui,{" "}
+            <a
+              href="https://youtu.be/eT0WrJJT9gw"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-[#e8b35a] underline underline-offset-4 hover:text-white"
+            >
+              assista no YouTube
+            </a>.
+          </p>
+        </div>
+      </section>
+
       <main className="mx-auto max-w-6xl px-4 py-16 md:py-24">
         <section className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d89900]">
