@@ -16,6 +16,7 @@ const LINKS_DESKTOP = {
   jornada: "Jornada do Aluno",
   aluno: "Portal do Aluno",
   alunos: "Alunos",
+  organizacoes: "Organizações",
 };
 
 export default async function AdminLayout({ children }) {
@@ -63,6 +64,11 @@ export default async function AdminLayout({ children }) {
         icone: "usuarios",
       },
 
+      {
+        href: "/admin/organizacoes",
+        rotulo: LINKS_DESKTOP.organizacoes,
+        icone: "organizacoes",
+      },
       {
         href: "/admin/alunos",
         rotulo: LINKS_DESKTOP.alunos,
