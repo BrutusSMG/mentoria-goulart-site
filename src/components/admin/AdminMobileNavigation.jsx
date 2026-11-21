@@ -8,6 +8,7 @@ import Image from "next/image";
 import AdminLogoutButton from "@/components/admin/AdminLogoutButton";
 import {
   BarChart3,
+  Building2,
   ClipboardList,
   Database,
   FileText,
@@ -29,6 +30,7 @@ const ICONES = {
   depoimentos: FileText,
   jornada: ClipboardList,
   alunos: GraduationCap,
+  organizacoes: Building2,
 };
 
 function linkAtivo(pathname, href) {
