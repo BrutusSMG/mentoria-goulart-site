@@ -414,6 +414,18 @@ Essa etapa preparou a fundação para novas funcionalidades sem exigir alteraç�
 
 ---
 
+## Etapa 7 — Organizações e representantes
+
+**Status: em homologação; não publicada em produção.**
+
+A Etapa 7 introduz o cadastro administrativo de organizações e o vínculo de pessoas com empresas, sem transformar automaticamente uma organização em fornecedora. O fluxo básico de cadastro, edição, validação e vínculos foi exercitado em homologação; a etapa ainda depende de fechamento funcional e promoção controlada.
+
+**Complemento planejado (não implementado):** o ADMIN poderá localizar representantes no cadastro central de Pessoas e cadastrar uma Pessoa quando necessário, independentemente de Lead ou Aluno. A identidade poderá acumular diferentes relacionamentos, sem gerar automaticamente login, matrícula, direitos ou poderes de representação legal. O processo deverá evitar duplicações e preservar ambiguidades para revisão.
+
+Consulte [Pessoas e representantes de organizações](PESSOAS-E-REPRESENTANTES.md) para a descrição funcional.
+
+---
+
 ## Próximas evoluções
 
 A plataforma continuará sendo desenvolvida de forma incremental.
