@@ -818,3 +818,11 @@ model PessoaOrganizacao {
   @@index([alteradoPorUsuarioId])
   @@index([encerradoPorUsuarioId])
 }
+
+// E7.3: contador compartilhado entre instancias para limitar enumeracao/cadastro ADMIN.
+// Chave = metodo + Usuario.id canonico; maximo duas linhas por administrador.
+model LimitePessoasAdmin {
+  chave        String   @id @db.VarChar(160)
+  janelaInicio DateTime @db.Timestamptz(3)
+  contador     Int
+}
