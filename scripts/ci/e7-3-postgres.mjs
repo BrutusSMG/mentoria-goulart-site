@@ -84,6 +84,9 @@ try {
     },
   }));
   assert.equal(colisaoDireta.code, "P2002", "Indice funcional deve bloquear duplicidade");
+  console.log("E7.3 Prisma P2002 metadata (CI sintetico):", JSON.stringify({
+    code: colisaoDireta.code, meta: colisaoDireta.meta, constraint: colisaoDireta.constraint,
+  }));
   const traduzido = traduzirErroPessoa(colisaoDireta);
   assert.equal(traduzido.codigo, "EMAIL_EM_USO", "Erro real do Prisma deve ser traduzido para HTTP 409");
   assert.equal(traduzido.status, 409);
