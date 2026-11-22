@@ -4,6 +4,7 @@ import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { AlertCircle, ArrowLeft, Building2, Loader2, Plus, RefreshCw, ShieldCheck, Users } from "lucide-react";
 import OrganizacaoFormulario from "@/components/admin/OrganizacaoFormulario";
+import SeletorPessoaOrganizacao from "@/components/admin/SeletorPessoaOrganizacao";
 import {
   apiOrganizacoes, formatarDataOrganizacao, nomeOrganizacao,
   ROTULOS_OPERACAO, ROTULOS_VALIDACAO, ROTULOS_VINCULO,
@@ -26,11 +27,8 @@ export default function OrganizacaoDetalhePage({ params }) {
   const [erro, setErro] = useState("");
   const [aviso, setAviso] = useState("");
   const [motivo, setMotivo] = useState("");
-  const [pessoaId, setPessoaId] = useState("");
+  const [pessoaSelecionada, setPessoaSelecionada] = useState(null);
   const [funcao, setFuncao] = useState("");
-  const [buscaPessoa, setBuscaPessoa] = useState("");
-  const [pessoasEncontradas, setPessoasEncontradas] = useState([]);
-  const [buscandoPessoas, setBuscandoPessoas] = useState(false);
 
   const carregar = useCallback(async (signal) => {
     setCarregando(true);
@@ -74,35 +72,18 @@ export default function OrganizacaoDetalhePage({ params }) {
     }
   }
 
-  async function buscarPessoas(event) {
-    event.preventDefault();
-    setErro("");
-    if (!buscaPessoa.trim()) { setPessoasEncontradas([]); return; }
-    setBuscandoPessoas(true);
-    try {
-      const query = new URLSearchParams({ page: "1", pageSize: "20", q: buscaPessoa.trim() });
-      const resultado = await apiOrganizacoes(`/api/admin/leads?${query.toString()}`);
-      const encontrados = (resultado.items || []).filter((lead) => lead.pessoaId);
-      setPessoasEncontradas(encontrados);
-    } catch (error) {
-      setErro(error.message);
-    } finally {
-      setBuscandoPessoas(false);
-    }
-  }
-
   async function criarVinculo(event) {
     event.preventDefault();
-    if (!pessoaId.trim()) { setErro("Selecione uma pessoa ou informe seu identificador."); return; }
+    if (!pessoaSelecionada?.id) { setErro("Selecione uma Pessoa."); return; }
     if (trabalhando) return;
     setTrabalhando(true);
     setErro("");
     setAviso("");
     try {
       await apiOrganizacoes(`${caminho}/vinculos`, {
-        method: "POST", body: { pessoaId: pessoaId.trim(), funcao: funcao.trim() || null },
+        method: "POST", body: { pessoaId: pessoaSelecionada.id, funcao: funcao.trim() || null },
       });
-      setPessoaId(""); setFuncao(""); setPessoasEncontradas([]);
+      setPessoaSelecionada(null); setFuncao("");
       setVinculosPagina(1);
       await carregar();
       setAviso("Vínculo criado como pendente. Ative-o após conferir a identidade da pessoa.");
@@ -203,35 +184,17 @@ export default function OrganizacaoDetalhePage({ params }) {
               Vínculos são associados a uma Pessoa existente no MGU. Apenas um vínculo ativo pode ser contato principal.
               O contato principal não recebe permissões administrativas automaticamente.
             </p>
-            <form onSubmit={buscarPessoas} className="flex flex-col gap-2 sm:flex-row">
-              <label className="flex-1 text-sm text-zinc-300">Localizar pessoa entre os leads
-                <input value={buscaPessoa} maxLength={120} onChange={(event) => setBuscaPessoa(event.target.value)}
-                  placeholder="Nome ou e-mail" className={`${inputClass} mt-1`} />
-              </label>
-              <button type="submit" disabled={buscandoPessoas} className={`${acaoClass} self-end`}>
-                {buscandoPessoas ? "Buscando..." : "Buscar lead"}
-              </button>
-            </form>
-            {pessoasEncontradas.length ? (
-              <div className="max-h-44 space-y-1 overflow-y-auto rounded-lg border border-zinc-700 p-2">
-                {pessoasEncontradas.map((lead) => (
-                  <button type="button" key={lead.id} onClick={() => { setPessoaId(lead.pessoaId); setPessoasEncontradas([]); }}
-                    className="block w-full rounded-md px-3 py-2 text-left text-sm text-zinc-200 hover:bg-zinc-800">
-                    {lead.nome || "Sem nome"} · {lead.email || "Sem e-mail"}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-            <form onSubmit={criarVinculo} className="grid gap-3 lg:grid-cols-[1fr_1fr_auto]">
-              <label className="text-sm text-zinc-300">Pessoa ID
-                <input required value={pessoaId} onChange={(event) => setPessoaId(event.target.value)}
-                  maxLength={128} placeholder="Selecione um lead ou informe o ID" className={`${inputClass} mt-1`} />
-              </label>
+            <SeletorPessoaOrganizacao
+              selecionada={pessoaSelecionada}
+              onSelecionar={setPessoaSelecionada}
+              disabled={trabalhando || organizacao.statusOperacional !== "ATIVA"}
+            />
+            <form onSubmit={criarVinculo} className="grid gap-3 lg:grid-cols-[1fr_auto]">
               <label className="text-sm text-zinc-300">Função ou relacionamento
                 <input value={funcao} onChange={(event) => setFuncao(event.target.value)}
                   maxLength={200} placeholder="Ex.: contato comercial" className={`${inputClass} mt-1`} />
               </label>
-              <button type="submit" disabled={trabalhando || organizacao.statusOperacional !== "ATIVA"}
+              <button type="submit" disabled={trabalhando || !pessoaSelecionada?.id || organizacao.statusOperacional !== "ATIVA"}
                 className={`${botaoPrimario} inline-flex items-center justify-center gap-2 self-end`}>
                 <Plus className="h-4 w-4" /> Vincular
               </button>
@@ -244,15 +207,18 @@ export default function OrganizacaoDetalhePage({ params }) {
                 <tbody className="divide-y divide-zinc-800">
                   {vinculos.map((vinculo) => (
                     <tr key={vinculo.id}>
-                      <td className="p-3"><p className="font-mono text-xs text-zinc-300">{vinculo.pessoaId}</p>
-                        <p className="mt-1 font-mono text-[10px] text-zinc-600">Vínculo {vinculo.id}</p></td>
+                      <td className="p-3">
+                        <p className="font-semibold text-zinc-200">{vinculo.pessoa?.nome || "Pessoa indisponível"}</p>
+                        <p className="mt-1 text-xs text-zinc-400">{vinculo.pessoa?.emailPrincipal || "E-mail indisponível"}</p>
+                        {vinculo.pessoa?.ativo === false ? <p className="text-xs text-amber-300">Pessoa inativa</p> : null}
+                      </td>
                       <td className="p-3 text-zinc-300">{vinculo.funcao || "Não informada"}</td>
                       <td className="p-3 text-zinc-300">{ROTULOS_VINCULO[vinculo.status] || vinculo.status}</td>
                       <td className="p-3 text-zinc-300">{vinculo.principal ? "Sim" : "Não"}</td>
                       <td className="p-3">
                         <div className="flex flex-wrap gap-2">
                           {vinculo.status === "PENDENTE" ? (
-                            <button type="button" disabled={trabalhando || organizacao.statusOperacional !== "ATIVA"} className={acaoClass}
+                            <button type="button" disabled={trabalhando || vinculo.pessoa?.ativo === false || organizacao.statusOperacional !== "ATIVA"} className={acaoClass}
                               onClick={() => confirmar("Ativar o vínculo desta pessoa?", () => mutacao(`${caminho}/vinculos/${encodeURIComponent(vinculo.id)}/ativar`, "POST", {}, "Vínculo ativado."))}>Ativar</button>
                           ) : null}
                           {vinculo.status === "ATIVO" ? (
