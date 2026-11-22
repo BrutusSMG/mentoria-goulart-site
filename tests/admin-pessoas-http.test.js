@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mock = vi.hoisted(() => ({
   acesso: vi.fn(),
+  limite: vi.fn(),
   respostaNegada: vi.fn(),
   prisma: {
     pessoa: { count: vi.fn(), findMany: vi.fn() },
@@ -16,7 +17,20 @@ vi.mock("@/lib/admin-permissoes", () => ({
   prisma: mock.prisma,
 }));
 
+vi.mock("@/lib/limite-pessoas-admin", () => ({
+  verificarLimitePessoasAdmin: mock.limite,
+  ErroLimitePessoasAdmin: class ErroLimitePessoasAdmin extends Error {
+    constructor(codigo, status, retryAfter = null) {
+      super(codigo);
+      this.codigo = codigo;
+      this.status = status;
+      this.retryAfter = retryAfter;
+    }
+  },
+}));
+
 import { GET, POST } from "../src/app/api/admin/pessoas/route.js";
+import { ErroLimitePessoasAdmin } from "../src/lib/limite-pessoas-admin.js";
 
 const BASE = "http://localhost:3000/api/admin/pessoas";
 const admin = () => ({
@@ -46,6 +60,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   process.env.MGU_E72_ADMIN_ORIGINS = "http://localhost:3000";
   mock.acesso.mockResolvedValue(admin());
+  mock.limite.mockResolvedValue({ restante: 20 });
   mock.respostaNegada.mockImplementation((acesso) => Response.json(
     { code: "ACESSO_NEGADO", error: "Acesso negado." },
     { status: acesso.status || 403 },
@@ -71,6 +86,7 @@ describe("E7.3: contrato HTTP de Pessoas", () => {
       : POST(requisicao("POST", "", { nome: "Joana", emailPrincipal: "joana@example.com" })));
     expect(res.status).toBe(401);
     expect(mock.prisma.pessoa.count).not.toHaveBeenCalled();
+    expect(mock.limite).not.toHaveBeenCalled();
     expect(mock.prisma.$transaction).not.toHaveBeenCalled();
   });
 
@@ -187,6 +203,33 @@ describe("E7.3: contrato HTTP de Pessoas", () => {
     }));
     expect(res.status).toBe(409);
     expect((await res.json()).code).toBe("EMAIL_EM_USO");
+  });
+
+  it("aplica limite somente apos validar ADMIN e antes de acessar Pessoas", async () => {
+    const res = await GET(requisicao("GET", "?q=Maria"));
+    expect(res.status).toBe(200);
+    expect(mock.limite).toHaveBeenCalledWith({
+      prisma: mock.prisma, usuarioId: "usuario_admin", operacao: "GET",
+    });
+  });
+
+  it("responde 429 com Retry-After sem consultar dados", async () => {
+    mock.limite.mockRejectedValue(new ErroLimitePessoasAdmin("LIMITE_EXCEDIDO", 429, 42));
+    const res = await GET(requisicao("GET", "?q=Maria"));
+    expect(res.status).toBe(429);
+    expect(res.headers.get("retry-after")).toBe("42");
+    expect((await res.json()).code).toBe("LIMITE_EXCEDIDO");
+    expect(mock.prisma.pessoa.count).not.toHaveBeenCalled();
+  });
+
+  it("falha fechado com 503 se o controle distribuido estiver indisponivel", async () => {
+    mock.limite.mockRejectedValue(new ErroLimitePessoasAdmin("LIMITE_INDISPONIVEL", 503, 60));
+    const res = await POST(requisicao("POST", "", {
+      nome: "Joana", emailPrincipal: "joana@example.com",
+    }));
+    expect(res.status).toBe(503);
+    expect(res.headers.get("retry-after")).toBe("60");
+    expect(mock.prisma.$transaction).not.toHaveBeenCalled();
   });
 
   it("não revela detalhes de falhas desconhecidas do banco", async () => {
