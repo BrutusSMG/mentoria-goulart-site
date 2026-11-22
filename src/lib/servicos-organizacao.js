@@ -241,9 +241,10 @@ export function criarServicosOrganizacao({ prisma, acesso, agora = () => new Dat
         const organizacao = await bloquearOrganizacao(tx, organizacaoId);
         if (organizacao.statusOperacional !== 'ATIVA') falhar('ORGANIZACAO_INATIVA');
         const pessoa = await tx.pessoa.findUnique({
-          where: { id: entrada.pessoaId }, select: { id: true },
+          where: { id: entrada.pessoaId }, select: { id: true, ativo: true },
         });
         if (!pessoa) falhar('NAO_ENCONTRADO', 404);
+        if (pessoa.ativo !== true) falhar('PESSOA_INATIVA');
         const aberto = await tx.pessoaOrganizacao.findFirst({
           where: { organizacaoId, pessoaId: entrada.pessoaId, status: { in: ['PENDENTE', 'ATIVO'] } },
           select: { id: true },
@@ -281,6 +282,10 @@ export function criarServicosOrganizacao({ prisma, acesso, agora = () => new Dat
         const atual = await obterVinculo(tx, organizacaoId, vinculoId);
         if (organizacao.statusOperacional !== 'ATIVA') falhar('ORGANIZACAO_INATIVA');
         if (atual.status !== 'PENDENTE') falhar('TRANSICAO_INVALIDA');
+        const pessoa = await tx.pessoa.findUnique({
+          where: { id: atual.pessoaId }, select: { ativo: true },
+        });
+        if (!pessoa || pessoa.ativo !== true) falhar('PESSOA_INATIVA');
         await atualizarUma(tx.pessoaOrganizacao,
           { id: vinculoId, organizacaoId, status: 'PENDENTE' },
           { status: 'ATIVO', inicioEm: timestamp(agora), alteradoPorUsuarioId: usuarioId });
