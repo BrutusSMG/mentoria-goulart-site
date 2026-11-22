@@ -67,6 +67,7 @@ export function traduzirErroPessoa(erro) {
   if (nomes.some((nome) => [
     "emailPrincipal", "Pessoa_emailPrincipal_key",
     "Pessoa_emailPrincipal_normalizado_uidx",
+    "lower(btrim(emailPrincipal))",
   ].includes(nome))) return new ErroPessoaAdmin("EMAIL_EM_USO", 409);
   return erro;
 }
