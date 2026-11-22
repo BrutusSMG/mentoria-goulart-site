@@ -54,3 +54,18 @@ npm run build
 4. Testes de integração com PostgreSQL descartável, segurança e concorrência.
 5. Validação visual ADMIN em Preview/HML com ambiente correto, após autorização de schema.
 6. Aprovação separada para merge em `homologacao`; promoção a `main` fora de escopo.
+
+## Verificações de 22/11/2026
+
+- Auditoria de e-mails em HML e PRD informada pelo operador: zero colisões, zero e-mails não normalizados e zero vazios. Essa auditoria é pontual; repetir imediatamente antes de aplicar a migration se houver intervalo significativo.
+- Histórico Prisma informado: HML registra E7.2 aplicada; PRD não registra E7.2. Não tratar os históricos como idênticos nem promover a E7.3 isoladamente para PRD.
+- Consulta estrutural de HML informada: tabelas `Organizacao` e `PessoaOrganizacao`, índice de par aberto e índice de principal ativo presentes; coluna de autoria e índice funcional de e-mail da E7.3 ausentes, como esperado.
+- Criado `tests/admin-pessoas-http.test.js` com cobertura adicional de autorização, busca, CSRF, limites de corpo, falhas sanitizadas e conflito de e-mail. **Ainda não executado neste incremento**, por indisponibilidade de checkout local e runner de CI acessível nesta sessão.
+
+### Gates que permanecem abertos
+
+1. Executar os testes HTTP e toda a suíte, lint, Prisma validate e build em checkout confiável; não presumir aprovação dos testes recém-adicionados.
+2. Testar a migration E7.3 e duas inserções concorrentes com o mesmo e-mail em PostgreSQL descartável, incluindo a forma real de `P2002.meta` do Prisma 5.22.
+3. Implementar/verificar proteção distribuída de frequência e enumeração na borda (WAF/gateway) para `GET/POST /api/admin/pessoas`; não confiar em contador em memória de instâncias serverless.
+4. Conferir a allowlist `MGU_E72_ADMIN_ORIGINS` no Preview/HML e realizar smoke de ponta a ponta com schema E7.3 somente após aprovação explícita de migration HML.
+5. Manter PR #28 em draft. Sem escrita em Neon HML/PRD, sem merge e sem deploy automático.
