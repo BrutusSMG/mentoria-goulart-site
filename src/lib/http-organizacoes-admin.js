@@ -219,12 +219,20 @@ export async function executarOperacaoOrganizacoes(req, operacao, context = {}) 
       const [total, items] = await Promise.all([
         prisma.pessoaOrganizacao.count({ where }),
         prisma.pessoaOrganizacao.findMany({
-          where, select: selectVinculo,
+          where, select: { ...selectVinculo, pessoa: {
+            select: { id: true, nome: true, emailPrincipal: true, ativo: true },
+          } },
           orderBy: [{ createdAt: "desc" }, { id: "desc" }],
           skip: (page - 1) * pageSize, take: pageSize,
         }),
       ]);
-      return itensPaginados(items.map((item) => projetar(item, CAMPOS_VINCULO)), { page, pageSize, total });
+      return itensPaginados(items.map((item) => ({
+        ...projetar(item, CAMPOS_VINCULO),
+        pessoa: item.pessoa ? {
+          id: item.pessoa.id, nome: item.pessoa.nome,
+          emailPrincipal: item.pessoa.emailPrincipal, ativo: item.pessoa.ativo,
+        } : null,
+      })), { page, pageSize, total });
     }
 
     // Métodos de escrita: apenas os campos explicitamente repassados ao serviço.
