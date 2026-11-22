@@ -1,6 +1,7 @@
 import { obterAcessoAdmin, prisma, respostaAcessoNegado } from "@/lib/admin-permissoes";
 import { origemMutacaoPermitida } from "@/lib/http-organizacoes-admin";
 import { criarServicosPessoasAdmin, ErroPessoaAdmin, traduzirErroPessoa } from "@/lib/servicos-pessoas-admin";
+import { verificarLimitePessoasAdmin, ErroLimitePessoasAdmin } from "@/lib/limite-pessoas-admin";
 
 const SEM_CACHE = { "Cache-Control": "private, no-store, max-age=0" };
 const responder = (dados, status = 200) => Response.json(dados, { status, headers: SEM_CACHE });
@@ -15,6 +16,7 @@ async function executar(req, operacao) {
       return responder({ code: "ACESSO_NEGADO", error: "Acesso restrito." }, 403);
     }
     const servicos = criarServicosPessoasAdmin({ prisma, acesso });
+    await verificarLimitePessoasAdmin({ prisma, usuarioId: acesso.conta.usuarioId, operacao });
     if (operacao === "GET") {
       const resultado = await servicos.buscar(new URL(req.url).searchParams);
       return responder(resultado);
@@ -54,6 +56,12 @@ async function executar(req, operacao) {
     return responder({ item }, 201);
   } catch (erro) {
     const convertido = traduzirErroPessoa(erro);
+    if (convertido instanceof ErroLimitePessoasAdmin) {
+      return Response.json({ code: convertido.codigo, error: convertido.codigo }, {
+        status: convertido.status,
+        headers: { ...SEM_CACHE, ...(convertido.retryAfter ? { "Retry-After": String(convertido.retryAfter) } : {}) },
+      });
+    }
     if (convertido instanceof ErroPessoaAdmin) {
       return responder({ code: convertido.codigo, error: convertido.codigo }, convertido.status);
     }
