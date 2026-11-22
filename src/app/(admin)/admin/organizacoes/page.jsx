@@ -46,7 +46,11 @@ export default function OrganizacoesPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    void carregar(controller.signal);
+    // Adia o início do carregamento para fora da execução síncrona do efeito.
+    // O AbortController também impede requisições após o cleanup (Strict Mode).
+    queueMicrotask(() => {
+      if (!controller.signal.aborted) void carregar(controller.signal);
+    });
     return () => controller.abort();
   }, [carregar]);
 
