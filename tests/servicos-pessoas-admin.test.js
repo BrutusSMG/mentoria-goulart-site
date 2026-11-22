@@ -29,6 +29,9 @@ describe("E7.3: validação e identidade", () => {
   });
   it("traduz somente colisão conhecida de e-mail", () => {
     expect(traduzirErroPessoa({ code: "P2002", meta: { target: ["emailPrincipal"] } }).codigo).toBe("EMAIL_EM_USO");
+    expect(traduzirErroPessoa({
+      code: "P2002", meta: { modelName: "Pessoa", target: ["lower(btrim(emailPrincipal))"] },
+    })).toMatchObject({ codigo: "EMAIL_EM_USO", status: 409 });
     const erro = { code: "P2002", meta: { target: ["outroCampo"] } };
     expect(traduzirErroPessoa(erro)).toBe(erro);
   });
