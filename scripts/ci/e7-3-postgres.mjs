@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { PrismaClient } from "@prisma/client";
 import { criarServicosPessoasAdmin, traduzirErroPessoa } from "../../src/lib/servicos-pessoas-admin.js";
+import { verificarLimitePessoasAdmin } from "../../src/lib/limite-pessoas-admin.js";
 
 const url = new URL(process.env.DATABASE_URL || "postgresql://invalid:invalid@invalid/invalid");
 assert.equal(process.env.CI, "true", "Execucao permitida somente no CI");
@@ -106,7 +107,36 @@ try {
     where: { emailPrincipal: { equals: concorrente, mode: "insensitive" } },
   }), 1);
 
-  console.log("E7.3 PostgreSQL 17: migration, indice, autoria, colisao direta e concorrencia aprovados.");
+  // 35 requisicoes simultaneas: 30 permitidas e 5 bloqueadas para GET.
+  const requisicoes = await Promise.allSettled(Array.from({ length: 35 }, () =>
+    verificarLimitePessoasAdmin({ prisma, usuarioId: usuario.id, operacao: "GET" })
+  ));
+  assert.equal(requisicoes.filter((r) => r.status === "fulfilled").length, 30);
+  const bloqueios = requisicoes.filter((r) => r.status === "rejected");
+  assert.equal(bloqueios.length, 5);
+  assert.ok(bloqueios.every((r) => r.reason.status === 429 &&
+    r.reason.codigo === "LIMITE_EXCEDIDO" && r.reason.retryAfter > 0));
+
+  // POST tem cota independente da busca.
+  const escritas = await Promise.allSettled(Array.from({ length: 12 }, () =>
+    verificarLimitePessoasAdmin({ prisma, usuarioId: usuario.id, operacao: "POST" })
+  ));
+  assert.equal(escritas.filter((r) => r.status === "fulfilled").length, 10);
+  assert.equal(escritas.filter((r) => r.status === "rejected").length, 2);
+  assert.equal(await prisma.limitePessoasAdmin.count({
+    where: { chave: { in: [`GET:${usuario.id}`, `POST:${usuario.id}`] } },
+  }), 2);
+
+  // Reiniciar a janela simulando expiracao de forma isolada.
+  await prisma.limitePessoasAdmin.update({
+    where: { chave: `GET:${usuario.id}` },
+    data: { janelaInicio: new Date(Date.now() - 120_000) },
+  });
+  await verificarLimitePessoasAdmin({ prisma, usuarioId: usuario.id, operacao: "GET" });
+  assert.equal((await prisma.limitePessoasAdmin.findUnique({
+    where: { chave: `GET:${usuario.id}` },
+  })).contador, 1);
+  console.log("E7.3 PostgreSQL 17: migration, autoria, unicidade, concorrencia e rate limit aprovados.");
 } finally {
   await prisma.$disconnect();
 }
