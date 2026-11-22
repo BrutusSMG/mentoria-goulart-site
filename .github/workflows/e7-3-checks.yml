@@ -1,0 +1,41 @@
+name: E7.3 verificacao isolada
+
+on:
+  push:
+    branches:
+      - feature/e7-3-pessoas-admin
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e7-3-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CI: "true"
+      DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci?schema=public
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: chave-ficticia-exclusiva-para-ci
+    steps:
+      - name: Checkout da branch
+        uses: actions/checkout@v4
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Instalar dependencias (sem Neon)
+        run: npm ci
+      - name: Validar schema Prisma
+        run: npx prisma validate
+      - name: Testes unitarios e HTTP
+        run: npm test
+      - name: Lint
+        run: npm run lint
+      - name: Build Next.js
+        run: npm run build
