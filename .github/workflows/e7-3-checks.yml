@@ -29,6 +29,10 @@ jobs:
         with:
           node-version: "22"
           cache: npm
+      - name: Diagnosticar lockfile inconsistente (temporario)
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          git diff -- package-lock.json
       - name: Instalar dependencias (sem Neon)
         run: npm ci
       - name: Validar schema Prisma
