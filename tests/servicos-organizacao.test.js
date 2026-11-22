@@ -83,7 +83,7 @@ function bancoFalso({ organizacoes = [org()], vinculos = [], pessoas = ['pessoa_
         pessoaOrganizacao: modelo('pessoaOrganizacao', trabalho),
         pessoa: {
           async findUnique({ where }) {
-            return trabalho.pessoas.includes(where.id) ? { id: where.id } : null;
+            return trabalho.pessoas.includes(where.id) ? { id: where.id, ativo: true } : null;
           },
         },
         async $queryRaw(_literais, id) {
