@@ -69,3 +69,15 @@ npm run build
 3. Implementar/verificar proteção distribuída de frequência e enumeração na borda (WAF/gateway) para `GET/POST /api/admin/pessoas`; não confiar em contador em memória de instâncias serverless.
 4. Conferir a allowlist `MGU_E72_ADMIN_ORIGINS` no Preview/HML e realizar smoke de ponta a ponta com schema E7.3 somente após aprovação explícita de migration HML.
 5. Manter PR #28 em draft. Sem escrita em Neon HML/PRD, sem merge e sem deploy automático.
+
+## Proteção distribuída implementada em 22/11/2026
+
+- `GET /api/admin/pessoas`: 30 solicitações por 60 segundos por `Usuario.id` ADMIN autenticado.
+- `POST /api/admin/pessoas`: 10 solicitações por 60 segundos por `Usuario.id`, independente de GET.
+- `LimitePessoasAdmin` armazena somente chave `GET:<usuarioId>` / `POST:<usuarioId>`, início da janela e contador. `INSERT ... ON CONFLICT DO UPDATE` usa relógio do PostgreSQL e incremento atômico; a janela reinicia na próxima solicitação após 60 segundos. Duas linhas por administrador ativo, sem IP ou e-mail persistidos.
+- Excesso: HTTP 429 `LIMITE_EXCEDIDO` e `Retry-After`. Falha do armazenamento: HTTP 503 `LIMITE_INDISPONIVEL`, sem consulta/criação (fail-closed).
+- Nova migration **`20261122200000_e7_3_limite_pessoas_admin`**, posterior à migration de autoria/índice. Ela cria uma tabela dedicada, não modifica dados de Pessoas.
+- O controle é por administrador autenticado, **não substitui proteção de borda contra tráfego anônimo**, DoS ou ataques distribuídos. A autenticação existente continua obrigatória; revisar WAF e observabilidade do provedor antes de exposição pública.
+- O banco é dependência operacional do limitador: qualquer falha de consulta bloqueia a rota. Monitorar 429/503 e carga do PostgreSQL. Limite e janela são constantes no código, não configuráveis por ambiente.
+- Teste HTTP cobre 429/503; teste PostgreSQL descartável verifica 35 requisições GET concorrentes (30 permitidas), 12 POST (10 permitidas), separação de cotas e reinício da janela. **Aguardando resultado de CI para esta alteração.**
+- A migration E7.3 permanece não aplicada no Neon HML/PRD; qualquer aplicação exige autorização explícita e nova auditoria somente leitura.
