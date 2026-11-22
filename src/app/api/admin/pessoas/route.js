@@ -40,9 +40,11 @@ async function executar(req, operacao) {
           await leitor.cancel();
           throw new ErroPessoaAdmin("ENTRADA_INVALIDA");
         }
-        texto += decoder.decode(value, { stream: true });
+        try { texto += decoder.decode(value, { stream: true }); }
+        catch { throw new ErroPessoaAdmin("ENTRADA_INVALIDA"); }
       }
-      texto += decoder.decode();
+      try { texto += decoder.decode(); }
+      catch { throw new ErroPessoaAdmin("ENTRADA_INVALIDA"); }
     } finally {
       leitor.releaseLock();
     }
