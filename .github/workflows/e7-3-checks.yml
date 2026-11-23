@@ -1,0 +1,76 @@
+name: E7.3 verificacao isolada
+
+on:
+  push:
+    branches:
+      - feature/e7-3-pessoas-admin
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e7-3-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CI: "true"
+      DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci?schema=public
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: chave-ficticia-exclusiva-para-ci
+    steps:
+      - name: Checkout da branch
+        uses: actions/checkout@v4
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Instalar dependencias (sem Neon)
+        run: npm ci
+      - name: Validar schema Prisma
+        run: npx prisma validate
+      - name: Testes unitarios e HTTP
+        run: npm test
+      - name: Lint
+        run: npm run lint
+      - name: Build Next.js
+        run: npm run build
+
+  postgres-e73:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      CI: "true"
+      DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci?schema=public
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Aplicar migrations em PostgreSQL descartavel
+        run: npx prisma migrate deploy
+      - name: Testar indice, autoria e concorrencia E7.3
+        run: node scripts/ci/e7-3-postgres.mjs

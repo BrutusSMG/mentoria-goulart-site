@@ -23,6 +23,10 @@ export const ROTULOS_VINCULO = {
 const MENSAGENS = {
   CNPJ_INVALIDO: "CNPJ inválido. Confira os dígitos verificadores.",
   CNPJ_EM_USO: "Já existe outra organização com esse CNPJ.",
+  EMAIL_EM_USO: "Este e-mail já está cadastrado. Pesquise e confirme a Pessoa existente.",
+  LIMITE_EXCEDIDO: "Muitas consultas ou cadastros em sequência. Aguarde um minuto e tente novamente.",
+  LIMITE_INDISPONIVEL: "A proteção de consultas está temporariamente indisponível. Tente novamente em instantes.",
+  PESSOA_INATIVA: "Pessoa inativa. Solicite revisão administrativa antes de vincular ou ativar.",
   NOME_OBRIGATORIO: "Informe pelo menos o nome fantasia ou a razão social.",
   ENTRADA_INVALIDA: "Os dados enviados são inválidos. Confira os campos e seus formatos.",
   RECONFIRMACAO_OBRIGATORIA: "Confirme a alteração cadastral de uma organização já validada.",

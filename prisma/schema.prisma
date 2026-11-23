@@ -404,6 +404,7 @@ model Usuario {
   vinculosOrganizacaoCriados    PessoaOrganizacao[]   @relation("VinculoOrganizacaoCriadoPor")
   vinculosOrganizacaoAlterados  PessoaOrganizacao[]   @relation("VinculoOrganizacaoAlteradoPor")
   vinculosOrganizacaoEncerrados PessoaOrganizacao[]   @relation("VinculoOrganizacaoEncerradoPor")
+  pessoasCriadasAdministrativamente Pessoa[] @relation("PessoaCriadaPorAdmin")
 
   @@index([status])
   @@index([createdAt])
@@ -706,15 +707,19 @@ model Pessoa {
   emailPrincipal    String   @unique
   telefonePrincipal String?
   ativo             Boolean  @default(true)
+  criadoPorUsuarioId String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
+  criadoPorAdmin      Usuario? @relation("PessoaCriadaPorAdmin", fields: [criadoPorUsuarioId], references: [id], onDelete: Restrict)
   lead                Lead?
   aluno               Aluno?
   adminUser           AdminUser?
   usuario             Usuario?
   interacoesMarketing InteracaoMarketing[]
   organizacoes        PessoaOrganizacao[]
+
+  @@index([criadoPorUsuarioId])
 }
 
 model InteracaoMarketing {
@@ -812,4 +817,12 @@ model PessoaOrganizacao {
   @@index([criadoPorUsuarioId])
   @@index([alteradoPorUsuarioId])
   @@index([encerradoPorUsuarioId])
+}
+
+// E7.3: contador compartilhado entre instancias para limitar enumeracao/cadastro ADMIN.
+// Chave = metodo + Usuario.id canonico; maximo duas linhas por administrador.
+model LimitePessoasAdmin {
+  chave        String   @id @db.VarChar(160)
+  janelaInicio DateTime @db.Timestamptz(3)
+  contador     Int
 }

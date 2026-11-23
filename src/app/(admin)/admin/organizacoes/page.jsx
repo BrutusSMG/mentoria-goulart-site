@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Building2, ChevronLeft, ChevronRight, Loader2, Plus, Search, AlertCircle } from "lucide-react";
 import OrganizacaoFormulario from "@/components/admin/OrganizacaoFormulario";
 import {
@@ -15,6 +16,7 @@ import {
 const SELECT = "rounded-lg border border-zinc-700 bg-black px-3 py-2.5 text-sm text-white outline-none focus:border-[#d89900]";
 
 export default function OrganizacoesPage() {
+  const router = useRouter();
   const [busca, setBusca] = useState("");
   const [pesquisa, setPesquisa] = useState("");
   const [validacao, setValidacao] = useState("");
@@ -44,7 +46,11 @@ export default function OrganizacoesPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    void carregar(controller.signal);
+    // Adia o início do carregamento para fora da execução síncrona do efeito.
+    // O AbortController também impede requisições após o cleanup (Strict Mode).
+    queueMicrotask(() => {
+      if (!controller.signal.aborted) void carregar(controller.signal);
+    });
     return () => controller.abort();
   }, [carregar]);
 
@@ -77,7 +83,7 @@ export default function OrganizacoesPage() {
       {novo ? (
         <OrganizacaoFormulario
           onCancelar={() => setNovo(false)}
-          onSalvo={() => { setNovo(false); setPagina(1); setPesquisa(""); setBusca(""); void carregar(); }}
+          onSalvo={(item) => { setNovo(false); router.push(`/admin/organizacoes/${encodeURIComponent(item.id)}`); }}
         />
       ) : null}
 
