@@ -1,24 +1,41 @@
 # Pessoas e representantes de organizações no MGU
 
-**Atualização documental: 21/11/2026**  
-**Situação:** complemento funcional planejado para a Etapa 7; ainda não implementado.
+**Atualização:** 23/11/2026  
+**Situação:** E7.2 e E7.3 implementadas e publicadas em produção. A validação funcional completa em PRD permanece em acompanhamento.
 
 ## Uma identidade, diferentes relacionamentos
 
-O MGU utiliza `Pessoa` como identidade central de cada pessoa física. A mesma pessoa pode ser Lead, Aluno, possuir acesso de Usuário e integrar uma ou mais organizações. Esses relacionamentos não exigem cadastros humanos duplicados.
+O MGU usa `Pessoa` como entidade central de identidade individual. A mesma Pessoa pode estar relacionada a um Lead, Aluno, Usuário ou Organização, de acordo com os fatos e permissões registrados. Esses relacionamentos não exigem a duplicação automática de uma identidade.
 
-Um representante de empresa **não precisa ser Lead nem Aluno**. O vínculo empresarial é independente dos relacionamentos comerciais e educacionais.
+O representante de uma empresa não precisa ser Lead nem Aluno. Criar uma Pessoa não cria automaticamente acesso ao sistema, matrícula, direitos, relacionamento de Lead ou papel administrativo.
 
-## Experiência administrativa planejada
+## Funcionalidade disponível para o ADMIN
 
-A evolução do cadastro de Organizações permitirá ao ADMIN pesquisar Pessoas pelo nome ou e-mail, selecionar um cadastro existente ou cadastrar uma nova Pessoa quando necessário. Em seguida, poderá associá-la à organização e gerenciar o vínculo, seu estado e o contato principal.
+A API administrativa de Pessoas permite:
 
-A nova identidade não receberá automaticamente acesso ao sistema, matrícula, direitos, papel de Lead ou habilitação como fornecedor. A associação a uma empresa também não comprova poderes de representação jurídica.
+- **Pesquisar por nome ou e-mail**, com consulta paginada, para selecionar um cadastro existente antes de considerar um novo registro;
+- **Cadastrar uma Pessoa**, informando nome e e-mail principal, com telefone opcional, sem criar outros relacionamentos automaticamente;
+- **Proteger contra e-mails já cadastrados**, inclusive variações de espaços e letras maiúsculas/minúsculas;
+- **Registrar a autoria** de cadastros realizados pela operação administrativa.
 
-O cadastro de nova Pessoa e a busca centralizada ainda dependem de implementação e homologação. Os recursos básicos de Organizações estão em validação no ambiente de homologação, sem anúncio de publicação em produção.
+A pesquisa e o cadastro de Pessoas integram o fluxo de representantes de Organizações. No painel, o seletor de Pessoas está disponível durante a gestão de vínculos de uma Organização, e não constitui necessariamente um módulo autônomo no menu ADMIN.
 
-## Proteção de identidade
+## Organizações e vínculos
 
-O processo deverá priorizar o reaproveitamento de identidades existentes e a revisão de possíveis duplicidades. O MGU não associará automaticamente pessoas distintas por simples semelhança de nomes ou e-mails.
+A E7.2 permite cadastrar Organizações, acompanhar estados de validação e operação, localizar Pessoas, estabelecer vínculos e gerenciar o representante de contato principal conforme as regras do sistema.
 
-Esta documentação descreve a direção funcional da Etapa 7, não uma funcionalidade pública disponível ou um compromisso de data de lançamento.
+O cadastro de uma Organização **não a habilita automaticamente como fornecedora**. A existência de um vínculo também não comprova poderes legais de representação.
+
+## Segurança e integridade
+
+As operações administrativas exigem autenticação e autorização de ADMIN. As consultas são limitadas e paginadas; cadastros aplicam validação de entrada, proteção contra duplicidade e controles de frequência de requisições. A consulta não deve ser usada para divulgação de dados pessoais.
+
+O fluxo preserva identidades existentes. Similaridade de nome não basta para fundir registros de Pessoas ou concluir que duas identidades são a mesma pessoa.
+
+## Estado da validação
+
+A implementação foi homologada e publicada em produção em 23/11/2026. Foram verificados o deploy, as migrations, a preservação dos registros de Pessoas e a recusa de acesso anônimo às APIs de Pessoas e Organizações. Também foi validada a interface de Organizações com ausência de registros e a validação básica do formulário.
+
+Ainda faltam evidências de consulta autenticada de Pessoas e de operações de cadastro, persistência, autoria e vínculos com dados reais em produção. Essas verificações deverão ocorrer quando houver necessidade operacional legítima, sem criação de registros fictícios.
+
+Este documento descreve as funcionalidades administrativas efetivamente incorporadas e distingue sua disponibilidade da validação operacional pendente.
