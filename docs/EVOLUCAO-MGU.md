@@ -422,7 +422,7 @@ A E7.2 introduziu o cadastro administrativo de Organizações, com estados de va
 
 A E7.3 ampliou o cadastro central de Pessoas para permitir que o ADMIN pesquise por nome ou e-mail e cadastre uma nova Pessoa quando necessário. O cadastro preserva a identidade individual e não cria automaticamente Lead, Aluno, Usuário, matrícula, login ou direitos de acesso. A implantação inclui proteção contra e-mails duplicados após normalização e registro da autoria do cadastro administrativo.
 
-A implementação foi homologada, testada automaticamente e publicada de forma controlada. Após a publicação, foram validados o esquema do banco, a integridade da base existente, a abertura e as regras básicas do formulário de Organizações e a recusa de acesso anônimo às interfaces e APIs administrativas.
+A implementação foi homologada, testada automaticamente e publicada de forma controlada. Após a publicação, foram validados o esquema do banco, a integridade da base existente, a abertura e as regras básicas do formulário de Organizações, a recusa de acesso anônimo às interfaces e APIs administrativas e a consulta autenticada de Pessoas com paginação.
 
 **Pendência acompanhada:** a verificação funcional completa em produção depende de cadastros reais e legítimos, especialmente de uma Organização e seus representantes. Não serão criados registros fictícios em PRD apenas para concluir os testes. A conclusão técnica não deve ser confundida com o encerramento da avaliação operacional.
 
