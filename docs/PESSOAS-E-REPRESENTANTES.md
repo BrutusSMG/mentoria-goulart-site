@@ -18,7 +18,7 @@ A API administrativa de Pessoas permite:
 - **Proteger contra e-mails já cadastrados**, inclusive variações de espaços e letras maiúsculas/minúsculas;
 - **Registrar a autoria** de cadastros realizados pela operação administrativa.
 
-A pesquisa e o cadastro de Pessoas integram o fluxo de representantes de Organizações. No painel, o seletor de Pessoas está disponível durante a gestão de vínculos de uma Organização, e não constitui necessariamente um módulo autônomo no menu ADMIN.
+A pesquisa e o cadastro de Pessoas integram o fluxo de representantes de Organizações. No painel ADMIN, o seletor de Pessoas está disponível durante a gestão de vínculos no detalhe de uma Organização. **Não existe uma página independente de Pessoas no menu ADMIN nesta entrega.**
 
 ## Organizações e vínculos
 
@@ -36,6 +36,8 @@ O fluxo preserva identidades existentes. Similaridade de nome não basta para fu
 
 A implementação foi homologada e publicada em produção em 23/11/2026. Foram verificados o deploy, as migrations, a preservação dos registros de Pessoas e a recusa de acesso anônimo às APIs de Pessoas e Organizações. Também foi validada a interface de Organizações com ausência de registros e a validação básica do formulário.
 
-Ainda faltam evidências de consulta autenticada de Pessoas e de operações de cadastro, persistência, autoria e vínculos com dados reais em produção. Essas verificações deverão ocorrer quando houver necessidade operacional legítima, sem criação de registros fictícios.
+Em 23/11/2026, a consulta autenticada de Pessoas e a paginação entre as páginas 1 e 2 foram verificadas em PRD, sem alterar registros ou divulgar dados pessoais nas evidências. Uma busca com apenas um caractere retornou `ENTRADA_INVALIDA`, e uma requisição sem autenticação retornou HTTP 401. O status HTTP da busca inválida na sessão autenticada não foi aferido independentemente.
+
+Ainda faltam evidências em PRD de cadastro administrativo de Pessoas reais, persistência, autoria e vínculos com Organizações reais. Essas verificações deverão ocorrer quando houver necessidade operacional legítima, sem criar registros fictícios. Acompanhar a [issue #30](https://github.com/BrutusSMG/mentoria-goulart-site/issues/30).
 
 Este documento descreve as funcionalidades administrativas efetivamente incorporadas e distingue sua disponibilidade da validação operacional pendente.
