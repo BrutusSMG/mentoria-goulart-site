@@ -17,7 +17,7 @@ A documentação pública tem como objetivo mostrar a evolução do MGU sem expo
 
 ### `PESSOAS-E-REPRESENTANTES.md`
 
-Explica o modelo de identidade única e a evolução planejada para seleção e cadastro administrativo de representantes de organizações. **Complemento ainda não implementado.**
+Descreve a identidade central e os recursos administrativos implementados de busca, cadastro de Pessoas e vínculos com Organizações, incluindo pendências de validação em PRD.
 
 ## Documentação interna
 

@@ -1,6 +1,24 @@
 # E7.3 — Cadastro ADMIN de Pessoas e representantes
 
-**Status:** implementação candidata em PR contra `homologacao`. **Não aplicar migration automaticamente.** Sem autorização de escrita em Neon HML/PRD ou promoção para `main`.
+**Status atual em 23/11/2026:** E7.2/E7.3 implementadas, homologadas e publicadas em PRD. A implantação técnica está concluída; a validação funcional completa em produção permanece aberta na [issue #30](https://github.com/BrutusSMG/mentoria-goulart-site/issues/30).
+
+## Implementação e evidências atuais
+
+- **Recursos:** `GET /api/admin/pessoas` permite busca autenticada ADMIN por nome ou e-mail (`q` de 2 a 120 caracteres), com `page` e `pageSize` de até 50; `POST /api/admin/pessoas` cria Pessoa com nome e e-mail obrigatório, telefone opcional, normalização de e-mail, verificação de duplicidade e autoria de criação em `Pessoa.criadoPorUsuarioId`. O cadastro não cria automaticamente Lead, Aluno, Usuário ou acesso.
+- **Interface:** seleção e criação de Pessoas estão disponíveis na gestão de representantes dentro do detalhe de Organizações. Não há tela independente de Pessoas no menu ADMIN nesta entrega.
+- **Autorização e segurança:** ADMIN autenticado, proteção de origem em mutações, entrada JSON limitada, respostas privadas sem cache. Rate limiting distribuído via PostgreSQL, por ADMIN autenticado: **30 GET e 10 POST por janela de 60 segundos**, em cotas separadas. Falhas no limitador bloqueiam as requisições; isso não substitui proteção de borda contra ataques anônimos.
+- **Migrations:** E7.2 `20261111000000_e7_2_organizacoes`; E7.3 `20261121231000_e7_3_pessoa_autoria_email_ci` e `20261122200000_e7_3_limite_pessoas_admin`. Aplicadas em PRD em 23/11/2026 após backup e auditoria. Conferência posterior: três migrations concluídas, nenhuma incompleta, tabelas, coluna, FK e índices esperados presentes; **717 Pessoas preservadas**. O histórico consolidado de migrations legadas exige atenção, não executar `prisma migrate reset`.
+- **Testes e publicação:** release validada com **644 testes automatizados**, incluindo PostgreSQL descartável, concorrência e limitações, além de lint e build. PR de release #29 integrado em `main` (`703528d`), aplicação Vercel Production em estado Ready.
+- **Testes funcionais em PRD:** acesso ADMIN a Organizações, formulário com validação de nome, restrição de página a não autenticados e HTTP 401 para APIs administrativas anônimas. Em 23/11/2026, busca autenticada `q=an` nas páginas 1 e 2 com `pageSize=5` retornou paginação consistente (`total=262`, `totalPages=53`), sem expor itens; busca com `q=a` retornou corpo `ENTRADA_INVALIDA` na sessão autenticada, sem medição independente do status HTTP; consulta anônima retornou HTTP 401.
+- **Pendente:** operações de criação e persistência de Pessoas e Organizações reais, comprovação de autoria, vínculos, estados e representante principal em PRD; regressão funcional final e decisão de encerramento. **Não criar dados fictícios em produção.** O registro da [issue #30](https://github.com/BrutusSMG/mentoria-goulart-site/issues/30) permanece aberto.
+
+**Limite de autorização:** esta atualização documental não concede permissão para novas migrations, alterações de registros, merges ou deploys.
+
+---
+
+## Histórico de implementação: registros anteriores à publicação
+
+Os itens abaixo documentam decisões, riscos e verificações realizados em 21 e 22/11/2026. **Expressões como “proposta”, “não implementado”, “não aplicado”, “aguardando CI”, “gates abertos” e “PR #28 em draft” retratam o momento daquele registro, não o estado atual.** Em caso de divergência, prevalece a seção de status atual acima. Manter esse histórico ajuda a auditar os critérios aplicados antes da publicação.
 
 ## Fluxo
 
