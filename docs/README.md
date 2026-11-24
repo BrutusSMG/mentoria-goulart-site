@@ -15,6 +15,10 @@ Apresenta, em alto nível:
 
 A documentação pública tem como objetivo mostrar a evolução do MGU sem expor detalhes internos de implementação, infraestrutura, operação ou decisões ainda em desenvolvimento.
 
+### `PESSOAS-E-REPRESENTANTES.md`
+
+Documenta a identidade central de Pessoas, a consulta e o cadastro administrativo de Pessoas e os vínculos com Organizações, incluindo limites de autorização e validações ainda pendentes em produção.
+
 ## Documentação interna
 
 Arquitetura detalhada, procedimentos operacionais, migrações de banco de dados, homologações, decisões técnicas e planejamento interno são mantidos separadamente em documentação privada.

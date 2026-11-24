@@ -414,6 +414,22 @@ Essa etapa preparou a fundação para novas funcionalidades sem exigir alteraç�
 
 ---
 
+## Etapa 7 — Organizações e Pessoas
+
+**Status: implementação técnica publicada em produção em 23/11/2026; validação funcional completa em PRD ainda pendente.**
+
+A E7.2 introduziu o cadastro administrativo de Organizações, com estados de validação e operação, e a associação de Pessoas a organizações. Uma organização cadastrada não se torna fornecedora automaticamente, e um vínculo empresarial não comprova, por si só, poderes de representação legal.
+
+A E7.3 ampliou o cadastro central de Pessoas para permitir que o ADMIN pesquise por nome ou e-mail e cadastre uma nova Pessoa quando necessário. O cadastro preserva a identidade individual e não cria automaticamente Lead, Aluno, Usuário, matrícula, login ou direitos de acesso. A implantação inclui proteção contra e-mails duplicados após normalização e registro da autoria do cadastro administrativo.
+
+A implementação foi homologada, testada automaticamente e publicada de forma controlada. Após a publicação, foram validados o esquema do banco, a integridade da base existente, a abertura e as regras básicas do formulário de Organizações, a recusa de acesso anônimo às interfaces e APIs administrativas e a consulta autenticada de Pessoas com paginação.
+
+**Pendência acompanhada:** a verificação funcional completa em produção depende de cadastros reais e legítimos, especialmente de uma Organização e seus representantes. Não serão criados registros fictícios em PRD apenas para concluir os testes. A conclusão técnica não deve ser confundida com o encerramento da avaliação operacional.
+
+Consulte [Pessoas e representantes de organizações](PESSOAS-E-REPRESENTANTES.md) para conhecer as funcionalidades disponíveis e seus limites.
+
+---
+
 ## Próximas evoluções
 
 A plataforma continuará sendo desenvolvida de forma incremental.
